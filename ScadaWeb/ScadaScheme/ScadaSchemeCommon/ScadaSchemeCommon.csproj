@@ -45,6 +45,7 @@
       <HintPath>..\..\..\..\dll\Svg.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web.Extensions" />
@@ -88,6 +89,13 @@
     <Compile Include="Model\PropertyGrid\CategoryAttribute.cs" />
     <Compile Include="Model\PropertyGrid\ComponentConverter.cs" />
     <Compile Include="Model\PropertyGrid\ComponentEditor.cs" />
+    <Compile Include="Model\PropertyGrid\FrmIDcustomDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\PropertyGrid\FrmIDcustomDialog.Designer.cs">
+      <DependentUpon>FrmIDcustomDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\PropertyGrid\IDcustomEditor.cs" />
     <Compile Include="Model\PropertyGrid\RangeEditor.cs" />
     <Compile Include="Model\PropertyGrid\FrmRangeDialog.cs">
       <SubType>Form</SubType>
@@ -159,6 +167,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Model\PropertyGrid\FrmFontDialog.resx">
       <DependentUpon>FrmFontDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\PropertyGrid\FrmIDcustomDialog.resx">
+      <DependentUpon>FrmIDcustomDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Model\PropertyGrid\FrmImageDialog.resx">
       <DependentUpon>FrmImageDialog.cs</DependentUpon>

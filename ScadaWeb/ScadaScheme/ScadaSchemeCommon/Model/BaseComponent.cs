@@ -72,7 +72,8 @@ namespace Scada.Scheme.Model
             BorderColor = "";
             BorderWidth = 0;
             ToolTip = "";
-            ID = 0;
+            IDcustom = "0"; //modif AT
+            ID = 0;//modif AT avant rien
             Name = "";
             Location = Point.Default;
             Size = Size.Default;
@@ -123,6 +124,18 @@ namespace Scada.Scheme.Model
         /// Получить или установить идентификатор.
         /// </summary>
         #region Attributes
+        [DisplayName("ID"), Category(Categories.Design)]//, CM.ReadOnly(true)] => modif AT
+        [Description("The unique identifier of the scheme component.")]
+        [CM.Editor(typeof(IDcustomEditor), typeof(UITypeEditor))] //modif AT
+        #endregion
+        public string IDcustom { get; set; }
+
+
+        /// <summary>
+        /// Получить или установить идентификатор.
+        /// </summary>
+        #region Attributes
+        [CM.Browsable(false)]//modif AT ajout
         [DisplayName("ID"), Category(Categories.Design), CM.ReadOnly(true)]
         [Description("The unique identifier of the scheme component.")]
         #endregion
@@ -207,7 +220,7 @@ namespace Scada.Scheme.Model
         /// <summary>
         /// Builds the display name for an editor.
         /// </summary>
-        public static string BuildDisplayName(int id, string name, string auxText, string typeName)
+        public static string BuildDisplayName(int id, string name, string auxText, string typeName) // modif AT int id
         {
             return new StringBuilder()
                 .Append("[").Append(id).Append("] ")
@@ -251,6 +264,7 @@ namespace Scada.Scheme.Model
                 string.IsNullOrEmpty(BorderColor) ? 0 : 1 /*для обратной совместимости*/);
             ToolTip = xmlNode.GetChildAsString("ToolTip");
             ID = xmlNode.GetChildAsInt("ID");
+            IDcustom = xmlNode.GetChildAsString("ID");//modif AT ajout
             Name = xmlNode.GetChildAsString("Name");
             Location = Point.GetChildAsPoint(xmlNode, "Location");
             Size = Size.GetChildAsSize(xmlNode, "Size");
