@@ -22,13 +22,8 @@ namespace Scada.Scheme.Model.PropertyGrid
 
                 if(editorSvc.ShowDialog(form) == DialogResult.OK)
                 {
-                   // value = form.
+                    value = form.getValue();
                 }
-                // font = value as Font;
-                //FrmFontDialog frmFontDialog = new FrmFontDialog(font);
-
-                //if (editorSvc.ShowDialog(frmFontDialog) == DialogResult.OK)
-                //    value = frmFontDialog.FontResult;
             }
 
             return value;

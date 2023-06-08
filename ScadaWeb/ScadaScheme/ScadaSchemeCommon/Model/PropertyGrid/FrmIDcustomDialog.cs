@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Scada.Scheme.Template;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,12 +12,19 @@ namespace Scada.Scheme.Model.PropertyGrid
 {
     public partial class FrmIDcustomDialog : Form
     {
+
+        private DataTable _dataTable = new DataTable();
+        private string _value = ""; 
+
         public FrmIDcustomDialog()
         {
             InitializeComponent();
-
+            
             // mise à jour de la TreeView
             updateTreeView(treeView1);
+
+            //test
+            fillTestDataGrid();
         }
 
         public void updateTreeView(TreeView treeView)
@@ -33,10 +41,10 @@ namespace Scada.Scheme.Model.PropertyGrid
                 },
             };
 
-            FillTreeView(treeView, data);
+            fillTreeView(treeView, data);
         }
 
-        private void FillTreeView(TreeView treeView, List<TreeNodeData> data)
+        private void fillTreeView(TreeView treeView, List<TreeNodeData> data)
         {
             // Effacez tous les nœuds existants
             treeView.Nodes.Clear();
@@ -60,6 +68,39 @@ namespace Scada.Scheme.Model.PropertyGrid
                 // Ajoutez le nœud au TreeView
                 treeView.Nodes.Add(node);
             }
+        }
+
+        //test
+        private void fillTestDataGrid()
+        {
+            _dataTable.Columns.Add("Name", typeof(string));
+            _dataTable.Columns.Add("Tag", typeof(string));
+            _dataTable.Columns.Add("Type", typeof(string));
+            _dataTable.Columns.Add("Device", typeof(string));
+
+            // Ajouter les deux lignes de données
+            _dataTable.Rows.Add("OUI", "INT", "type1", "bip");
+            _dataTable.Rows.Add("NON", "BOOL", "type2", "coucou");
+
+            dataGridView1.DataSource = _dataTable;
+        }
+
+        private void buttonSearch_Click(object sender, EventArgs e)
+        {
+            DataView dataView = _dataTable.DefaultView;
+            dataView.RowFilter = string.Format(@"Name LIKE '%{0}%'", textBox1.Text);
+            dataGridView1.DataSource = dataView;
+        }
+
+        private void buttonOK_Click(object sender, EventArgs e)
+        {
+            _value = dataGridView1.SelectedRows[0].Cells[0].Value.ToString();
+            DialogResult = DialogResult.OK;
+        }
+
+        public string getValue()
+        {
+            return _value;
         }
     }
 

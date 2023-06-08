@@ -264,7 +264,7 @@ namespace Scada.Scheme.Model
                 string.IsNullOrEmpty(BorderColor) ? 0 : 1 /*для обратной совместимости*/);
             ToolTip = xmlNode.GetChildAsString("ToolTip");
             ID = xmlNode.GetChildAsInt("ID");
-            IDcustom = xmlNode.GetChildAsString("ID");//modif AT ajout
+            IDcustom = xmlNode.GetChildAsString("IDcustom");//modif AT ajout
             Name = xmlNode.GetChildAsString("Name");
             Location = Point.GetChildAsPoint(xmlNode, "Location");
             Size = Size.GetChildAsSize(xmlNode, "Size");
@@ -284,6 +284,7 @@ namespace Scada.Scheme.Model
             xmlElem.AppendElem("BorderWidth", BorderWidth);
             xmlElem.AppendElem("ToolTip", ToolTip);
             xmlElem.AppendElem("ID", ID);
+            xmlElem.AppendElem("IDcustom", IDcustom);
             xmlElem.AppendElem("Name", Name);
             Point.AppendElem(xmlElem, "Location", Location);
             Size.AppendElem(xmlElem, "Size", Size);
