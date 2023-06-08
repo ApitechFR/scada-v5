@@ -31,6 +31,7 @@ using Scada.UI;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using Utils;
@@ -389,6 +390,7 @@ namespace Scada.Scheme.Editor
                         foreach (BaseComponent component in editor.SchemeView.Components.Values)
                         {
                             cbSchComp.Items.Add(component);
+                            //todo: add to tree
                         }
                     }
                 }
@@ -560,6 +562,23 @@ namespace Scada.Scheme.Editor
 
                         // добавление компонента в выпадающий список
                         cbSchComp.Items.Add(changedObject);
+
+                        TreeNode existingParent = null;
+                        var currentParents = treeView1.Nodes.Find(((BaseComponent)changedObject).ZIndex.ToString(), false).ToList();
+
+                        TreeNode tn = new TreeNode(((BaseComponent)changedObject).ToString());
+                        if (currentParents.Count() == 0)
+                        {
+                            existingParent = new TreeNode(string.Format("Zindex : {0}",((BaseComponent)changedObject).ZIndex));
+                            existingParent.Name = ((BaseComponent)changedObject).ZIndex.ToString();
+                            existingParent.Nodes.Add(tn);
+                            treeView1.Nodes.Add(existingParent);
+                        }
+                        else
+                        {
+                            existingParent = currentParents.First();
+                            existingParent.Nodes.Add(tn);
+                        }
                         break;
 
                     case SchemeChangeTypes.ComponentChanged:
@@ -680,6 +699,22 @@ namespace Scada.Scheme.Editor
             // создание новой или загрузка существующей схемы
             string[] args = Environment.GetCommandLineArgs();
             InitScheme(args.Length > 1 ? args[1] : "");
+
+            //load componentsTree
+            //if (editor.SchemeView != null)
+            //{
+            //    lock (editor.SchemeView)
+            //    {
+            //        TreeNode tn = new TreeNode("le parent");
+            //        treeView1.Nodes.Add(tn);
+            //        //cbSchComp.Items.Add(editor.SchemeView.SchemeDoc);
+
+            //        foreach (BaseComponent component in editor.SchemeView.Components.Values)
+            //        {
+            //            Debug.WriteLine("ok");
+            //        }
+            //    }
+            //}
 
             // загрузка состояния формы
             FormState formState = new FormState();
