@@ -46,7 +46,7 @@
             // 
             // buttonSearch
             // 
-            this.buttonSearch.Location = new System.Drawing.Point(724, 11);
+            this.buttonSearch.Location = new System.Drawing.Point(924, 9);
             this.buttonSearch.Name = "buttonSearch";
             this.buttonSearch.Size = new System.Drawing.Size(100, 29);
             this.buttonSearch.TabIndex = 2;
@@ -56,10 +56,11 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(257, 14);
+            this.textBox1.Location = new System.Drawing.Point(257, 12);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(459, 22);
+            this.textBox1.Size = new System.Drawing.Size(661, 22);
             this.textBox1.TabIndex = 3;
+            this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
             // dataGridView1
             // 
@@ -76,13 +77,13 @@
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(567, 379);
+            this.dataGridView1.Size = new System.Drawing.Size(767, 379);
             this.dataGridView1.TabIndex = 4;
             // 
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(724, 432);
+            this.buttonCancel.Location = new System.Drawing.Point(924, 432);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(100, 33);
             this.buttonCancel.TabIndex = 5;
@@ -91,7 +92,7 @@
             // 
             // buttonOK
             // 
-            this.buttonOK.Location = new System.Drawing.Point(618, 432);
+            this.buttonOK.Location = new System.Drawing.Point(818, 432);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(100, 33);
             this.buttonOK.TabIndex = 6;
@@ -103,7 +104,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(837, 471);
+            this.ClientSize = new System.Drawing.Size(1036, 471);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.dataGridView1);

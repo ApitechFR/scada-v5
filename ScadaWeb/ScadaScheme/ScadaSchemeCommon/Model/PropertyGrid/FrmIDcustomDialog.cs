@@ -1,4 +1,5 @@
 ﻿using Scada.Scheme.Template;
+using Scada.Web;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,6 +26,8 @@ namespace Scada.Scheme.Model.PropertyGrid
 
             //test
             fillTestDataGrid();
+
+            string pathXml = AppDirs.DefWebAppDir;
         }
 
         public void updateTreeView(TreeView treeView)
@@ -74,33 +77,50 @@ namespace Scada.Scheme.Model.PropertyGrid
         private void fillTestDataGrid()
         {
             _dataTable.Columns.Add("Name", typeof(string));
-            _dataTable.Columns.Add("Tag", typeof(string));
+            _dataTable.Columns.Add("Tag_Num", typeof(string));
+            _dataTable.Columns.Add("Tag_Code", typeof(string));
             _dataTable.Columns.Add("Type", typeof(string));
             _dataTable.Columns.Add("Device", typeof(string));
 
             // Ajouter les deux lignes de données
-            _dataTable.Rows.Add("OUI", "INT", "type1", "bip");
-            _dataTable.Rows.Add("NON", "BOOL", "type2", "coucou");
+            _dataTable.Rows.Add("Vanne A145", "12345", "Vanne A", "Input", "Simulator");
+            _dataTable.Rows.Add("Mesure h2s ouvrage", "20500", "211_29_ait_001", "Output", "Device3");
 
             dataGridView1.DataSource = _dataTable;
         }
 
         private void buttonSearch_Click(object sender, EventArgs e)
         {
-            DataView dataView = _dataTable.DefaultView;
-            dataView.RowFilter = string.Format(@"Name LIKE '%{0}%'", textBox1.Text);
-            dataGridView1.DataSource = dataView;
+            search();
         }
 
         private void buttonOK_Click(object sender, EventArgs e)
         {
-            _value = dataGridView1.SelectedRows[0].Cells[0].Value.ToString();
+            if (dataGridView1.SelectedRows.Count != 0)
+                _value = dataGridView1.SelectedRows[0].Cells[0].Value.ToString();
+            else _value = "";
             DialogResult = DialogResult.OK;
+
         }
 
         public string getValue()
         {
             return _value;
+        }
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if(e.KeyChar == (char)Keys.Enter)
+            {
+                search();
+            }
+        }
+
+        private void search()
+        {
+            DataView dataView = _dataTable.DefaultView;
+            dataView.RowFilter = string.Format(@"Name LIKE '%{0}%'", textBox1.Text);
+            dataGridView1.DataSource = dataView;
         }
     }
 
