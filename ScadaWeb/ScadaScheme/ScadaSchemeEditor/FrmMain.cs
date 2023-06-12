@@ -23,12 +23,16 @@
  * Modified : 2019
  */
 
+using Scada.Data.Tables;
+using Scada.Scheme.Editor.AppCode;
 using Scada.Scheme.Editor.Properties;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
 using Scada.UI;
 using System;
+using System.ComponentModel;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -548,6 +552,58 @@ namespace Scada.Scheme.Editor
             return formStateDTO;
         }
 
+        private void addComponentToTree (BaseComponent component)
+        {
+            TreeNode existingParent = null;
+            var currentParents = treeView1.Nodes.Find(component.ZIndex.ToString(), false).ToList();
+
+            TreeNode tn = new TreeNode(string.Format("{0} ({1})", component.Name, component.GetType().Name));
+            tn.Tag = component;
+            //tn.cl
+            if (currentParents.Count() == 0)
+            {
+                existingParent = new TreeNode(string.Format("Z-index : {0}", component.ZIndex));
+                existingParent.Name = component.ZIndex.ToString();
+                existingParent.Nodes.Add(tn);
+                treeView1.Nodes.Add(existingParent);
+            }
+            else
+            {
+                existingParent = currentParents.First();
+                existingParent.Nodes.Add(tn);
+            }
+            treeView1.Sort();
+        }
+
+        private void removeComponentFromTree(BaseComponent component)
+        {
+            for(int i = 0; i < treeView1.Nodes.Count; i++)
+            {
+                bool isDeleted = false;
+                for (int j = 0; j < treeView1.Nodes[i].Nodes.Count; j++)
+                {
+                    if (treeView1.Nodes[i].Nodes[j].Tag == component)
+                    {
+                        var nodeToRemove = treeView1.Nodes[i].Nodes.Count == 1 ? treeView1.Nodes[i] : treeView1.Nodes[i].Nodes[j];
+                        nodeToRemove.Remove();
+                        isDeleted = true;
+                        break;
+                    }
+                }
+                if (isDeleted)
+                {
+                    break;
+                }
+            }
+        }
+
+        //public event TreeViewEventHandler SelectedNodeChanged;
+        public void treeView1_NodeMouseClick(object sender, TreeViewEventArgs e)
+        {
+            //if (e.Node == tv.SelectedNode)
+            //    treeView1_AfterSelect(sender, null);
+            Debug.WriteLine("okok");
+        }
 
         private void Scheme_ItemChanged(object sender, SchemeChangeTypes changeType, 
             object changedObject, object oldKey)
@@ -562,43 +618,32 @@ namespace Scada.Scheme.Editor
 
                         // добавление компонента в выпадающий список
                         cbSchComp.Items.Add(changedObject);
+                        addComponentToTree((BaseComponent)changedObject);
 
-                        TreeNode existingParent = null;
-                        var currentParents = treeView1.Nodes.Find(((BaseComponent)changedObject).ZIndex.ToString(), false).ToList();
-
-                        TreeNode tn = new TreeNode(((BaseComponent)changedObject).ToString());
-                        if (currentParents.Count() == 0)
-                        {
-                            existingParent = new TreeNode(string.Format("Zindex : {0}",((BaseComponent)changedObject).ZIndex));
-                            existingParent.Name = ((BaseComponent)changedObject).ZIndex.ToString();
-                            existingParent.Nodes.Add(tn);
-                            treeView1.Nodes.Add(existingParent);
-                        }
-                        else
-                        {
-                            existingParent = currentParents.First();
-                            existingParent.Nodes.Add(tn);
-                        }
                         break;
 
                     case SchemeChangeTypes.ComponentChanged:
                         // обновление текста выпадающего списка при изменении отображаемого наименования выбранного объекта
                         object selItem = cbSchComp.SelectedItem;
+                        string oldDisplayName = cbSchComp.Text;
                         if (selItem != null)
                         {
                             string newDisplayName = selItem.ToString();
-                            string oldDisplayName = cbSchComp.Text;
                             if (oldDisplayName != newDisplayName)
                                 cbSchComp.Items[cbSchComp.SelectedIndex] = selItem;
                         }
+                        var a = oldKey;
+                        removeComponentFromTree((BaseComponent)changedObject);
+                        addComponentToTree((BaseComponent)changedObject);
                         break;
 
                     case SchemeChangeTypes.ComponentDeleted:
                         // удаление компонента из выпадающего списка
                         cbSchComp.Items.Remove(changedObject);
+                        removeComponentFromTree((BaseComponent)changedObject);
                         break;
                 }
-
+                //updateComponentsTree();
                 SetButtonsEnabled();
             });
         }

@@ -1,4 +1,7 @@
-﻿namespace Scada.Scheme.Editor
+﻿using Scada.Scheme.Editor.AppCode;
+using System.Windows.Forms;
+
+namespace Scada.Scheme.Editor
 {
     partial class FrmMain
     {
@@ -621,6 +624,8 @@
             this.treeView1.Name = "treeView1";
             this.treeView1.Size = new System.Drawing.Size(285, 172);
             this.treeView1.TabIndex = 0;
+            this.treeView1.TreeViewNodeSorter = new NodeSorter();
+            this.treeView1.AfterSelect += new TreeViewEventHandler(this.treeView1_NodeMouseClick);
             // 
             // FrmMain
             // 
