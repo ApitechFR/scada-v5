@@ -11,6 +11,7 @@ using System.Text;
 using System.Windows.Forms;
 using Scada.Scheme;
 using System.Runtime.Remoting.Contexts;
+using System.Xml;
 
 namespace Scada.Scheme.Model.PropertyGrid
 {
@@ -21,7 +22,8 @@ namespace Scada.Scheme.Model.PropertyGrid
         private string _value = "";
         private string _projectPath = "";
         private string _projectXMLPath = "";
-
+        private List<string[]> _lstProperties = new List<string[]>();
+        private string[] _xmlNames = { "Cnl.xml", "CnlType.xml", "Device.xml", "Obj.xml" };
         private string _errFolder = "Aucun dossier sélectionné.";
 
         Scada.Scheme.SchemeContext context = Scada.Scheme.SchemeContext.GetInstance();
@@ -30,15 +32,18 @@ namespace Scada.Scheme.Model.PropertyGrid
         {
             InitializeComponent();
 
-            // choosing project path automaticaly
-            // TODO
-            // mise à jour de la TreeView
-            updateTreeView(treeView1);
+            // Retrieve Base XML Directory
 
             if (Directory.Exists(context.SchemePath))
             {
                 labelPath.Text = context.SchemePath;
                 _projectXMLPath = Path.Combine(context.SchemePath, "BaseXML");
+
+                foreach (string name in _xmlNames)
+                {
+                    xmlReader(name);
+                }
+
             }
             else if (File.Exists(context.SchemePath))
             {
@@ -56,7 +61,21 @@ namespace Scada.Scheme.Model.PropertyGrid
                 _projectPath = Directory.GetParent(_projectPath).FullName;
                 labelPath.Text = _projectPath;
                 _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
+
+                foreach (string name in _xmlNames)
+                {
+                    xmlReader(name);
+                }
+
             }
+
+
+
+            // choosing project path automaticaly
+            // TODO
+            // mise à jour de la TreeView
+
+            updateTreeView(treeView1);
 
             //test
             fillTestDataGrid();
@@ -167,10 +186,76 @@ namespace Scada.Scheme.Model.PropertyGrid
                 labelPath.Text = _projectPath;
                 Scada.Scheme.SchemeContext.GetInstance().SchemePath = _projectPath;
                 _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
+
+                foreach (string name in _xmlNames)
+                {
+                    xmlReader(name);
+                }
             }
             else
                 Console.WriteLine(_errFolder);
 
+        }
+
+        private void xmlReader(string file)
+        {
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(Path.Combine(_projectXMLPath, file));
+            XmlNode root = xmlDoc.DocumentElement;
+
+            switch (file)
+            {
+                case "Cnl.xml":
+                    foreach (XmlNode cnlNode in root.SelectNodes("Cnl"))
+                    {
+                        string[] tab = new string[9];
+                        tab[0] = cnlNode.SelectSingleNode("Name").InnerText;
+                        tab[1] = cnlNode.SelectSingleNode("CnlTypeID").InnerText;
+                        tab[2] = cnlNode.SelectSingleNode("ObjNum").InnerText;
+                        tab[3] = cnlNode.SelectSingleNode("DeviceNum").InnerText;
+                        tab[4] = cnlNode.SelectSingleNode("TagNum").InnerText;
+                        tab[5] = cnlNode.SelectSingleNode("TagCode").InnerText;
+                        _lstProperties.Add(tab);
+                    }
+                    break;
+
+                case "CnlType.xml":
+                    foreach (string[] tab in _lstProperties)
+                    {
+                        foreach (XmlNode cnlTypeNode in root.SelectNodes("CnlType"))
+                        {
+                            if (tab[1] == cnlTypeNode.SelectSingleNode("CnlTypeID").InnerText)
+                                tab[6] = cnlTypeNode.SelectSingleNode("Name").InnerText;
+                        }
+                    }
+                    break;
+
+                case "Device.xml":
+                    foreach (string[] tab in _lstProperties)
+                    {
+                        foreach (XmlNode deviceNode in root.SelectNodes("Device"))
+                        {
+                            if (tab[3] == deviceNode.SelectSingleNode("DeviceNum").InnerText)
+                                tab[7] = deviceNode.SelectSingleNode("Name").InnerText;
+                        }
+                    }
+                    break;
+
+
+                case "Obj.xml":
+                    foreach (string[] tab in _lstProperties)
+                    {
+                        foreach (XmlNode objNode in root.SelectNodes("Obj"))
+                        {
+                            if (tab[2] == objNode.SelectSingleNode("ObjNum").InnerText)
+                                tab[8] = objNode.SelectSingleNode("Name").InnerText;
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 
