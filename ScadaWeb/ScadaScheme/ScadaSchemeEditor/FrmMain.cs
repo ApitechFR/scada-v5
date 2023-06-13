@@ -555,7 +555,6 @@ namespace Scada.Scheme.Editor
 
             TreeNode tn = new TreeNode(string.Format("{0} ({1})", component.Name, component.GetType().Name));
             tn.Tag = component;
-            //tn.cl
             if (currentParents.Count() == 0)
             {
                 existingParent = new TreeNode(string.Format("Z-index : {0}", component.ZIndex));
@@ -622,10 +621,10 @@ namespace Scada.Scheme.Editor
                     case SchemeChangeTypes.ComponentChanged:
                         // обновление текста выпадающего списка при изменении отображаемого наименования выбранного объекта
                         object selItem = cbSchComp.SelectedItem;
-                        string oldDisplayName = cbSchComp.Text;
                         if (selItem != null)
                         {
                             string newDisplayName = selItem.ToString();
+                            string oldDisplayName = cbSchComp.Text;
                             if (oldDisplayName != newDisplayName)
                                 cbSchComp.Items[cbSchComp.SelectedIndex] = selItem;
                         }
