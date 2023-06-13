@@ -23,16 +23,12 @@
  * Modified : 2019
  */
 
-using Scada.Data.Tables;
-using Scada.Scheme.Editor.AppCode;
 using Scada.Scheme.Editor.Properties;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
 using Scada.UI;
 using System;
-using System.ComponentModel;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -394,7 +390,7 @@ namespace Scada.Scheme.Editor
                         foreach (BaseComponent component in editor.SchemeView.Components.Values)
                         {
                             cbSchComp.Items.Add(component);
-                            //todo: add to tree
+                            addComponentToTree(component);
                         }
                     }
                 }
@@ -597,12 +593,13 @@ namespace Scada.Scheme.Editor
             }
         }
 
-        //public event TreeViewEventHandler SelectedNodeChanged;
         public void treeView1_NodeMouseClick(object sender, TreeViewEventArgs e)
         {
-            //if (e.Node == tv.SelectedNode)
-            //    treeView1_AfterSelect(sender, null);
-            Debug.WriteLine("okok");
+
+            if(e.Node.Tag != null)
+            {
+                editor.SelectComponent(((BaseComponent)(e.Node.Tag)).ID);
+            }
         }
 
         private void Scheme_ItemChanged(object sender, SchemeChangeTypes changeType, 
@@ -643,7 +640,6 @@ namespace Scada.Scheme.Editor
                         removeComponentFromTree((BaseComponent)changedObject);
                         break;
                 }
-                //updateComponentsTree();
                 SetButtonsEnabled();
             });
         }
@@ -744,22 +740,6 @@ namespace Scada.Scheme.Editor
             // создание новой или загрузка существующей схемы
             string[] args = Environment.GetCommandLineArgs();
             InitScheme(args.Length > 1 ? args[1] : "");
-
-            //load componentsTree
-            //if (editor.SchemeView != null)
-            //{
-            //    lock (editor.SchemeView)
-            //    {
-            //        TreeNode tn = new TreeNode("le parent");
-            //        treeView1.Nodes.Add(tn);
-            //        //cbSchComp.Items.Add(editor.SchemeView.SchemeDoc);
-
-            //        foreach (BaseComponent component in editor.SchemeView.Components.Values)
-            //        {
-            //            Debug.WriteLine("ok");
-            //        }
-            //    }
-            //}
 
             // загрузка состояния формы
             FormState formState = new FormState();
