@@ -28,25 +28,29 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmIDcustomDialog));
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.buttonSearch = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonOK = new System.Windows.Forms.Button();
+            this.labelProjectPath = new System.Windows.Forms.Label();
+            this.labelPath = new System.Windows.Forms.Label();
+            this.buttonPorjectPath = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // treeView1
             // 
-            this.treeView1.Location = new System.Drawing.Point(12, 12);
+            this.treeView1.Location = new System.Drawing.Point(12, 59);
             this.treeView1.Name = "treeView1";
             this.treeView1.Size = new System.Drawing.Size(239, 414);
             this.treeView1.TabIndex = 0;
             // 
             // buttonSearch
             // 
-            this.buttonSearch.Location = new System.Drawing.Point(924, 9);
+            this.buttonSearch.Location = new System.Drawing.Point(924, 56);
             this.buttonSearch.Name = "buttonSearch";
             this.buttonSearch.Size = new System.Drawing.Size(100, 29);
             this.buttonSearch.TabIndex = 2;
@@ -56,7 +60,7 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(257, 12);
+            this.textBox1.Location = new System.Drawing.Point(257, 59);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(661, 22);
             this.textBox1.TabIndex = 3;
@@ -70,7 +74,7 @@
             this.dataGridView1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.dataGridView1.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(257, 47);
+            this.dataGridView1.Location = new System.Drawing.Point(257, 94);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
@@ -83,7 +87,7 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(924, 432);
+            this.buttonCancel.Location = new System.Drawing.Point(924, 479);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(100, 33);
             this.buttonCancel.TabIndex = 5;
@@ -92,7 +96,7 @@
             // 
             // buttonOK
             // 
-            this.buttonOK.Location = new System.Drawing.Point(818, 432);
+            this.buttonOK.Location = new System.Drawing.Point(818, 479);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(100, 33);
             this.buttonOK.TabIndex = 6;
@@ -100,11 +104,47 @@
             this.buttonOK.UseVisualStyleBackColor = true;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
             // 
+            // labelProjectPath
+            // 
+            this.labelProjectPath.AutoSize = true;
+            this.labelProjectPath.Location = new System.Drawing.Point(51, 26);
+            this.labelProjectPath.Name = "labelProjectPath";
+            this.labelProjectPath.Size = new System.Drawing.Size(88, 16);
+            this.labelProjectPath.TabIndex = 7;
+            this.labelProjectPath.Text = "Project Path : ";
+            // 
+            // labelPath
+            // 
+            this.labelPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelPath.AutoSize = true;
+            this.labelPath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.labelPath.Location = new System.Drawing.Point(145, 24);
+            this.labelPath.Name = "labelPath";
+            this.labelPath.Size = new System.Drawing.Size(175, 18);
+            this.labelPath.TabIndex = 8;
+            this.labelPath.Text = "Please, select project folder";
+            this.labelPath.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // buttonPorjectPath
+            // 
+            this.buttonPorjectPath.BackColor = System.Drawing.Color.White;
+            this.buttonPorjectPath.Image = ((System.Drawing.Image)(resources.GetObject("buttonPorjectPath.Image")));
+            this.buttonPorjectPath.Location = new System.Drawing.Point(12, 21);
+            this.buttonPorjectPath.Name = "buttonPorjectPath";
+            this.buttonPorjectPath.Size = new System.Drawing.Size(33, 27);
+            this.buttonPorjectPath.TabIndex = 9;
+            this.buttonPorjectPath.UseVisualStyleBackColor = false;
+            this.buttonPorjectPath.Click += new System.EventHandler(this.buttonPorjectPath_Click);
+            // 
             // FrmIDcustomDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1036, 471);
+            this.ClientSize = new System.Drawing.Size(1036, 523);
+            this.Controls.Add(this.buttonPorjectPath);
+            this.Controls.Add(this.labelPath);
+            this.Controls.Add(this.labelProjectPath);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.dataGridView1);
@@ -128,5 +168,8 @@
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonOK;
         public System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.Label labelProjectPath;
+        private System.Windows.Forms.Label labelPath;
+        private System.Windows.Forms.Button buttonPorjectPath;
     }
 }

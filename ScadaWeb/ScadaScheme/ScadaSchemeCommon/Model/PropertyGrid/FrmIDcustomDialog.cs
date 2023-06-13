@@ -5,9 +5,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Scada.Scheme;
+using System.Runtime.Remoting.Contexts;
 
 namespace Scada.Scheme.Model.PropertyGrid
 {
@@ -15,19 +18,48 @@ namespace Scada.Scheme.Model.PropertyGrid
     {
 
         private DataTable _dataTable = new DataTable();
-        private string _value = ""; 
+        private string _value = "";
+        private string _projectPath = "";
+        private string _projectXMLPath = "";
+
+        private string _errFolder = "Aucun dossier sélectionné.";
+
+        Scada.Scheme.SchemeContext context = Scada.Scheme.SchemeContext.GetInstance();
 
         public FrmIDcustomDialog()
         {
             InitializeComponent();
-            
+
+            // choosing project path automaticaly
+            // TODO
             // mise à jour de la TreeView
             updateTreeView(treeView1);
 
+            if (Directory.Exists(context.SchemePath))
+            {
+                labelPath.Text = context.SchemePath;
+                _projectXMLPath = Path.Combine(context.SchemePath, "BaseXML");
+            }
+            else if (File.Exists(context.SchemePath))
+            {
+                _projectPath = context.SchemePath;
+
+                while (Path.GetFileName(_projectPath) != "Interface") //Views
+                {
+                    string dossierParent = Directory.GetParent(_projectPath).FullName;
+                    if (string.IsNullOrEmpty(dossierParent))
+                    {
+                        return;
+                    }
+                    _projectPath = dossierParent;
+                }
+                _projectPath = Directory.GetParent(_projectPath).FullName;
+                labelPath.Text = _projectPath;
+                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
+            }
+
             //test
             fillTestDataGrid();
-
-            string pathXml = AppDirs.DefWebAppDir;
         }
 
         public void updateTreeView(TreeView treeView)
@@ -121,6 +153,24 @@ namespace Scada.Scheme.Model.PropertyGrid
             DataView dataView = _dataTable.DefaultView;
             dataView.RowFilter = string.Format(@"Name LIKE '%{0}%'", textBox1.Text);
             dataGridView1.DataSource = dataView;
+        }
+
+        private void buttonPorjectPath_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+
+            DialogResult result = folderBrowserDialog.ShowDialog();
+
+            if(result == DialogResult.OK)
+            {
+                _projectPath = folderBrowserDialog.SelectedPath;
+                labelPath.Text = _projectPath;
+                Scada.Scheme.SchemeContext.GetInstance().SchemePath = _projectPath;
+                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
+            }
+            else
+                Console.WriteLine(_errFolder);
+
         }
     }
 

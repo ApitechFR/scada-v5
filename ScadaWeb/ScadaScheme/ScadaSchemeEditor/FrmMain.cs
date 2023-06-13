@@ -783,6 +783,7 @@ namespace Scada.Scheme.Editor
                 {
                     ofdScheme.InitialDirectory = Path.GetDirectoryName(ofdScheme.FileName);
                     InitScheme(ofdScheme.FileName);
+                    SchemeContext.GetInstance().SchemePath = ofdScheme.FileName; //modif AT
                 }
             }
         }
