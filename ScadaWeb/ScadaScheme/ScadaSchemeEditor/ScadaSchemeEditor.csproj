@@ -67,6 +67,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceModel.Web" />
@@ -86,6 +87,7 @@
     <Compile Include="AppCode\FormStateDTO.cs" />
     <Compile Include="AppCode\History.cs" />
     <Compile Include="AppCode\IMainForm.cs" />
+    <Compile Include="AppCode\NodeSorter.cs" />
     <Compile Include="AppCode\PasteSpecialParams.cs" />
     <Compile Include="AppCode\PointerMode.cs" />
     <Compile Include="AppCode\SelectAction.cs" />
