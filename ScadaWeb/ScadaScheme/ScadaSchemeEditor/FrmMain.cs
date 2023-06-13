@@ -31,6 +31,7 @@ using Scada.UI;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using Utils;
@@ -389,6 +390,7 @@ namespace Scada.Scheme.Editor
                         foreach (BaseComponent component in editor.SchemeView.Components.Values)
                         {
                             cbSchComp.Items.Add(component);
+                            addComponentToTree(component);
                         }
                     }
                 }
@@ -546,6 +548,58 @@ namespace Scada.Scheme.Editor
             return formStateDTO;
         }
 
+        private void addComponentToTree (BaseComponent component)
+        {
+            TreeNode existingParent = null;
+            var currentParents = treeView1.Nodes.Find(component.ZIndex.ToString(), false).ToList();
+
+            TreeNode tn = new TreeNode(string.Format("{0} ({1})", component.Name, component.GetType().Name));
+            tn.Tag = component;
+            if (currentParents.Count() == 0)
+            {
+                existingParent = new TreeNode(string.Format("Z-index : {0}", component.ZIndex));
+                existingParent.Name = component.ZIndex.ToString();
+                existingParent.Nodes.Add(tn);
+                treeView1.Nodes.Add(existingParent);
+            }
+            else
+            {
+                existingParent = currentParents.First();
+                existingParent.Nodes.Add(tn);
+            }
+            treeView1.Sort();
+        }
+
+        private void removeComponentFromTree(BaseComponent component)
+        {
+            for(int i = 0; i < treeView1.Nodes.Count; i++)
+            {
+                bool isDeleted = false;
+                for (int j = 0; j < treeView1.Nodes[i].Nodes.Count; j++)
+                {
+                    if (treeView1.Nodes[i].Nodes[j].Tag == component)
+                    {
+                        var nodeToRemove = treeView1.Nodes[i].Nodes.Count == 1 ? treeView1.Nodes[i] : treeView1.Nodes[i].Nodes[j];
+                        nodeToRemove.Remove();
+                        isDeleted = true;
+                        break;
+                    }
+                }
+                if (isDeleted)
+                {
+                    break;
+                }
+            }
+        }
+
+        public void treeView1_NodeMouseClick(object sender, TreeViewEventArgs e)
+        {
+
+            if(e.Node.Tag != null)
+            {
+                editor.SelectComponent(((BaseComponent)(e.Node.Tag)).ID);
+            }
+        }
 
         private void Scheme_ItemChanged(object sender, SchemeChangeTypes changeType, 
             object changedObject, object oldKey)
@@ -560,6 +614,8 @@ namespace Scada.Scheme.Editor
 
                         // добавление компонента в выпадающий список
                         cbSchComp.Items.Add(changedObject);
+                        addComponentToTree((BaseComponent)changedObject);
+
                         break;
 
                     case SchemeChangeTypes.ComponentChanged:
@@ -572,14 +628,16 @@ namespace Scada.Scheme.Editor
                             if (oldDisplayName != newDisplayName)
                                 cbSchComp.Items[cbSchComp.SelectedIndex] = selItem;
                         }
+                        removeComponentFromTree((BaseComponent)changedObject);
+                        addComponentToTree((BaseComponent)changedObject);
                         break;
 
                     case SchemeChangeTypes.ComponentDeleted:
                         // удаление компонента из выпадающего списка
                         cbSchComp.Items.Remove(changedObject);
+                        removeComponentFromTree((BaseComponent)changedObject);
                         break;
                 }
-
                 SetButtonsEnabled();
             });
         }

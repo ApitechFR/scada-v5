@@ -1,4 +1,7 @@
-﻿namespace Scada.Scheme.Editor
+﻿using Scada.Scheme.Editor.AppCode;
+using System.Windows.Forms;
+
+namespace Scada.Scheme.Editor
 {
     partial class FrmMain
     {
@@ -30,12 +33,12 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
-            System.Windows.Forms.ListViewGroup listViewGroup2 = new System.Windows.Forms.ListViewGroup("Standard", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewItem listViewItem6 = new System.Windows.Forms.ListViewItem("Pointer", "(none)");
-            System.Windows.Forms.ListViewItem listViewItem7 = new System.Windows.Forms.ListViewItem("Static Text", "(none)");
-            System.Windows.Forms.ListViewItem listViewItem8 = new System.Windows.Forms.ListViewItem("Dynamic Text", "(none)");
-            System.Windows.Forms.ListViewItem listViewItem9 = new System.Windows.Forms.ListViewItem("Static Picture", "(none)");
-            System.Windows.Forms.ListViewItem listViewItem10 = new System.Windows.Forms.ListViewItem("Dynamic Picture", "(none)");
+            System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Standard", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem("Pointer", "(none)");
+            System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem("Static Text", "(none)");
+            System.Windows.Forms.ListViewItem listViewItem3 = new System.Windows.Forms.ListViewItem("Dynamic Text", "(none)");
+            System.Windows.Forms.ListViewItem listViewItem4 = new System.Windows.Forms.ListViewItem("Static Picture", "(none)");
+            System.Windows.Forms.ListViewItem listViewItem5 = new System.Windows.Forms.ListViewItem("Dynamic Picture", "(none)");
             this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.btnFileNew = new System.Windows.Forms.ToolStripButton();
             this.btnFileOpen = new System.Windows.Forms.ToolStripButton();
@@ -77,6 +80,7 @@
             this.miEditCut = new System.Windows.Forms.ToolStripMenuItem();
             this.miEditCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.miEditPaste = new System.Windows.Forms.ToolStripMenuItem();
+            this.miEditPasteSpecial = new System.Windows.Forms.ToolStripMenuItem();
             this.miEditSep1 = new System.Windows.Forms.ToolStripSeparator();
             this.miEditUndo = new System.Windows.Forms.ToolStripMenuItem();
             this.miEditRedo = new System.Windows.Forms.ToolStripMenuItem();
@@ -87,13 +91,15 @@
             this.miToolsOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.miHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.miHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
-            this.miEditPasteSpecial = new System.Windows.Forms.ToolStripMenuItem();
+            this.ComponentsTree = new System.Windows.Forms.TabPage();
+            this.treeView1 = new System.Windows.Forms.TreeView();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.pageComponents.SuspendLayout();
             this.pageProperties.SuspendLayout();
             this.menuStrip.SuspendLayout();
+            this.ComponentsTree.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip
@@ -274,6 +280,7 @@
             // 
             this.tabControl.Controls.Add(this.pageComponents);
             this.tabControl.Controls.Add(this.pageProperties);
+            this.tabControl.Controls.Add(this.ComponentsTree);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 49);
             this.tabControl.Multiline = true;
@@ -300,32 +307,32 @@
             this.colCompName});
             this.lvCompTypes.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lvCompTypes.FullRowSelect = true;
-            listViewGroup2.Header = "Standard";
-            listViewGroup2.Name = "lvgStandard";
+            listViewGroup1.Header = "Standard";
+            listViewGroup1.Name = "lvgStandard";
             this.lvCompTypes.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
-            listViewGroup2});
+            listViewGroup1});
             this.lvCompTypes.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
             this.lvCompTypes.HideSelection = false;
-            listViewItem6.Group = listViewGroup2;
-            listViewItem6.IndentCount = 1;
-            listViewItem7.Group = listViewGroup2;
-            listViewItem7.IndentCount = 1;
-            listViewItem7.Tag = "Scada.Scheme.Model.StaticText";
-            listViewItem8.Group = listViewGroup2;
-            listViewItem8.IndentCount = 1;
-            listViewItem8.Tag = "Scada.Scheme.Model.DynamicText";
-            listViewItem9.Group = listViewGroup2;
-            listViewItem9.IndentCount = 1;
-            listViewItem9.Tag = "Scada.Scheme.Model.StaticPicture";
-            listViewItem10.Group = listViewGroup2;
-            listViewItem10.IndentCount = 1;
-            listViewItem10.Tag = "Scada.Scheme.Model.DynamicPicture";
+            listViewItem1.Group = listViewGroup1;
+            listViewItem1.IndentCount = 1;
+            listViewItem2.Group = listViewGroup1;
+            listViewItem2.IndentCount = 1;
+            listViewItem2.Tag = "Scada.Scheme.Model.StaticText";
+            listViewItem3.Group = listViewGroup1;
+            listViewItem3.IndentCount = 1;
+            listViewItem3.Tag = "Scada.Scheme.Model.DynamicText";
+            listViewItem4.Group = listViewGroup1;
+            listViewItem4.IndentCount = 1;
+            listViewItem4.Tag = "Scada.Scheme.Model.StaticPicture";
+            listViewItem5.Group = listViewGroup1;
+            listViewItem5.IndentCount = 1;
+            listViewItem5.Tag = "Scada.Scheme.Model.DynamicPicture";
             this.lvCompTypes.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem6,
-            listViewItem7,
-            listViewItem8,
-            listViewItem9,
-            listViewItem10});
+            listViewItem1,
+            listViewItem2,
+            listViewItem3,
+            listViewItem4,
+            listViewItem5});
             this.lvCompTypes.LabelWrap = false;
             this.lvCompTypes.Location = new System.Drawing.Point(3, 3);
             this.lvCompTypes.MultiSelect = false;
@@ -447,7 +454,7 @@
             // 
             this.miFileSaveAs.Image = ((System.Drawing.Image)(resources.GetObject("miFileSaveAs.Image")));
             this.miFileSaveAs.Name = "miFileSaveAs";
-            this.miFileSaveAs.Size = new System.Drawing.Size(180, 22);
+            this.miFileSaveAs.Size = new System.Drawing.Size(155, 22);
             this.miFileSaveAs.Text = "Save As...";
             this.miFileSaveAs.Click += new System.EventHandler(this.miFileSaveAs_Click);
             // 
@@ -455,7 +462,7 @@
             // 
             this.miFileOpenBrowser.Image = ((System.Drawing.Image)(resources.GetObject("miFileOpenBrowser.Image")));
             this.miFileOpenBrowser.Name = "miFileOpenBrowser";
-            this.miFileOpenBrowser.Size = new System.Drawing.Size(180, 22);
+            this.miFileOpenBrowser.Size = new System.Drawing.Size(155, 22);
             this.miFileOpenBrowser.Text = "Open Browser";
             this.miFileOpenBrowser.Click += new System.EventHandler(this.miFileOpenBrowser_Click);
             // 
@@ -494,7 +501,7 @@
             this.miEditCut.Image = ((System.Drawing.Image)(resources.GetObject("miEditCut.Image")));
             this.miEditCut.Name = "miEditCut";
             this.miEditCut.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-            this.miEditCut.Size = new System.Drawing.Size(180, 22);
+            this.miEditCut.Size = new System.Drawing.Size(151, 22);
             this.miEditCut.Text = "Cut";
             this.miEditCut.Click += new System.EventHandler(this.miEditCut_Click);
             // 
@@ -503,7 +510,7 @@
             this.miEditCopy.Image = ((System.Drawing.Image)(resources.GetObject("miEditCopy.Image")));
             this.miEditCopy.Name = "miEditCopy";
             this.miEditCopy.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.miEditCopy.Size = new System.Drawing.Size(180, 22);
+            this.miEditCopy.Size = new System.Drawing.Size(151, 22);
             this.miEditCopy.Text = "Copy";
             this.miEditCopy.Click += new System.EventHandler(this.miEditCopy_Click);
             // 
@@ -512,21 +519,28 @@
             this.miEditPaste.Image = ((System.Drawing.Image)(resources.GetObject("miEditPaste.Image")));
             this.miEditPaste.Name = "miEditPaste";
             this.miEditPaste.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.miEditPaste.Size = new System.Drawing.Size(180, 22);
+            this.miEditPaste.Size = new System.Drawing.Size(151, 22);
             this.miEditPaste.Text = "Paste";
             this.miEditPaste.Click += new System.EventHandler(this.miEditPaste_Click);
+            // 
+            // miEditPasteSpecial
+            // 
+            this.miEditPasteSpecial.Name = "miEditPasteSpecial";
+            this.miEditPasteSpecial.Size = new System.Drawing.Size(151, 22);
+            this.miEditPasteSpecial.Text = "Paste Special...";
+            this.miEditPasteSpecial.Click += new System.EventHandler(this.miEditPasteSpecial_Click);
             // 
             // miEditSep1
             // 
             this.miEditSep1.Name = "miEditSep1";
-            this.miEditSep1.Size = new System.Drawing.Size(177, 6);
+            this.miEditSep1.Size = new System.Drawing.Size(148, 6);
             // 
             // miEditUndo
             // 
             this.miEditUndo.Image = ((System.Drawing.Image)(resources.GetObject("miEditUndo.Image")));
             this.miEditUndo.Name = "miEditUndo";
             this.miEditUndo.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.miEditUndo.Size = new System.Drawing.Size(180, 22);
+            this.miEditUndo.Size = new System.Drawing.Size(151, 22);
             this.miEditUndo.Text = "Undo";
             this.miEditUndo.Click += new System.EventHandler(this.miEditUndo_Click);
             // 
@@ -535,20 +549,20 @@
             this.miEditRedo.Image = ((System.Drawing.Image)(resources.GetObject("miEditRedo.Image")));
             this.miEditRedo.Name = "miEditRedo";
             this.miEditRedo.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
-            this.miEditRedo.Size = new System.Drawing.Size(180, 22);
+            this.miEditRedo.Size = new System.Drawing.Size(151, 22);
             this.miEditRedo.Text = "Redo";
             this.miEditRedo.Click += new System.EventHandler(this.miEditRedo_Click);
             // 
             // miEditSep2
             // 
             this.miEditSep2.Name = "miEditSep2";
-            this.miEditSep2.Size = new System.Drawing.Size(177, 6);
+            this.miEditSep2.Size = new System.Drawing.Size(148, 6);
             // 
             // miEditPointer
             // 
             this.miEditPointer.Image = ((System.Drawing.Image)(resources.GetObject("miEditPointer.Image")));
             this.miEditPointer.Name = "miEditPointer";
-            this.miEditPointer.Size = new System.Drawing.Size(180, 22);
+            this.miEditPointer.Size = new System.Drawing.Size(151, 22);
             this.miEditPointer.Text = "Pointer";
             this.miEditPointer.Click += new System.EventHandler(this.miEditPointer_Click);
             // 
@@ -556,7 +570,7 @@
             // 
             this.miEditDelete.Image = ((System.Drawing.Image)(resources.GetObject("miEditDelete.Image")));
             this.miEditDelete.Name = "miEditDelete";
-            this.miEditDelete.Size = new System.Drawing.Size(180, 22);
+            this.miEditDelete.Size = new System.Drawing.Size(151, 22);
             this.miEditDelete.Text = "Delete";
             this.miEditDelete.Click += new System.EventHandler(this.miEditDelete_Click);
             // 
@@ -572,7 +586,7 @@
             // 
             this.miToolsOptions.Image = ((System.Drawing.Image)(resources.GetObject("miToolsOptions.Image")));
             this.miToolsOptions.Name = "miToolsOptions";
-            this.miToolsOptions.Size = new System.Drawing.Size(180, 22);
+            this.miToolsOptions.Size = new System.Drawing.Size(125, 22);
             this.miToolsOptions.Text = "Options...";
             this.miToolsOptions.Click += new System.EventHandler(this.miToolsOptions_Click);
             // 
@@ -592,12 +606,26 @@
             this.miHelpAbout.Text = "About";
             this.miHelpAbout.Click += new System.EventHandler(this.miHelpAbout_Click);
             // 
-            // miEditPasteSpecial
+            // ComponentsTree
             // 
-            this.miEditPasteSpecial.Name = "miEditPasteSpecial";
-            this.miEditPasteSpecial.Size = new System.Drawing.Size(180, 22);
-            this.miEditPasteSpecial.Text = "Paste Special...";
-            this.miEditPasteSpecial.Click += new System.EventHandler(this.miEditPasteSpecial_Click);
+            this.ComponentsTree.Controls.Add(this.treeView1);
+            this.ComponentsTree.Location = new System.Drawing.Point(4, 22);
+            this.ComponentsTree.Name = "ComponentsTree";
+            this.ComponentsTree.Padding = new System.Windows.Forms.Padding(3);
+            this.ComponentsTree.Size = new System.Drawing.Size(301, 414);
+            this.ComponentsTree.TabIndex = 3;
+            this.ComponentsTree.Text = "View";
+            this.ComponentsTree.UseVisualStyleBackColor = true;
+            // 
+            // treeView1
+            // 
+            this.treeView1.BackColor = System.Drawing.SystemColors.MenuBar;
+            this.treeView1.Location = new System.Drawing.Point(8, 32);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.Size = new System.Drawing.Size(285, 172);
+            this.treeView1.TabIndex = 0;
+            this.treeView1.TreeViewNodeSorter = new NodeSorter();
+            this.treeView1.AfterSelect += new TreeViewEventHandler(this.treeView1_NodeMouseClick);
             // 
             // FrmMain
             // 
@@ -633,6 +661,7 @@
             this.pageProperties.ResumeLayout(false);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
+            this.ComponentsTree.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -691,6 +720,8 @@
         private System.Windows.Forms.ToolStripMenuItem miHelpAbout;
         private System.Windows.Forms.ToolStripMenuItem miFileOpenBrowser;
         private System.Windows.Forms.ToolStripMenuItem miEditPasteSpecial;
+        private System.Windows.Forms.TabPage ComponentsTree;
+        private System.Windows.Forms.TreeView treeView1;
     }
 }
 
