@@ -628,7 +628,6 @@ namespace Scada.Scheme.Editor
                             if (oldDisplayName != newDisplayName)
                                 cbSchComp.Items[cbSchComp.SelectedIndex] = selItem;
                         }
-                        var a = oldKey;
                         removeComponentFromTree((BaseComponent)changedObject);
                         addComponentToTree((BaseComponent)changedObject);
                         break;
