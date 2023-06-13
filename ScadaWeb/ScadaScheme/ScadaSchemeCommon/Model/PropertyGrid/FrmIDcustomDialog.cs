@@ -32,44 +32,7 @@ namespace Scada.Scheme.Model.PropertyGrid
         {
             InitializeComponent();
 
-            // Retrieve Base XML Directory
-
-            if (Directory.Exists(context.SchemePath))
-            {
-                labelPath.Text = context.SchemePath;
-                _projectXMLPath = Path.Combine(context.SchemePath, "BaseXML");
-
-                foreach (string name in _xmlNames)
-                {
-                    xmlReader(name);
-                }
-
-            }
-            else if (File.Exists(context.SchemePath))
-            {
-                _projectPath = context.SchemePath;
-
-                while (Path.GetFileName(_projectPath) != "Interface") //Views
-                {
-                    string dossierParent = Directory.GetParent(_projectPath).FullName;
-                    if (string.IsNullOrEmpty(dossierParent))
-                    {
-                        return;
-                    }
-                    _projectPath = dossierParent;
-                }
-                _projectPath = Directory.GetParent(_projectPath).FullName;
-                labelPath.Text = _projectPath;
-                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
-
-                foreach (string name in _xmlNames)
-                {
-                    xmlReader(name);
-                }
-
-            }
-
-
+            retrieveBaseXMLDirectory();
 
             // choosing project path automaticaly
             // TODO
@@ -255,6 +218,44 @@ namespace Scada.Scheme.Model.PropertyGrid
 
                 default:
                     break;
+            }
+        }
+
+        private void retrieveBaseXMLDirectory()
+        {
+            if (Directory.Exists(context.SchemePath))
+            {
+                labelPath.Text = context.SchemePath;
+                _projectXMLPath = Path.Combine(context.SchemePath, "BaseXML");
+
+                foreach (string name in _xmlNames)
+                {
+                    xmlReader(name);
+                }
+
+            }
+            else if (File.Exists(context.SchemePath))
+            {
+                _projectPath = context.SchemePath;
+
+                while (Path.GetFileName(_projectPath) != "Interface") //Views
+                {
+                    string dossierParent = Directory.GetParent(_projectPath).FullName;
+                    if (string.IsNullOrEmpty(dossierParent))
+                    {
+                        return;
+                    }
+                    _projectPath = dossierParent;
+                }
+                _projectPath = Directory.GetParent(_projectPath).FullName;
+                labelPath.Text = _projectPath;
+                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
+
+                foreach (string name in _xmlNames)
+                {
+                    xmlReader(name);
+                }
+
             }
         }
     }
