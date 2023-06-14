@@ -49,7 +49,7 @@ namespace Scada.Scheme.Model.PropertyGrid
             TreeNode objectsNode = new TreeNode("By objects");
             parentNode.Nodes.Add(objectsNode);
 
-            //récuperation des devices
+            //devices
             List<string> lstNameDevices = new List<string>();
             foreach (string[] tab in _lstProperties)
             {
@@ -62,7 +62,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 devicesNode.Nodes.Add(node);
             }
 
-            //récuperation des objets
+            //objects
             List<string> lstNameObjets = new List<string>();
             foreach (string[] tab in _lstProperties)
             {
@@ -232,7 +232,7 @@ namespace Scada.Scheme.Model.PropertyGrid
             {
                 _projectPath = context.SchemePath;
 
-                while (Path.GetFileName(_projectPath) != "Views") //Views Interface
+                while (Path.GetFileName(_projectPath) != "Views")
                 {
                     string dossierParent = Directory.GetParent(_projectPath).FullName;
                     if (string.IsNullOrEmpty(dossierParent))
