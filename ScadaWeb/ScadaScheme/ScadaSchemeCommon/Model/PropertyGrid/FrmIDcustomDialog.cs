@@ -40,8 +40,7 @@ namespace Scada.Scheme.Model.PropertyGrid
 
             updateTreeView(treeView1);
 
-            //test
-            fillTestDataGrid();
+            
         }
 
         public void updateTreeView(TreeView treeView)
@@ -87,8 +86,7 @@ namespace Scada.Scheme.Model.PropertyGrid
             }
         }
 
-        //test
-        private void fillTestDataGrid()
+        private void fillDataGridView()
         {
             _dataTable.Columns.Add("Name", typeof(string));
             _dataTable.Columns.Add("Tag_Num", typeof(string));
@@ -96,9 +94,10 @@ namespace Scada.Scheme.Model.PropertyGrid
             _dataTable.Columns.Add("Type", typeof(string));
             _dataTable.Columns.Add("Device", typeof(string));
 
-            // Ajouter les deux lignes de données
-            _dataTable.Rows.Add("Vanne A145", "12345", "Vanne A", "Input", "Simulator");
-            _dataTable.Rows.Add("Mesure h2s ouvrage", "20500", "211_29_ait_001", "Output", "Device3");
+            foreach (string[] tab in _lstProperties)
+            {
+                _dataTable.Rows.Add(String.IsNullOrEmpty(tab[0]) ? "" : tab[0], String.IsNullOrEmpty(tab[4]) ? "" : tab[4], String.IsNullOrEmpty(tab[5]) ? "" : tab[5], String.IsNullOrEmpty(tab[6]) ? "" : tab[6], String.IsNullOrEmpty(tab[7]) ? "" : tab[7]);
+            }
 
             dataGridView1.DataSource = _dataTable;
         }
@@ -154,6 +153,8 @@ namespace Scada.Scheme.Model.PropertyGrid
                 {
                     xmlReader(name);
                 }
+
+                fillDataGridView();
             }
             else
                 Console.WriteLine(_errFolder);
@@ -232,13 +233,13 @@ namespace Scada.Scheme.Model.PropertyGrid
                 {
                     xmlReader(name);
                 }
-
+                fillDataGridView();
             }
             else if (File.Exists(context.SchemePath))
             {
                 _projectPath = context.SchemePath;
 
-                while (Path.GetFileName(_projectPath) != "Interface") //Views
+                while (Path.GetFileName(_projectPath) != "Views") //Views Interface
                 {
                     string dossierParent = Directory.GetParent(_projectPath).FullName;
                     if (string.IsNullOrEmpty(dossierParent))
@@ -255,7 +256,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 {
                     xmlReader(name);
                 }
-
+                fillDataGridView();
             }
         }
     }
