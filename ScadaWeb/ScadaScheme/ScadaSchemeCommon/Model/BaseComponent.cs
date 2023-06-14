@@ -78,6 +78,7 @@ namespace Scada.Scheme.Model
             Location = Point.Default;
             Size = Size.Default;
             ZIndex = 0;
+            GroupId = null;
         }
 
 
@@ -141,6 +142,14 @@ namespace Scada.Scheme.Model
         #endregion
         public int ID { get; set; }
 
+        /// <summary>
+        /// Get or Set the Group ID
+        /// </summary>
+        #region Attributes
+        [DisplayName("Group ID"), Category(Categories.Design)]
+        [Description("The id of the group the component belongs to.")]
+        #endregion
+        public int? GroupId { get; set; }
         /// <summary>
         /// Получить или установить наименование.
         /// </summary>
@@ -269,6 +278,7 @@ namespace Scada.Scheme.Model
             Location = Point.GetChildAsPoint(xmlNode, "Location");
             Size = Size.GetChildAsSize(xmlNode, "Size");
             ZIndex = xmlNode.GetChildAsInt("ZIndex");
+            GroupId = xmlNode.GetChildAsInt("GroupID");
         }
 
         /// <summary>
@@ -289,6 +299,7 @@ namespace Scada.Scheme.Model
             Point.AppendElem(xmlElem, "Location", Location);
             Size.AppendElem(xmlElem, "Size", Size);
             xmlElem.AppendElem("ZIndex", ZIndex);
+            xmlElem.AppendElem("GroupID", GroupId);
         }
 
         /// <summary>
