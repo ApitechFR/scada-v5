@@ -287,6 +287,8 @@ namespace Scada.Scheme
                             return new StaticPicture();
                         else if (localName == "dynamicpicture")
                             return new DynamicPicture();
+                        else if (localName == "componentgroup")
+                            return new ComponentGroup();
                         else
                             errMsg = string.Format(SchemePhrases.UnknownComponent, nodeName);
                     }

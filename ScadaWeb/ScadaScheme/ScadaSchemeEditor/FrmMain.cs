@@ -385,7 +385,7 @@ namespace Scada.Scheme.Editor
                 cbSchComp.Items.Clear();
                 treeView1.Nodes.Clear();
                 treeView1.SelectedNode = null;
-                ((TreeViewMultipleSelection)treeView1).SelectedNodes.Clear();
+                treeView1.SelectedNodes.Clear();
 
                 if (editor.SchemeView != null)
                 {
@@ -463,7 +463,7 @@ namespace Scada.Scheme.Editor
                         }
                     }
                 }
-                ((TreeViewMultipleSelection)treeView1).SelectedNodes = newSelectedNodes;
+                treeView1.SelectedNodes = newSelectedNodes;
             }
             this.noTreeviewSelectionEffect = false;
 
@@ -500,6 +500,7 @@ namespace Scada.Scheme.Editor
             miEditPointer.Enabled = btnEditPointer.Enabled = editor.PointerMode != PointerMode.Select;
             miEditUndo.Enabled = btnEditUndo.Enabled = editor.History.CanUndo;
             miEditRedo.Enabled = btnEditRedo.Enabled = editor.History.CanRedo;
+            btnGroup.Enabled = editor.SelectionNotEmpty;
         }
 
         /// <summary>
@@ -975,6 +976,29 @@ namespace Scada.Scheme.Editor
             editor.DeleteSelected();
         }
 
+        private void miGroup_Click(object sender, EventArgs e)
+        {
+            BaseComponent newGroup = new ComponentGroup();
+            BaseComponent[] selection = editor.GetSelectedComponents();
+
+            bool isUngroupAction = false;
+            if(selection.GroupBy(c=>c.GroupId).Count() > 1)
+            {
+                isUngroupAction = true;
+            }
+
+            foreach(BaseComponent c in selection)
+            {
+                if (isUngroupAction)
+                {
+                    c.GroupId = null;
+                }
+                else
+                {
+                    c.GroupId = newGroup.ID;
+                }
+            }
+        }
         private void miToolsOptions_Click(object sender, EventArgs e)
         {
             // отображение формы настроек

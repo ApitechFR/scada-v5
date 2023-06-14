@@ -220,6 +220,7 @@
     <None Include="Resources\comp_st.png" />
     <None Include="Resources\pointer.png" />
     <None Include="Resources\component.png" />
+    <None Include="Resources\shape_square.png" />
     <Content Include="Web\js\api\ajaxqueue.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
