@@ -33,57 +33,48 @@ namespace Scada.Scheme.Model.PropertyGrid
             InitializeComponent();
 
             retrieveBaseXMLDirectory();
-
-            // choosing project path automaticaly
-            // TODO
-            // mise à jour de la TreeView
-
-            updateTreeView(treeView1);
-
-            
         }
 
         public void updateTreeView(TreeView treeView)
         {
-            List<TreeNodeData> data = new List<TreeNodeData>
+            TreeNode parentNode = new TreeNode("Channels");
+            treeView1.Nodes.Add(parentNode);
+
+            TreeNode allNode = new TreeNode("All");
+            parentNode.Nodes.Add(allNode);
+
+            TreeNode devicesNode = new TreeNode("By devices");
+            parentNode.Nodes.Add(devicesNode);
+
+            TreeNode objectsNode = new TreeNode("By objects");
+            parentNode.Nodes.Add(objectsNode);
+
+            //récuperation des devices
+            List<string> lstNameDevices = new List<string>();
+            foreach (string[] tab in _lstProperties)
             {
-                new TreeNodeData
-                {
-                    Text = "Channels",
-                    Children = new List<TreeNodeData>
-                    {
-                        new TreeNodeData { Text = "All" },
-                    }
-                },
-            };
-
-            fillTreeView(treeView, data);
-        }
-
-        private void fillTreeView(TreeView treeView, List<TreeNodeData> data)
-        {
-            // Effacez tous les nœuds existants
-            treeView.Nodes.Clear();
-
-            // Parcourez les données et ajoutez les nœuds au TreeView
-            foreach (var item in data)
-            {
-                // Créez un nouveau nœud avec le texte de l'élément actuel
-                TreeNode node = new TreeNode(item.Text);
-
-                // Récursivement, ajoutez les nœuds enfants s'il y en a
-                if (item.Children != null)
-                {
-                    foreach (var child in item.Children)
-                    {
-                        TreeNode childNode = new TreeNode(child.Text);
-                        node.Nodes.Add(childNode);
-                    }
-                }
-
-                // Ajoutez le nœud au TreeView
-                treeView.Nodes.Add(node);
+                if (!String.IsNullOrEmpty(tab[7]) && !lstNameDevices.Contains(tab[7]))
+                    lstNameDevices.Add(tab[7]);
             }
+            foreach(string device in lstNameDevices)
+            {
+                TreeNode node = new TreeNode(device);
+                devicesNode.Nodes.Add(node);
+            }
+
+            //récuperation des objets
+            List<string> lstNameObjets = new List<string>();
+            foreach (string[] tab in _lstProperties)
+            {
+                if (!String.IsNullOrEmpty(tab[8]) && !lstNameObjets.Contains(tab[8]))
+                    lstNameObjets.Add(tab[8]);
+            }
+            foreach (string objet in lstNameObjets)
+            {
+                TreeNode node = new TreeNode(objet);
+                objectsNode.Nodes.Add(node);
+            }
+
         }
 
         private void fillDataGridView()
@@ -155,6 +146,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 }
 
                 fillDataGridView();
+                updateTreeView(treeView1);
             }
             else
                 Console.WriteLine(_errFolder);
@@ -234,6 +226,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                     xmlReader(name);
                 }
                 fillDataGridView();
+                updateTreeView(treeView1);
             }
             else if (File.Exists(context.SchemePath))
             {
@@ -257,6 +250,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                     xmlReader(name);
                 }
                 fillDataGridView();
+                updateTreeView(treeView1);
             }
         }
     }
