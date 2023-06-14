@@ -188,7 +188,6 @@ namespace Scada.Scheme.Model
         #endregion
         public int ZIndex { get; set; }
 
-
         /// <summary>
         /// Получить или установить ссылку на представление схемы.
         /// </summary>
