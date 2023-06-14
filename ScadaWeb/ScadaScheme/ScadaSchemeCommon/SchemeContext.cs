@@ -56,6 +56,7 @@ namespace Scada.Scheme
         {
             EditorMode = GetEditorMode();
             AppDirs = null;
+            SchemePath = ""; 
         }
 
 
@@ -69,6 +70,10 @@ namespace Scada.Scheme
         /// </summary>
         public AppDirs AppDirs { get; private set; }
 
+        /// <summary>
+        /// Gets the scheme path.
+        /// </summary>
+        public string SchemePath {get; set; }
 
         /// <summary>
         /// Determines whether the editor mode is running.
