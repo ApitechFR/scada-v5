@@ -92,7 +92,7 @@ namespace Scada.Scheme.Editor
             this.miHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.miHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.ComponentsTree = new System.Windows.Forms.TabPage();
-            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.treeView1 = new TreeViewMultipleSelection();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -625,7 +625,7 @@ namespace Scada.Scheme.Editor
             this.treeView1.Size = new System.Drawing.Size(285, 172);
             this.treeView1.TabIndex = 0;
             this.treeView1.TreeViewNodeSorter = new NodeSorter();
-            this.treeView1.AfterSelect += new TreeViewEventHandler(this.treeView1_NodeMouseClick);
+            this.treeView1.AfterSelect += new TreeViewEventHandler(this.treeView1_onNodeSelection);
             // 
             // FrmMain
             // 
