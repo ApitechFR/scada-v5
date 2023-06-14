@@ -253,6 +253,34 @@ namespace Scada.Scheme.Model.PropertyGrid
                 updateTreeView(treeView1);
             }
         }
+
+        private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if(e.Node.Parent != null && e.Node.Parent.Text == "By devices")
+            {
+                string selectedDevice = e.Node.Text;
+
+                DataView dataView = _dataTable.DefaultView;
+                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'", selectedDevice);
+                dataGridView1.DataSource = dataView;
+            }
+
+            if (e.Node.Parent != null && e.Node.Parent.Text == "By objetcs")
+            {
+                string selectedObject = e.Node.Text;
+
+                DataView dataView = _dataTable.DefaultView;
+                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'", selectedObject);
+                dataGridView1.DataSource = dataView;
+            }
+
+            if (e.Node.Parent != null && e.Node.Parent.Text == "Channels")
+            {
+                DataView dataView = _dataTable.DefaultView;
+                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'", "");
+                dataGridView1.DataSource = dataView;
+            }
+        }
     }
 
     public class TreeNodeData
