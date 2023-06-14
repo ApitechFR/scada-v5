@@ -84,13 +84,15 @@ namespace Scada.Scheme.Model.PropertyGrid
             _dataTable.Columns.Add("Tag_Code", typeof(string));
             _dataTable.Columns.Add("Type", typeof(string));
             _dataTable.Columns.Add("Device", typeof(string));
+            _dataTable.Columns.Add("Object", typeof(string));
 
             foreach (string[] tab in _lstProperties)
             {
-                _dataTable.Rows.Add(String.IsNullOrEmpty(tab[0]) ? "" : tab[0], String.IsNullOrEmpty(tab[4]) ? "" : tab[4], String.IsNullOrEmpty(tab[5]) ? "" : tab[5], String.IsNullOrEmpty(tab[6]) ? "" : tab[6], String.IsNullOrEmpty(tab[7]) ? "" : tab[7]);
+                _dataTable.Rows.Add(String.IsNullOrEmpty(tab[0]) ? "" : tab[0], String.IsNullOrEmpty(tab[4]) ? "" : tab[4], String.IsNullOrEmpty(tab[5]) ? "" : tab[5], String.IsNullOrEmpty(tab[6]) ? "" : tab[6], String.IsNullOrEmpty(tab[7]) ? "" : tab[7], String.IsNullOrEmpty(tab[8]) ? "" : tab[8]);
             }
 
             dataGridView1.DataSource = _dataTable;
+            dataGridView1.Columns[dataGridView1.Columns.Count - 1].Visible = false;
         }
 
         private void buttonSearch_Click(object sender, EventArgs e)
@@ -270,7 +272,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 string selectedObject = e.Node.Text;
 
                 DataView dataView = _dataTable.DefaultView;
-                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'", selectedObject);
+                dataView.RowFilter = string.Format(@"Object LIKE '%{0}%'", selectedObject);
                 dataGridView1.DataSource = dataView;
             }
 
