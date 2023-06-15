@@ -9,7 +9,7 @@ namespace Scada.Scheme.Model
     /// Scheme that represent a group of components
     /// </summary>
     [Serializable]
-    internal class ComponentGroup : BaseComponent
+    public class ComponentGroup : BaseComponent
     {
         public ComponentGroup() :base() { }
     }

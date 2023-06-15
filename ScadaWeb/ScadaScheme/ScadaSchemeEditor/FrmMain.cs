@@ -29,6 +29,7 @@ using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
 using Scada.UI;
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -58,6 +59,7 @@ namespace Scada.Scheme.Editor
         private bool compTypesChanging;     // пользователь изменяет выбранный элемент lvCompTypes
         private bool schCompChanging;       // пользователь изменяет выбранный элемент cbSchComp
         private FormStateDTO formStateDTO;  // состояние формы для передачи
+        private bool noTreeviewSelectionEffect;
 
 
         /// <summary>
@@ -75,6 +77,7 @@ namespace Scada.Scheme.Editor
             compTypesChanging = false;
             schCompChanging = false;
             formStateDTO = null;
+            noTreeviewSelectionEffect = false;
 
             editor.ModifiedChanged += Editor_ModifiedChanged;
             editor.PointerModeChanged += Editor_PointerModeChanged;
@@ -380,6 +383,9 @@ namespace Scada.Scheme.Editor
             {
                 cbSchComp.BeginUpdate();
                 cbSchComp.Items.Clear();
+                treeView1.Nodes.Clear();
+                treeView1.SelectedNode = null;
+                treeView1.SelectedNodes.Clear();
 
                 if (editor.SchemeView != null)
                 {
@@ -432,6 +438,35 @@ namespace Scada.Scheme.Editor
                 cbSchComp.SelectedIndexChanged += cbSchComp_SelectedIndexChanged;
             }
 
+            //Nodes selection in treeview
+            if (!this.noTreeviewSelectionEffect)
+            {
+                ArrayList newSelectedNodes = new ArrayList();
+                treeView1.SelectedNode = null;
+                foreach (BaseComponent component in selection)
+                {
+                    for (int i = 0; i < treeView1.Nodes.Count;i++)
+                    {
+                        bool added = false;
+                        for (int j = 0; j < treeView1.Nodes[i].Nodes.Count; j++)
+                        {
+                            if ((BaseComponent)(treeView1.Nodes[i].Nodes[j].Tag) == component)
+                            {
+                                newSelectedNodes.Add(treeView1.Nodes[i].Nodes[j]);
+                                added = true;
+                                break;
+                            }
+                        }
+                        if (added)
+                        {
+                            break;
+                        }
+                    }
+                }
+                treeView1.SelectedNodes = newSelectedNodes;
+            }
+            this.noTreeviewSelectionEffect = false;
+
             // установка доступности кнопок
             SetButtonsEnabled();
         }
@@ -465,6 +500,7 @@ namespace Scada.Scheme.Editor
             miEditPointer.Enabled = btnEditPointer.Enabled = editor.PointerMode != PointerMode.Select;
             miEditUndo.Enabled = btnEditUndo.Enabled = editor.History.CanUndo;
             miEditRedo.Enabled = btnEditRedo.Enabled = editor.History.CanRedo;
+            btnGroup.Enabled = editor.SelectionNotEmpty;
         }
 
         /// <summary>
@@ -548,56 +584,115 @@ namespace Scada.Scheme.Editor
             return formStateDTO;
         }
 
-        private void addComponentToTree (BaseComponent component)
+        private TreeNode findNode(TreeNodeCollection nodes, Func<TreeNode, Boolean> predicate)
         {
-            TreeNode existingParent = null;
-            var currentParents = treeView1.Nodes.Find(component.ZIndex.ToString(), false).ToList();
-
-            TreeNode tn = new TreeNode(string.Format("{0} ({1})", component.Name, component.GetType().Name));
-            tn.Tag = component;
-            if (currentParents.Count() == 0)
+            Debug.WriteLine("enter findNode function");
+            TreeNode foundedNode = null;
+            for(int i=0;i<nodes.Count; i++)
             {
-                existingParent = new TreeNode(string.Format("Z-index : {0}", component.ZIndex));
-                existingParent.Name = component.ZIndex.ToString();
-                existingParent.Nodes.Add(tn);
-                treeView1.Nodes.Add(existingParent);
+                Debug.WriteLine("\t node : " + nodes[i].Tag.ToString());
+                if (predicate(nodes[i]))
+                {
+                    return nodes[i];
+                }
+                else if (nodes[i].Nodes.Count >0)
+                {
+                    foundedNode = findNode(nodes[i].Nodes, predicate);
+                }
+                if(foundedNode != null)
+                {
+                    return foundedNode;
+                }
+            }
+            return null;
+        }
+
+        private void addComponentToTree(BaseComponent component)
+        {
+            Debug.WriteLine("Add component " + component.ToString()+"(id : "+component.ID + ") to tree");
+            TreeNode tn = null;
+            if (component.GetType() == new ComponentGroup().GetType()) 
+            {
+                Debug.WriteLine("\t it is a group");
+                tn = new TreeNode(string.Format("Group {0} ({1})", component.Name, component.ID));
+            } 
+            else
+            {
+                Debug.WriteLine("\t it is not a group");
+                tn = new TreeNode(string.Format("{0} ({1})", component.Name, component.GetType().Name));
+            } 
+            tn.Tag = component;
+
+            if (component.GroupId == null)
+            {
+                Debug.WriteLine("\t it doesn't belong to a group --> we add it to the root");
+                treeView1.Nodes.Add(tn);
             }
             else
             {
-                existingParent = currentParents.First();
-                existingParent.Nodes.Add(tn);
+                Debug.WriteLine("\t it belongs to group "+component.GroupId);
+                Debug.WriteLine("\t searching the group...");
+                var groupNode = findNode(treeView1.Nodes, n => (n.Tag != null && ((BaseComponent)(n.Tag)).ID == component.GroupId));
+            
+                if(groupNode == null)
+                {
+                    Debug.WriteLine("\t group not found --> add it to the root instead");
+                    treeView1.Nodes.Add(tn);
+                    return;
+                }
+                else
+                {
+                    Debug.WriteLine("\t goup found : add component to group");
+                    groupNode.Nodes.Add(tn);
+                }
             }
-            treeView1.Sort();
+            
+            //treeView1.Sort();
         }
 
+        private void removeEmptyGroups(TreeNodeCollection nodes)
+        {
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                if (nodes[i].Tag!=null && ((BaseComponent)(nodes[i].Tag)).GetType() == new ComponentGroup().GetType() && nodes[i].Nodes.Count==0)
+                {
+                    nodes[i].Remove();
+                }
+                else
+                {
+                    removeEmptyGroups(nodes[i].Nodes);
+                }
+            }
+        }
         private void removeComponentFromTree(BaseComponent component)
         {
-            for(int i = 0; i < treeView1.Nodes.Count; i++)
+
+            Debug.WriteLine("removing component "+component.ToString()+" (id: "+component.ID+") from tree");
+            Debug.WriteLine("\tsearching compoennt in tree...");
+            TreeNode tn = findNode(treeView1.Nodes, n => (n.Tag != null && ((BaseComponent)(n.Tag)==component)));
+            if(tn == null)
             {
-                bool isDeleted = false;
-                for (int j = 0; j < treeView1.Nodes[i].Nodes.Count; j++)
-                {
-                    if (treeView1.Nodes[i].Nodes[j].Tag == component)
-                    {
-                        var nodeToRemove = treeView1.Nodes[i].Nodes.Count == 1 ? treeView1.Nodes[i] : treeView1.Nodes[i].Nodes[j];
-                        nodeToRemove.Remove();
-                        isDeleted = true;
-                        break;
-                    }
-                }
-                if (isDeleted)
-                {
-                    break;
-                }
+                Debug.WriteLine("\tcomponent not found in tree");
+
+                return;
             }
+            Debug.WriteLine("\tcomponent found : delete it");
+            tn.Remove();
+
+            Debug.WriteLine("\tremoving empty groups");
         }
 
-        public void treeView1_NodeMouseClick(object sender, TreeViewEventArgs e)
+        public void treeView1_onNodeSelection(object sender, TreeViewEventArgs e)
         {
-
-            if(e.Node.Tag != null)
+            this.noTreeviewSelectionEffect = true;
+            editor.DeselectAll();
+            foreach (TreeNode tn in ((TreeViewMultipleSelection)treeView1).SelectedNodes)
             {
-                editor.SelectComponent(((BaseComponent)(e.Node.Tag)).ID);
+                if (tn.Tag != null && tn.Tag.ToString()!= "")
+                {
+                    this.noTreeviewSelectionEffect = true;
+                    editor.SelectComponent(((BaseComponent)(tn.Tag)).ID, true);
+                }
             }
         }
 
@@ -935,6 +1030,39 @@ namespace Scada.Scheme.Editor
             editor.DeleteSelected();
         }
 
+        private void miGroup_Click(object sender, EventArgs e)
+        {
+            BaseComponent[] selection = editor.GetSelectedComponents();
+
+            bool isUngroupAction = false;
+            if (selection.Where(c=>c.GroupId != null).Count() > 0)
+            {
+                isUngroupAction = true;
+            }
+            
+            if (isUngroupAction)
+            {
+                foreach (BaseComponent c in selection)
+                {
+                    removeComponentFromTree(c);
+                    c.GroupId = null;
+                    addComponentToTree(c);
+                }
+                removeEmptyGroups(treeView1.Nodes);
+            }
+            else
+            {
+                BaseComponent newGroup = new ComponentGroup();
+                newGroup.ID = DateTime.Now.GetHashCode();
+                addComponentToTree(newGroup);
+                foreach (BaseComponent c in selection)
+                {
+                    removeComponentFromTree(c);
+                    c.GroupId = newGroup.ID;
+                    addComponentToTree(c);
+                }
+            }
+        }
         private void miToolsOptions_Click(object sender, EventArgs e)
         {
             // отображение формы настроек
