@@ -1042,7 +1042,7 @@ namespace Scada.Scheme.Editor
             else
             {
                 BaseComponent newGroup = new ComponentGroup();
-                newGroup.ID = DateTime.Now.GetHashCode();
+                newGroup.ID = editor.SchemeView.GetNextComponentID();
                 addComponentToTree(newGroup);
                 foreach (BaseComponent c in selection)
                 {
