@@ -307,10 +307,13 @@ namespace Scada.Scheme
                 CompManager compManager = CompManager.GetInstance();
                 HashSet<string> prefixes = new HashSet<string>();
                 XmlElement componentsElem = xmlDoc.CreateElement("Components");
+                XmlElement groupsElem = xmlDoc.CreateElement("Groups");
                 rootElem.AppendChild(componentsElem);
+                rootElem.AppendChild(groupsElem);
 
                 foreach (BaseComponent component in Components.Values)
                 {
+
                     if (component is UnknownComponent)
                     {
                         componentsElem.AppendChild(((UnknownComponent)component).XmlNode);
@@ -332,7 +335,9 @@ namespace Scada.Scheme
                             xmlDoc.CreateElement(compType.Name) /*стандартный компонент*/ :
                             xmlDoc.CreateElement(compLibSpec.XmlPrefix, compType.Name, compLibSpec.XmlNs);
 
-                        componentsElem.AppendChild(componentElem);
+                        if (compType == typeof(ComponentGroup)) groupsElem.AppendChild(componentElem);
+                        else componentsElem.AppendChild(componentElem);
+
                         component.SaveToXml(componentElem);
                     }
                 }

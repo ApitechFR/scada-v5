@@ -151,7 +151,7 @@ namespace Scada.Scheme
         private bool TypeIsStrandard(Type compType)
         {
             return compType == typeof(StaticText) || compType == typeof(DynamicText) || 
-                compType == typeof(StaticPicture) || compType == typeof(DynamicPicture);
+                compType == typeof(StaticPicture) || compType == typeof(DynamicPicture) || compType == typeof(ComponentGroup);
         }
 
 
