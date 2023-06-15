@@ -417,9 +417,9 @@ namespace Scada.Scheme.Editor
             this.treeView1.Name = "treeView1";
             this.treeView1.SelectedNodes = ((System.Collections.ArrayList)(resources.GetObject("treeView1.SelectedNodes")));
             this.treeView1.Size = new System.Drawing.Size(285, 172);
-            this.treeView1.Sorted = true;
             this.treeView1.TabIndex = 0;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_onNodeSelection);
+            this.treeView1.TreeViewNodeSorter = new NodeSorter();
             // 
             // ofdScheme
             // 
