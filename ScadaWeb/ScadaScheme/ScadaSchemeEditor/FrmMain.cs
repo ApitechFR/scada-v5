@@ -1044,6 +1044,8 @@ namespace Scada.Scheme.Editor
                 BaseComponent newGroup = new ComponentGroup();
                 newGroup.ID = editor.SchemeView.GetNextComponentID();
                 addComponentToTree(newGroup);
+                editor.SchemeView.Components[newGroup.ID] = newGroup;
+
                 foreach (BaseComponent c in selection)
                 {
                     removeComponentFromTree(c);
