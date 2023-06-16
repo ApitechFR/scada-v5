@@ -78,7 +78,7 @@ namespace Scada.Scheme.Model
             Location = Point.Default;
             Size = Size.Default;
             ZIndex = 0;
-            GroupId = null;
+            GroupId = -1;
         }
 
 
@@ -149,7 +149,7 @@ namespace Scada.Scheme.Model
         [DisplayName("Group ID"), Category(Categories.Design)]
         [Description("The id of the group the component belongs to.")]
         #endregion
-        public int? GroupId { get; set; }
+        public int GroupId { get; set; }
         /// <summary>
         /// Получить или установить наименование.
         /// </summary>
