@@ -31,6 +31,7 @@ using Scada.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -415,8 +416,7 @@ namespace Scada.Scheme.Editor
         {
             BaseComponent[] selection = editor.GetSelectedComponents();
             object[] selObjects;
-            int groupID =0;
-            bool areGroups = AreGroups(selection, out groupID);
+            bool areGroups = AreGroups(selection, out int groupID);
             if (!areGroups)
             {
 
@@ -454,12 +454,22 @@ namespace Scada.Scheme.Editor
             {
                 ArrayList newSelectedNodes = new ArrayList();
                 treeView1.SelectedNode = null;
-                foreach (BaseComponent component in selection)
+                
+                if (areGroups)
                 {
-                    TreeNode nodeToSelect = findNode(treeView1.Nodes, n => ((BaseComponent)n.Tag == component));
-                    if (nodeToSelect != null)
+                    editor.SchemeView.Components.TryGetValue(groupID,out BaseComponent group);
+                    TreeNode nodeToSelect = findNode(treeView1.Nodes, n => ((BaseComponent)n.Tag == group));
+                    if (nodeToSelect!=null) newSelectedNodes.Add(nodeToSelect);
+                }
+                else
+                {
+                    foreach (BaseComponent component in selection)
                     {
-                        newSelectedNodes.Add(nodeToSelect);
+                        TreeNode nodeToSelect = findNode(treeView1.Nodes, n => ((BaseComponent)n.Tag == component));
+                        if (nodeToSelect != null)
+                        {
+                            newSelectedNodes.Add(nodeToSelect);
+                        }
                     }
                 }
                 treeView1.SelectedNodes = newSelectedNodes;
