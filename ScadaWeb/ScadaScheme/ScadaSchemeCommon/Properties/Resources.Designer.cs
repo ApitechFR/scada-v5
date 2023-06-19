@@ -61,11 +61,20 @@ namespace Scada.Scheme.Properties {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à &quot;Aucun dossier sélectionné.&quot;.
+        ///   Recherche une chaîne localisée semblable à Aucun dossier sélectionné..
         /// </summary>
         internal static string _errFolder {
             get {
                 return ResourceManager.GetString("_errFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Veuillez sélectionner un dossier projet valide..
+        /// </summary>
+        internal static string _errProject {
+            get {
+                return ResourceManager.GetString("_errProject", resourceCulture);
             }
         }
     }
