@@ -415,7 +415,8 @@ namespace Scada.Scheme.Editor
         {
             BaseComponent[] selection = editor.GetSelectedComponents();
             object[] selObjects;
-            bool areGroups = AreGroups(selection, out int groupID);
+            int groupID =0;
+            bool areGroups = AreGroups(selection, out groupID);
             if (!areGroups)
             {
 
@@ -471,6 +472,11 @@ namespace Scada.Scheme.Editor
 
         private bool AreGroups(BaseComponent[] components, out int groupId)
         {
+            if (components.Length == 0) 
+            {
+                groupId = -1;
+                return false; 
+            }
             groupId = editor.getHihghestGroup(components[0]).ID;
             List<BaseComponent> groupList = editor.getGroupedComponents(groupId);
             if (components.Length != groupList.Count)
@@ -1055,7 +1061,7 @@ namespace Scada.Scheme.Editor
             BaseComponent[] selection = editor.GetSelectedComponents();
 
             bool isUngroupAction = false;
-            if (selection.Where(c=>c.GroupId != null).Count() > 0)
+            if (selection.Where(c=>c.GroupId != -1).Count() > 0)
             {
                 isUngroupAction = true;
             }

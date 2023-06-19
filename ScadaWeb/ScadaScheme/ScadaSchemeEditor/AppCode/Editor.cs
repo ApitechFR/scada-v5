@@ -877,8 +877,10 @@ namespace Scada.Scheme.Editor
             {
                 if (component.GroupId == groupID) { groupedComponents.Add(component); }
             }
-            foreach(ComponentGroup componentGroup in SchemeView.Components.Values.Where(x=>x.GroupId == groupID)) 
+            
+            foreach(BaseComponent componentGroup in SchemeView.Components.Values.Where(x=>x.GroupId == groupID).DefaultIfEmpty().ToList()) 
             {
+                if (componentGroup == null) break;
                 groupedComponents.AddRange(getGroupedComponents(componentGroup.ID));
             }
 
@@ -893,7 +895,9 @@ namespace Scada.Scheme.Editor
             {
                 return comp;
             }
+
             BaseComponent group = SchemeView.Components.Values.Where(x=>x.ID == groupID).FirstOrDefault();
+            if (group == null) return comp;
             while(group.GroupId != -1)
             {
                 group = getHihghestGroup(group);
@@ -961,13 +965,14 @@ namespace Scada.Scheme.Editor
             switch (selectAction)
             {
                 case SelectAction.Select:
-                    if (getGroupedComponents(componentID).Count != 0)
+                    SchemeView.Components.TryGetValue(componentID, out BaseComponent component);
+                    List<BaseComponent> groupedComponents = getGroupedComponents((getHihghestGroup(component).ID));
+                    if (groupedComponents.Count != 0)
                     {
-                        selComponents.Clear();
-                        foreach (BaseComponent comp in getGroupedComponents(componentID))
+                        DeselectAll();
+                        foreach (BaseComponent comp in groupedComponents)
                         {
-                            SelectComponent(comp.ID, true);
-                            
+                            SelectComponent(comp.ID, true);                            
                         }
                         break;
                     }

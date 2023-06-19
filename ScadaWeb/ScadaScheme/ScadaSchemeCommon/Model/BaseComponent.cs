@@ -278,7 +278,7 @@ namespace Scada.Scheme.Model
             Location = Point.GetChildAsPoint(xmlNode, "Location");
             Size = Size.GetChildAsSize(xmlNode, "Size");
             ZIndex = xmlNode.GetChildAsInt("ZIndex");
-            GroupId = xmlNode.GetChildAsInt("GroupId");
+            GroupId = xmlNode.GetChildAsInt("GroupID",defaultVal:-1);
         }
 
         /// <summary>
