@@ -25,6 +25,7 @@ namespace Scada.Scheme.Model.PropertyGrid
         private List<string[]> _lstProperties = new List<string[]>();
         private string[] _xmlNames = { "Cnl.xml", "CnlType.xml", "Device.xml", "Obj.xml" };
         private string _errFolder = "Aucun dossier sélectionné.";
+        private string _errProject = "Veuillez sélectionner un dossier projet valide.";
 
         Scada.Scheme.SchemeContext context = Scada.Scheme.SchemeContext.GetInstance();
 
@@ -125,7 +126,7 @@ namespace Scada.Scheme.Model.PropertyGrid
         private void search()
         {
             DataView dataView = _dataTable.DefaultView;
-            dataView.RowFilter = string.Format(@"Name LIKE '%{0}%'", textBox1.Text);
+            dataView.RowFilter = string.Format(@"Name LIKE '%{0}%' OR Tag_Num LIKE '%{0}%' OR Tag_Code LIKE '%{0}%' OR Type LIKE '%{0}%' OR Device LIKE '%{0}%'", textBox1.Text);
             dataGridView1.DataSource = dataView;
         }
 
@@ -138,17 +139,21 @@ namespace Scada.Scheme.Model.PropertyGrid
             if(result == DialogResult.OK)
             {
                 _projectPath = folderBrowserDialog.SelectedPath;
-                labelPath.Text = _projectPath;
-                Scada.Scheme.SchemeContext.GetInstance().SchemePath = _projectPath;
-                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
-
-                foreach (string name in _xmlNames)
+                if (Directory.Exists(Path.Combine(_projectPath, "BaseXML")))
                 {
-                    xmlReader(name);
-                }
+                    labelPath.Text = _projectPath;
+                    Scada.Scheme.SchemeContext.GetInstance().SchemePath = _projectPath;
+                    _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
 
-                fillDataGridView();
-                updateTreeView(treeView1);
+                    foreach (string name in _xmlNames)
+                    {
+                        xmlReader(name);
+                    }
+
+                    fillDataGridView();
+                    updateTreeView(treeView1);
+                }
+                else MessageBox.Show(_errProject);
             }
             else
                 Console.WriteLine(_errFolder);
@@ -220,39 +225,55 @@ namespace Scada.Scheme.Model.PropertyGrid
         {
             if (Directory.Exists(context.SchemePath))
             {
-                labelPath.Text = context.SchemePath;
-                _projectXMLPath = Path.Combine(context.SchemePath, "BaseXML");
-
-                foreach (string name in _xmlNames)
+                if (Directory.Exists(Path.Combine(context.SchemePath, "BaseXML")))
                 {
-                    xmlReader(name);
+                    labelPath.Text = context.SchemePath;
+                    _projectXMLPath = Path.Combine(context.SchemePath, "BaseXML");
+
+                    foreach (string name in _xmlNames)
+                    {
+                        xmlReader(name);
+                    }
+                    fillDataGridView();
+                    updateTreeView(treeView1);
                 }
-                fillDataGridView();
-                updateTreeView(treeView1);
             }
             else if (File.Exists(context.SchemePath))
             {
                 _projectPath = context.SchemePath;
+                _projectPath = Path.GetDirectoryName(_projectPath);
 
-                while (Path.GetFileName(_projectPath) != "Views")
+                if (Directory.GetParent(_projectPath) != null)
                 {
-                    string dossierParent = Directory.GetParent(_projectPath).FullName;
-                    if (string.IsNullOrEmpty(dossierParent))
+                    while (true)
                     {
-                        return;
-                    }
-                    _projectPath = dossierParent;
-                }
-                _projectPath = Directory.GetParent(_projectPath).FullName;
-                labelPath.Text = _projectPath;
-                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
+                        string[] projectFiles = Directory.GetFiles(_projectPath, "*.rsproj");
 
-                foreach (string name in _xmlNames)
-                {
-                    xmlReader(name);
+                        if (projectFiles.Length > 0)
+                        {
+                            labelPath.Text = _projectPath;
+                            if (Directory.Exists(Path.Combine(_projectPath, "BaseXML")))
+                            {
+                                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
+
+                                foreach (string name in _xmlNames)
+                                {
+                                    xmlReader(name);
+                                }
+                                fillDataGridView();
+                                updateTreeView(treeView1);
+                            }
+                            break;
+                        }
+
+                        if (_projectPath == Path.GetPathRoot(_projectPath))
+                        {
+                            break;
+                        }
+                        _projectPath = Directory.GetParent(_projectPath).FullName;
+                    }
+
                 }
-                fillDataGridView();
-                updateTreeView(treeView1);
             }
         }
 

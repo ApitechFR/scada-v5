@@ -118,6 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_errFolder" xml:space="preserve">
-    <value>"Aucun dossier sélectionné."</value>
+    <value>Aucun dossier sélectionné.</value>
+  </data>
+  <data name="_errProject" xml:space="preserve">
+    <value>Veuillez sélectionner un dossier projet valide.</value>
   </data>
 </root>
