@@ -832,7 +832,6 @@ namespace Scada.Scheme.Editor
             {
                 if (SchemeView != null)
                 {
-
                     BaseComponent component;
                     lock (SchemeView.SyncRoot)
                     {
@@ -841,7 +840,6 @@ namespace Scada.Scheme.Editor
 
                     if (component != null)
                     {
-
                         lock (selComponents)
                         {
                             if (append)
@@ -856,8 +854,7 @@ namespace Scada.Scheme.Editor
                             }
                         }
 
-                        OnSelectionChanged();
-                        
+                        OnSelectionChanged();                        
                     }
                 }
             }
@@ -868,8 +865,10 @@ namespace Scada.Scheme.Editor
                     "Error selecting scheme component");
             }
         }
-        
 
+        /// <summary>
+        /// Returns every BaseComponents in the group
+        /// </summary>
         public List<BaseComponent> getGroupedComponents(int groupID)
         {
             List<BaseComponent> groupedComponents = new List<BaseComponent>();

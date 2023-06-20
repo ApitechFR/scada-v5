@@ -503,7 +503,6 @@ namespace Scada.Scheme.Editor
                 }
             }
             return true;
-
         }
 
         /// <summary>
