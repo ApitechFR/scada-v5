@@ -36,6 +36,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using Utils;
+using System.Collections.Generic;
 
 namespace Scada.Scheme.Editor
 {
@@ -379,6 +380,7 @@ namespace Scada.Scheme.Editor
         /// </summary>
         private void FillSchemeComponents()
         {
+            Debug.WriteLine("\nFill Scheme Components");
             try
             {
                 cbSchComp.BeginUpdate();
@@ -572,6 +574,25 @@ namespace Scada.Scheme.Editor
             return formStateDTO;
         }
 
+        private List<TreeNode> findNodes(TreeNodeCollection nodes, Func<TreeNode, Boolean> predicate, List<TreeNode> foundNodes = null)
+        {
+            if(foundNodes == null)
+            {
+                foundNodes = new List<TreeNode>();
+            }
+            foreach (TreeNode n in nodes)
+            {
+                if (predicate(n))
+                {
+                    foundNodes.Add(n);
+                }
+                if (n.Nodes.Count > 0)
+                {
+                    foundNodes = findNodes(nodes, predicate, foundNodes);
+                }
+            }
+            return foundNodes;
+        }
         private TreeNode findNode(TreeNodeCollection nodes, Func<TreeNode, Boolean> predicate)
         {
             TreeNode foundedNode = null;
@@ -595,11 +616,13 @@ namespace Scada.Scheme.Editor
 
         private void addComponentToTree(BaseComponent component)
         {
+            Debug.WriteLine("\nAdd component to tree: "+component.ToString());
             TreeNode tn = null;
-            if (component.GetType() == new ComponentGroup().GetType()) 
+            bool isGroup = component.GetType() == new ComponentGroup().GetType();
+            if (isGroup)
             {
                 tn = new TreeNode(string.Format("Group {0} ({1})", component.Name, component.ID));
-            } 
+            }
             else
             {
                 tn = new TreeNode(string.Format("{0} ({1})", component.Name, component.GetType().Name));
@@ -624,6 +647,17 @@ namespace Scada.Scheme.Editor
                     groupNode.Nodes.Add(tn);
                 }
             }
+            if (isGroup)
+            {
+                Debug.WriteLine("\n----- START REARANGE CHILDREN -----");
+                List<TreeNode> groupMembers = findNodes(treeView1.Nodes, n=>((BaseComponent)(n.Tag)).GroupId == component.ID);
+                foreach(TreeNode n in groupMembers)
+                {
+                    removeComponentFromTree((BaseComponent)(n.Tag));
+                    addComponentToTree((BaseComponent)(n.Tag));
+                }
+                Debug.WriteLine("\n----- END REARANGE CHILDREN -----");
+            }
             treeView1.Sort();
         }
 
@@ -633,6 +667,7 @@ namespace Scada.Scheme.Editor
             {
                 if (nodes[i].Tag!=null && ((BaseComponent)(nodes[i].Tag)).GetType() == new ComponentGroup().GetType() && nodes[i].Nodes.Count==0)
                 {
+                    ((BaseComponent)(nodes[i].Tag)).OnItemChanged(SchemeChangeTypes.ComponentDeleted, (BaseComponent)(nodes[i].Tag));
                     nodes[i].Remove();
                 }
                 else
@@ -643,8 +678,8 @@ namespace Scada.Scheme.Editor
         }
         private void removeComponentFromTree(BaseComponent component)
         {
-
-            TreeNode tn = findNode(treeView1.Nodes, n => (n.Tag != null && ((BaseComponent)(n.Tag)==component)));
+            Debug.WriteLine("\nRemove component from tree: "+ component.ToString());
+            TreeNode tn = findNode(treeView1.Nodes, n => (n.Tag != null && (((BaseComponent)(n.Tag)).ID==component.ID)));
             if(tn == null)
             {
 
@@ -672,9 +707,11 @@ namespace Scada.Scheme.Editor
         {
             ExecuteAction(() =>
             {
+                Debug.WriteLine("\nScheme_ItemChanged: "+ changeType+" , "+ changedObject.ToString());
                 switch (changeType)
                 {
                     case SchemeChangeTypes.ComponentAdded:
+                        //Debug.WriteLine("component added : " + ((BaseComponent)changedObject).ToString());
                         // привязка события на изменение компонента
                         ((BaseComponent)changedObject).ItemChanged += Scheme_ItemChanged;
 
@@ -685,6 +722,7 @@ namespace Scada.Scheme.Editor
                         break;
 
                     case SchemeChangeTypes.ComponentChanged:
+                        //Debug.WriteLine("component changed : " + ((BaseComponent)changedObject).ToString());
                         // обновление текста выпадающего списка при изменении отображаемого наименования выбранного объекта
                         object selItem = cbSchComp.SelectedItem;
                         if (selItem != null)
@@ -699,6 +737,7 @@ namespace Scada.Scheme.Editor
                         break;
 
                     case SchemeChangeTypes.ComponentDeleted:
+                        //Debug.WriteLine("component deleted : " + ((BaseComponent)changedObject).ToString());
                         // удаление компонента из выпадающего списка
                         cbSchComp.Items.Remove(changedObject);
                         removeComponentFromTree((BaseComponent)changedObject);
@@ -1019,38 +1058,65 @@ namespace Scada.Scheme.Editor
             }
             treeView1.SelectedNodes = newSelectedNodes;
         }
+
         private void miGroup_Click(object sender, EventArgs e)
         {
+            //Debug.WriteLine("\nmiGroup_Click");
             BaseComponent[] selection = editor.GetSelectedComponents();
 
             bool isUngroupAction = false;
-            if (selection.Where(c=>c.GroupId != null).Count() > 0)
+            if (selection.Where(c => c.GroupId != null).Count() > 0)
             {
                 isUngroupAction = true;
             }
-            
+
+
+            //Debug.WriteLine("Clicked group button");
             if (isUngroupAction)
             {
+                //Debug.WriteLine("this is an ungroup action");
                 foreach (BaseComponent c in selection)
                 {
-                    removeComponentFromTree(c);
+                    //Debug.WriteLine("set group id null for component "+c.ToString());
+                    //var oldC = c.Clone();
+                    //removeComponentFromTree(c);
                     c.GroupId = null;
-                    addComponentToTree(c);
+                    //addComponentToTree(c);
+                    c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
                 }
-                removeEmptyGroups(treeView1.Nodes);
+                //removeEmptyGroups(treeView1.Nodes);
             }
             else
             {
+                //Debug.WriteLine("this is a group action");
                 BaseComponent newGroup = new ComponentGroup();
                 newGroup.ID = editor.SchemeView.GetNextComponentID();
-                addComponentToTree(newGroup);
+                newGroup.Location = new Point(0,0);
+                newGroup.SchemeView = editor.SchemeView;
+                newGroup.ItemChanged += Scheme_ItemChanged;
                 editor.SchemeView.Components[newGroup.ID] = newGroup;
 
+
+                //Debug.WriteLine("add new group " + newGroup.ToString());
+
+
+                editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
+
+
+                //Scheme_ItemChanged(sender, SchemeChangeTypes.ComponentAdded, newGroup, null);
+
+                //editor.NewComponentTypeName = typeof(ComponentGroup).FullName;
+                //editor.CreateComponent(0, 0);
+
+                // //newGroup.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
                 foreach (BaseComponent c in selection)
                 {
-                    removeComponentFromTree(c);
+                    //Debug.WriteLine("fill new group with component : " + c.ToString());
+                    //var oldC = c.Clone();
+                    //removeComponentFromTree(c);
                     c.GroupId = newGroup.ID;
-                    addComponentToTree(c);
+                    //addComponentToTree(c);
+                    c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
                 }
             }
             updateSelectionInTree();
@@ -1116,9 +1182,11 @@ namespace Scada.Scheme.Editor
 
         private void propertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
+            //Debug.WriteLine("\nProperty value changed");
             // отслеживание изменений
             if (propertyGrid.SelectedObjects != null)
             {
+
                 editor.History.BeginPoint();
 
                 foreach (object selObj in propertyGrid.SelectedObjects)
