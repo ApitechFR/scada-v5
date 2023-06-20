@@ -28,7 +28,9 @@ using Scada.Scheme.Model.DataTypes;
 using Scada.Web;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Utils;
@@ -852,7 +854,7 @@ namespace Scada.Scheme.Editor
                             }
                         }
 
-                        OnSelectionChanged();
+                        OnSelectionChanged();                        
                     }
                 }
             }
@@ -862,6 +864,44 @@ namespace Scada.Scheme.Editor
                     "Ошибка при выборе компонента схемы" :
                     "Error selecting scheme component");
             }
+        }
+
+        /// <summary>
+        /// Returns every BaseComponents in the group
+        /// </summary>
+        public List<BaseComponent> getGroupedComponents(int groupID)
+        {
+            List<BaseComponent> groupedComponents = new List<BaseComponent>();
+            foreach(BaseComponent component in SchemeView.Components.Values)
+            {
+                if (component.GroupId == groupID) { groupedComponents.Add(component); }
+            }
+            
+            foreach(BaseComponent componentGroup in SchemeView.Components.Values.Where(x=>x.GroupId == groupID).DefaultIfEmpty().ToList()) 
+            {
+                if (componentGroup == null) break;
+                groupedComponents.AddRange(getGroupedComponents(componentGroup.ID));
+            }
+
+            return groupedComponents;
+
+        }
+
+        public BaseComponent getHihghestGroup(BaseComponent comp)
+        {
+            int groupID = comp.GroupId;
+            if (groupID == -1)
+            {
+                return comp;
+            }
+
+            BaseComponent group = SchemeView.Components.Values.Where(x=>x.ID == groupID).FirstOrDefault();
+            if (group == null) return comp;
+            while(group.GroupId != -1)
+            {
+                group = getHihghestGroup(group);
+            }
+            return group;
         }
 
         /// <summary>
@@ -924,6 +964,17 @@ namespace Scada.Scheme.Editor
             switch (selectAction)
             {
                 case SelectAction.Select:
+                    SchemeView.Components.TryGetValue(componentID, out BaseComponent component);
+                    List<BaseComponent> groupedComponents = getGroupedComponents((getHihghestGroup(component).ID));
+                    if (groupedComponents.Count != 0)
+                    {
+                        DeselectAll();
+                        foreach (BaseComponent comp in groupedComponents)
+                        {
+                            SelectComponent(comp.ID, true);                            
+                        }
+                        break;
+                    }
                     SelectComponent(componentID);
                     break;
                 case SelectAction.Append:

@@ -30,6 +30,8 @@ using Scada.Scheme.Model.PropertyGrid;
 using Scada.UI;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -414,19 +416,28 @@ namespace Scada.Scheme.Editor
         {
             BaseComponent[] selection = editor.GetSelectedComponents();
             object[] selObjects;
-
-            if (selection != null && selection.Length > 0)
+            bool areGroups = AreGroups(selection, out int groupID);
+            if (!areGroups)
             {
-                // выбор компонентов схемы
-                selObjects = selection;
+
+                if (selection != null && selection.Length > 0)
+                {
+                    // выбор компонентов схемы
+                    selObjects = selection;
+                }
+                else
+                {
+                    // выбор свойств документа схемы
+                    selObjects = editor.SchemeView == null ?
+                        null : new object[] { editor.SchemeView.SchemeDoc };
+                }
             }
             else
             {
-                // выбор свойств документа схемы
-                selObjects = editor.SchemeView == null ?
-                    null : new object[] { editor.SchemeView.SchemeDoc };
+                editor.SchemeView.Components.TryGetValue(groupID,out BaseComponent selected);
+                selObjects = new object[] { selected };
             }
-
+            
             // отображение выбранных объектов
             propertyGrid.SelectedObjects = selObjects;
 
@@ -443,12 +454,22 @@ namespace Scada.Scheme.Editor
             {
                 ArrayList newSelectedNodes = new ArrayList();
                 treeView1.SelectedNode = null;
-                foreach (BaseComponent component in selection)
+                
+                if (areGroups)
                 {
-                    TreeNode nodeToSelect = findNode(treeView1.Nodes, n => ((BaseComponent)n.Tag == component));
-                    if (nodeToSelect != null)
+                    editor.SchemeView.Components.TryGetValue(groupID,out BaseComponent group);
+                    TreeNode nodeToSelect = findNode(treeView1.Nodes, n => ((BaseComponent)n.Tag == group));
+                    if (nodeToSelect!=null) newSelectedNodes.Add(nodeToSelect);
+                }
+                else
+                {
+                    foreach (BaseComponent component in selection)
                     {
-                        newSelectedNodes.Add(nodeToSelect);
+                        TreeNode nodeToSelect = findNode(treeView1.Nodes, n => ((BaseComponent)n.Tag == component));
+                        if (nodeToSelect != null)
+                        {
+                            newSelectedNodes.Add(nodeToSelect);
+                        }
                     }
                 }
                 treeView1.SelectedNodes = newSelectedNodes;
@@ -457,6 +478,31 @@ namespace Scada.Scheme.Editor
 
             // установка доступности кнопок
             SetButtonsEnabled();
+        }
+
+        private bool AreGroups(BaseComponent[] components, out int groupId)
+        {
+            if (components.Length == 0) 
+            {
+                groupId = -1;
+                return false; 
+            }
+            groupId = editor.getHihghestGroup(components[0]).ID;
+            List<BaseComponent> groupList = editor.getGroupedComponents(groupId);
+            if (components.Length != groupList.Count)
+            {
+                groupId = -1;
+                return false;
+            }
+            foreach (BaseComponent comp in components)
+            {
+                if (!groupList.Contains(comp))
+                {
+                    groupId = -1;
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -1024,7 +1070,7 @@ namespace Scada.Scheme.Editor
             BaseComponent[] selection = editor.GetSelectedComponents();
 
             bool isUngroupAction = false;
-            if (selection.Where(c=>c.GroupId != null).Count() > 0)
+            if (selection.Where(c=>c.GroupId != -1).Count() > 0)
             {
                 isUngroupAction = true;
             }
@@ -1034,7 +1080,7 @@ namespace Scada.Scheme.Editor
                 foreach (BaseComponent c in selection)
                 {
                     removeComponentFromTree(c);
-                    c.GroupId = null;
+                    c.GroupId = -1;
                     addComponentToTree(c);
                 }
                 removeEmptyGroups(treeView1.Nodes);
