@@ -23,7 +23,7 @@
  * Modified : 2018
  */
 
-using Scada.Scheme
+using Scada.Scheme;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
@@ -102,6 +102,7 @@ namespace Scada.Web.Plugins.SchBasicComp
         /// Получить или установить номер входного канала
         /// </summary>
         #region Attributes
+        [CM.Browsable(false)]
         [DisplayName("Input channel"), Category(Categories.Data)]
         [Description("The input channel number associated with the component.")]
         [CM.DefaultValue(0)]
@@ -122,6 +123,7 @@ namespace Scada.Web.Plugins.SchBasicComp
         /// Получить или установить номер канала управления
         /// </summary>
         #region Attributes
+        [CM.Browsable(false)]
         [DisplayName("Output channel"), Category(Categories.Data)]
         [Description("The output channel number associated with the component.")]
         [CM.DefaultValue(0)]
