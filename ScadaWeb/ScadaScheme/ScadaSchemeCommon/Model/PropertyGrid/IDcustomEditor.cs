@@ -19,7 +19,7 @@ namespace Scada.Scheme.Model.PropertyGrid
             if (context != null && context.Instance != null && editorSvc != null)
             {
                 FrmIDcustomDialog form = new FrmIDcustomDialog();
-
+                
                 if(editorSvc.ShowDialog(form) == DialogResult.OK)
                 {
                     value = form.getValue();

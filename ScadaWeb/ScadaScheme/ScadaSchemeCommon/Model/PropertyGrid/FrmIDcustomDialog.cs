@@ -141,7 +141,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 _projectPath = folderBrowserDialog.SelectedPath;
                 if (Directory.Exists(Path.Combine(_projectPath, "BaseXML")))
                 {
-                    labelPath.Text = _projectPath;
+                    textBox2.Text = _projectPath;
                     Scada.Scheme.SchemeContext.GetInstance().SchemePath = _projectPath;
                     _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
 
@@ -227,7 +227,7 @@ namespace Scada.Scheme.Model.PropertyGrid
             {
                 if (Directory.Exists(Path.Combine(context.SchemePath, "BaseXML")))
                 {
-                    labelPath.Text = context.SchemePath;
+                    textBox2.Text = context.SchemePath;
                     _projectXMLPath = Path.Combine(context.SchemePath, "BaseXML");
 
                     foreach (string name in _xmlNames)
@@ -251,7 +251,7 @@ namespace Scada.Scheme.Model.PropertyGrid
 
                         if (projectFiles.Length > 0)
                         {
-                            labelPath.Text = _projectPath;
+                            textBox2.Text = _projectPath;
                             if (Directory.Exists(Path.Combine(_projectPath, "BaseXML")))
                             {
                                 _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
@@ -284,7 +284,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 string selectedDevice = e.Node.Text;
 
                 DataView dataView = _dataTable.DefaultView;
-                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'", selectedDevice);
+                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'",selectedDevice);
                 dataGridView1.DataSource = dataView;
             }
 
