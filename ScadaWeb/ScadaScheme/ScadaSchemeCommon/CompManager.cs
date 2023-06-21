@@ -72,7 +72,8 @@ namespace Scada.Scheme
                 { typeof(StaticText).FullName, typeof(StaticText) },
                 { typeof(DynamicText).FullName, typeof(DynamicText) },
                 { typeof(StaticPicture).FullName, typeof(StaticPicture) },
-                { typeof(DynamicPicture).FullName, typeof(DynamicPicture) }
+                { typeof(DynamicPicture).FullName, typeof(DynamicPicture) },
+                { typeof(ComponentGroup).FullName, typeof(ComponentGroup) }
             };
 
             instance = new CompManager();
