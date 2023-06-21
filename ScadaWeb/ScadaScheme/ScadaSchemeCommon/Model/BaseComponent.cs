@@ -72,7 +72,6 @@ namespace Scada.Scheme.Model
             BorderColor = "";
             BorderWidth = 0;
             ToolTip = "";
-            IDcustom = "0";
             ID = 0;
             Name = "";
             Location = Point.Default;
@@ -124,18 +123,6 @@ namespace Scada.Scheme.Model
         /// Получить или установить идентификатор.
         /// </summary>
         #region Attributes
-        [DisplayName("ID"), Category(Categories.Design)]
-        [Description("The unique identifier of the scheme component.")]
-        [CM.Editor(typeof(IDcustomEditor), typeof(UITypeEditor))]
-        #endregion
-        public string IDcustom { get; set; }
-
-
-        /// <summary>
-        /// Получить или установить идентификатор.
-        /// </summary>
-        #region Attributes
-        [CM.Browsable(false)]
         [DisplayName("ID"), Category(Categories.Design), CM.ReadOnly(true)]
         [Description("The unique identifier of the scheme component.")]
         #endregion
@@ -264,7 +251,6 @@ namespace Scada.Scheme.Model
                 string.IsNullOrEmpty(BorderColor) ? 0 : 1 /*для обратной совместимости*/);
             ToolTip = xmlNode.GetChildAsString("ToolTip");
             ID = xmlNode.GetChildAsInt("ID");
-            IDcustom = xmlNode.GetChildAsString("IDcustom");
             Name = xmlNode.GetChildAsString("Name");
             Location = Point.GetChildAsPoint(xmlNode, "Location");
             Size = Size.GetChildAsSize(xmlNode, "Size");
@@ -284,7 +270,6 @@ namespace Scada.Scheme.Model
             xmlElem.AppendElem("BorderWidth", BorderWidth);
             xmlElem.AppendElem("ToolTip", ToolTip);
             xmlElem.AppendElem("ID", ID);
-            xmlElem.AppendElem("IDcustom", IDcustom);
             xmlElem.AppendElem("Name", Name);
             Point.AppendElem(xmlElem, "Location", Location);
             Size.AppendElem(xmlElem, "Size", Size);

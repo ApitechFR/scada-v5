@@ -53,6 +53,8 @@ namespace Scada.Scheme.Model
             Conditions = new List<ImageCondition>();
             InCnlNum = 0;
             CtrlCnlNum = 0;
+            InCnlNumCustom = "0";
+            CtrlCnlNumCustom = "0";
         }
 
 
@@ -112,6 +114,7 @@ namespace Scada.Scheme.Model
         /// Получить или установить номер входного канала
         /// </summary>
         #region Attributes
+        [CM.Browsable(false)]
         [DisplayName("Input channel"), Category(Categories.Data)]
         [Description("The input channel number associated with the component.")]
         [CM.DefaultValue(0)]
@@ -119,15 +122,36 @@ namespace Scada.Scheme.Model
         public int InCnlNum { get; set; }
 
         /// <summary>
+        /// Получить или установить номер входного канала
+        /// </summary>
+        #region Attributes
+        [DisplayName("Input channel"), Category(Categories.Data)]
+        [Description("The input channel number associated with the component.")]
+        [CM.Editor(typeof(IDcustomEditor), typeof(UITypeEditor))]
+        #endregion
+        public string InCnlNumCustom { get; set; }
+
+        /// <summary>
         /// Получить или установить номер канала управления
         /// </summary>
         #region Attributes
+        [CM.Browsable(false)]
         [DisplayName("Output channel"), Category(Categories.Data)]
         [Description("The output channel number associated with the component.")]
         [CM.DefaultValue(0)]
         #endregion
         public int CtrlCnlNum { get; set; }
 
+
+        /// <summary>
+        /// Получить или установить номер канала управления
+        /// </summary>
+        #region Attributes
+        [DisplayName("Output channel"), Category(Categories.Data)]
+        [Description("The output channel number associated with the component.")]
+        [CM.Editor(typeof(IDcustomEditor), typeof(UITypeEditor))]
+        #endregion
+        public string CtrlCnlNumCustom { get; set; }
 
         /// <summary>
         /// Загрузить конфигурацию компонента из XML-узла
@@ -156,6 +180,8 @@ namespace Scada.Scheme.Model
 
             InCnlNum = xmlNode.GetChildAsInt("InCnlNum");
             CtrlCnlNum = xmlNode.GetChildAsInt("CtrlCnlNum");
+            InCnlNumCustom = xmlNode.GetChildAsString("InCnlNumCustom");
+            CtrlCnlNumCustom = xmlNode.GetChildAsString("CtrlCnlNumCustom");
         }
 
         /// <summary>
@@ -179,6 +205,8 @@ namespace Scada.Scheme.Model
 
             xmlElem.AppendElem("InCnlNum", InCnlNum);
             xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
+            xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
+            xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
         }
 
         /// <summary>

@@ -284,7 +284,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 string selectedDevice = e.Node.Text;
 
                 DataView dataView = _dataTable.DefaultView;
-                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'", selectedDevice);
+                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'",selectedDevice);
                 dataGridView1.DataSource = dataView;
             }
 
