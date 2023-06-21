@@ -1107,20 +1107,21 @@ namespace Scada.Scheme.Editor
                 isUngroupAction = true;
             }
 
+            editor.History.BeginPoint();
             if (isUngroupAction)
             {
                 //Debug.WriteLine("this is an ungroup action");
                 foreach (BaseComponent c in selection)
                 {
-                    c.GroupId = null;
-                    c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+                    BaseComponent currentGroup = (BaseComponent)(findNode(treeView1.Nodes, n => ((BaseComponent)(n.Tag)).ID == c.GroupId).Tag);
+                    c.GroupId = currentGroup.GroupId;
+                    editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+                    //c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
                 }
                 //removeEmptyGroups(treeView1.Nodes);
             }
             else
             {
-
-                editor.History.BeginPoint();
                 //Debug.WriteLine("this is a group action");
                 BaseComponent newGroup = new ComponentGroup();
                 newGroup.ID = editor.SchemeView.GetNextComponentID();
@@ -1132,10 +1133,11 @@ namespace Scada.Scheme.Editor
                 foreach (BaseComponent c in selection)
                 {
                     c.GroupId = newGroup.ID;
-                    c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+                    editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+                    //c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
                 }
-                editor.History.EndPoint();
             }
+            editor.History.EndPoint();
             updateSelectionInTree();
         }
         private void miToolsOptions_Click(object sender, EventArgs e)
