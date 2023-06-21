@@ -674,7 +674,7 @@ namespace Scada.Scheme.Editor
 
             tn.Tag = component;
 
-            if (component.GroupId == null)
+            if (component.GroupId == -1)
             {
                 treeView1.Nodes.Add(tn);
             }
@@ -761,7 +761,7 @@ namespace Scada.Scheme.Editor
                 tn.Text = string.Format("{0} ({1}) {2}", component.Name, component.GetType().Name, component.GroupId);
             }
             tn.Remove();
-            if (component.GroupId == null)
+            if (component.GroupId == -1)
             {
                 treeView1.Nodes.Add(tn);
             }
