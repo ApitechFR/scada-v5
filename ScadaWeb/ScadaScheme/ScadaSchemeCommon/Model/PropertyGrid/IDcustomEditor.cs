@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace Scada.Scheme.Model.PropertyGrid
 {
-    internal class IDcustomEditor : UITypeEditor
+    public class IDcustomEditor : UITypeEditor
     {
         public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
         {
