@@ -63,8 +63,8 @@ namespace Scada.Web.Plugins.SchBasicComp
             Action = Actions.SendCommand;
             InCnlNum = 0;
             CtrlCnlNum = 0;
-            InCnlNumCustom = "0";
-            CtrlCnlNumCustom = "0";
+            InCnlNumCustom = "NA (0)";
+            CtrlCnlNumCustom = "NA (0)";
             Size = DefaultSize;
         }
 
