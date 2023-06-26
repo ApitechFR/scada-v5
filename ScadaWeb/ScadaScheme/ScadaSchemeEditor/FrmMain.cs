@@ -1233,12 +1233,38 @@ namespace Scada.Scheme.Editor
 
                 editor.History.BeginPoint();
 
-                foreach (object selObj in propertyGrid.SelectedObjects)
+                if (propertyGrid.SelectedObject is ComponentGroup group)
                 {
-                    if (selObj is SchemeDocument document)
-                        document.OnItemChanged(SchemeChangeTypes.SchemeDocChanged, selObj);
-                    else if (selObj is BaseComponent component)
-                        component.OnItemChanged(SchemeChangeTypes.ComponentChanged, selObj);
+                    List<BaseComponent> components = editor.getGroupedComponents(group.ID);
+                    if (e.ChangedItem.Label == "X" || e.ChangedItem.Label =="Y" || e.ChangedItem.Label =="ZIndex")
+                    {
+                        foreach (BaseComponent component in components)
+                        {
+                            Point location = component.Location;
+                            int valueDiff = (int)e.ChangedItem.Value - (int)e.OldValue;
+
+                            if (e.ChangedItem.Label == "X") location.X += valueDiff;
+                            else if (e.ChangedItem.Label == "Y") location.Y += valueDiff;
+                            else component.ZIndex += valueDiff;
+
+                            component.Location = location;
+
+                            component.OnItemChanged(SchemeChangeTypes.ComponentChanged, component);
+                        }
+                    }
+                    group.OnItemChanged(SchemeChangeTypes.ComponentChanged, group);
+                }
+                else
+                {
+
+
+                    foreach (object selObj in propertyGrid.SelectedObjects)
+                    {
+                        if (selObj is SchemeDocument document)
+                            document.OnItemChanged(SchemeChangeTypes.SchemeDocChanged, selObj);
+                        else if (selObj is BaseComponent component)
+                            component.OnItemChanged(SchemeChangeTypes.ComponentChanged, selObj);
+                    }
                 }
 
                 editor.History.EndPoint();
