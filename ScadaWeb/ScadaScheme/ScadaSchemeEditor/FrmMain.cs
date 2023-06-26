@@ -417,7 +417,7 @@ namespace Scada.Scheme.Editor
         {
             BaseComponent[] selection = editor.GetSelectedComponents();
             object[] selObjects;
-            bool areGroups = AreGroups(selection, out int groupID);
+            bool areGroups = editor.AreGroups(selection, out int groupID);
             if (!areGroups)
             {
 
@@ -481,30 +481,7 @@ namespace Scada.Scheme.Editor
             SetButtonsEnabled();
         }
 
-        private bool AreGroups(BaseComponent[] components, out int groupId)
-        {
-            if (components.Length == 0) 
-            {
-                groupId = -1;
-                return false; 
-            }
-            groupId = editor.getHihghestGroup(components[0]).ID;
-            List<BaseComponent> groupList = editor.getGroupedComponents(groupId);
-            if (components.Length != groupList.Count)
-            {
-                groupId = -1;
-                return false;
-            }
-            foreach (BaseComponent comp in components)
-            {
-                if (!groupList.Contains(comp))
-                {
-                    groupId = -1;
-                    return false;
-                }
-            }
-            return true;
-        }
+
 
         /// <summary>
         /// Подписаться на изменения схемы.
