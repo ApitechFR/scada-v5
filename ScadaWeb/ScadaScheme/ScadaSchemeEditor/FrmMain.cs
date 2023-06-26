@@ -1236,7 +1236,7 @@ namespace Scada.Scheme.Editor
                 if (propertyGrid.SelectedObject is ComponentGroup group)
                 {
                     List<BaseComponent> components = editor.getGroupedComponents(group.ID);
-                    if (e.ChangedItem.Label == "X" || e.ChangedItem.Label =="Y")
+                    if (e.ChangedItem.Label == "X" || e.ChangedItem.Label =="Y" || e.ChangedItem.Label =="ZIndex")
                     {
                         foreach (BaseComponent component in components)
                         {
@@ -1244,13 +1244,12 @@ namespace Scada.Scheme.Editor
                             int valueDiff = (int)e.ChangedItem.Value - (int)e.OldValue;
 
                             if (e.ChangedItem.Label == "X") location.X += valueDiff;
-                            else location.Y += valueDiff;
+                            else if (e.ChangedItem.Label == "Y") location.Y += valueDiff;
+                            else component.ZIndex += valueDiff;
 
                             component.Location = location;
-                            object selObj = component;
 
-
-                            component.OnItemChanged(SchemeChangeTypes.ComponentChanged, selObj);
+                            component.OnItemChanged(SchemeChangeTypes.ComponentChanged, component);
                         }
                     }
                     group.OnItemChanged(SchemeChangeTypes.ComponentChanged, group);
