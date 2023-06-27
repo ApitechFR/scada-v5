@@ -1127,18 +1127,28 @@ namespace Scada.Scheme.Editor
             }
             else
             {
+                int minX = int.MaxValue;
+                int minY = int.MaxValue;
+
                 BaseComponent newGroup = new ComponentGroup();
                 newGroup.ID = editor.SchemeView.GetNextComponentID();
-                newGroup.Location = new Point(0, 0);
+                
                 newGroup.SchemeView = editor.SchemeView;
                 newGroup.ItemChanged += Scheme_ItemChanged;
-                editor.SchemeView.Components[newGroup.ID] = newGroup;
-                editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
+
                 foreach (BaseComponent c in selection)
                 {
                     c.GroupId = newGroup.ID;
+
+                    if(c.Location.X < minX) minX = c.Location.X;
+                    if(c.Location.Y < minY) minY = c.Location.Y;
+
                     editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
                 }
+                Point location = new Point(minX, minY);
+                newGroup.Location = location;
+                editor.SchemeView.Components[newGroup.ID] = newGroup;
+                editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
             }
             editor.History.EndPoint();
             updateSelectionInTree();

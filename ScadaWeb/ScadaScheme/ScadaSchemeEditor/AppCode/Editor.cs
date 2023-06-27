@@ -1146,13 +1146,18 @@ namespace Scada.Scheme.Editor
             }
             groupId = getHihghestGroup(components[0]).ID;
             List<BaseComponent> groupList = getGroupedComponents(groupId);
-            if (components.Length != groupList.Count)
+            if (components.Length != groupList.Count+1)
             {
                 groupId = -1;
                 return false;
             }
             foreach (BaseComponent comp in components)
             {
+                if(comp is ComponentGroup group)
+                {
+                    if (comp.ID == groupId) continue;
+                }
+
                 if (!groupList.Contains(comp))
                 {
                     groupId = -1;
