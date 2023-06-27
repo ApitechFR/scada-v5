@@ -147,37 +147,11 @@ namespace Scada.Scheme.Editor
                         removePaintFromNodes();
                         selectedNodes.Clear();
                     }
-                    if(e.Node.Tag is ComponentGroup)
-                    {
-                        e.Node.Expand();
-                        e.Node.ExpandAll();
-                        foreach(TreeNode node in e.Node.Nodes) 
-                        {
-                        }
-                    }
                     selectedNodes.Add(e.Node);
                 }
             }
             base.OnAfterSelect(e);
         }
-
-        private List<TreeNode> getAllChildrenNodes(TreeNode root)
-        {
-            List<TreeNode> children = new List<TreeNode>();
-            root.Expand();
-            root.ExpandAll();
-
-            foreach(TreeNode node in root.Nodes)
-            {
-                if(node.Nodes.Count > 0)
-                {
-                    children.AddRange(getAllChildrenNodes(node));
-                }
-                children.Add(node);
-            }
-            return children;
-        }
-
         protected void paintSelectedNodes()
         {
             foreach (TreeNode n in selectedNodes)

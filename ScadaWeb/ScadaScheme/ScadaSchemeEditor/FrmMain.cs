@@ -708,18 +708,29 @@ namespace Scada.Scheme.Editor
         public void treeView1_onNodeSelection(object sender, TreeViewEventArgs e)
         {
             this.noTreeviewSelectionEffect = true;
-            editor.DeselectAll();
-            foreach (TreeNode tn in ((TreeViewMultipleSelection)treeView1).SelectedNodes)
+            List<BaseComponent> compToSelect = new List<BaseComponent>();
+            lock (((TreeViewMultipleSelection)treeView1).SelectedNodes)
             {
-                if (tn.Tag != null && tn.Tag.ToString() != "")
+                foreach (TreeNode tn in ((TreeViewMultipleSelection)treeView1).SelectedNodes)
                 {
-                    this.noTreeviewSelectionEffect = true;
-                    BaseComponent component = tn.Tag as BaseComponent;
-                    if(component is ComponentGroup group)
+                    if (tn.Tag != null && tn.Tag.ToString() != "")
                     {
-
+                        this.noTreeviewSelectionEffect = true;
+                        BaseComponent component = tn.Tag as BaseComponent;
+                        compToSelect.Add(component);
                     }
-                    editor.SelectComponent(component.ID, true);
+                }
+                foreach(BaseComponent comp in compToSelect)
+                {
+                    if(comp is ComponentGroup)
+                    {
+                        foreach(BaseComponent child in editor.SchemeView.Components.Values.Where(x=>x.GroupId == comp.ID))
+                        {
+                            editor.SelectComponent(child.ID, true);
+                        }
+                    }
+                    editor.SelectComponent(comp.ID, true);
+
                 }
             }
         }
