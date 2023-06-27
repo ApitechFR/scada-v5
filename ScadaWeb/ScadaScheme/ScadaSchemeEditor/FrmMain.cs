@@ -714,7 +714,12 @@ namespace Scada.Scheme.Editor
                 if (tn.Tag != null && tn.Tag.ToString() != "")
                 {
                     this.noTreeviewSelectionEffect = true;
-                    editor.SelectComponent(((BaseComponent)(tn.Tag)).ID, true);
+                    BaseComponent component = tn.Tag as BaseComponent;
+                    if(component is ComponentGroup group)
+                    {
+
+                    }
+                    editor.SelectComponent(component.ID, true);
                 }
             }
         }
@@ -1143,12 +1148,17 @@ namespace Scada.Scheme.Editor
                     if(c.Location.X < minX) minX = c.Location.X;
                     if(c.Location.Y < minY) minY = c.Location.Y;
 
-                    editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
                 }
                 Point location = new Point(minX, minY);
                 newGroup.Location = location;
                 editor.SchemeView.Components[newGroup.ID] = newGroup;
                 editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
+
+                foreach(BaseComponent c in selection)
+                {
+                    editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+
+                }
             }
             editor.History.EndPoint();
             updateSelectionInTree();
