@@ -38,7 +38,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using Utils;
-using System.Collections.Generic;
+
 
 namespace Scada.Scheme.Editor
 {
