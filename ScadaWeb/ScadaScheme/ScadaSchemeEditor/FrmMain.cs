@@ -38,7 +38,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using Utils;
-using System.Collections.Generic;
+
 
 namespace Scada.Scheme.Editor
 {
@@ -417,7 +417,7 @@ namespace Scada.Scheme.Editor
         {
             BaseComponent[] selection = editor.GetSelectedComponents();
             object[] selObjects;
-            bool areGroups = AreGroups(selection, out int groupID);
+            bool areGroups = editor.AreGroups(selection, out int groupID);
             if (!areGroups)
             {
 
@@ -481,30 +481,7 @@ namespace Scada.Scheme.Editor
             SetButtonsEnabled();
         }
 
-        private bool AreGroups(BaseComponent[] components, out int groupId)
-        {
-            if (components.Length == 0) 
-            {
-                groupId = -1;
-                return false; 
-            }
-            groupId = editor.getHihghestGroup(components[0]).ID;
-            List<BaseComponent> groupList = editor.getGroupedComponents(groupId);
-            if (components.Length != groupList.Count)
-            {
-                groupId = -1;
-                return false;
-            }
-            foreach (BaseComponent comp in components)
-            {
-                if (!groupList.Contains(comp))
-                {
-                    groupId = -1;
-                    return false;
-                }
-            }
-            return true;
-        }
+
 
         /// <summary>
         /// Подписаться на изменения схемы.
@@ -1150,18 +1127,28 @@ namespace Scada.Scheme.Editor
             }
             else
             {
+                int minX = int.MaxValue;
+                int minY = int.MaxValue;
+
                 BaseComponent newGroup = new ComponentGroup();
                 newGroup.ID = editor.SchemeView.GetNextComponentID();
-                newGroup.Location = new Point(0, 0);
+                
                 newGroup.SchemeView = editor.SchemeView;
                 newGroup.ItemChanged += Scheme_ItemChanged;
-                editor.SchemeView.Components[newGroup.ID] = newGroup;
-                editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
+
                 foreach (BaseComponent c in selection)
                 {
                     c.GroupId = newGroup.ID;
+
+                    if(c.Location.X < minX) minX = c.Location.X;
+                    if(c.Location.Y < minY) minY = c.Location.Y;
+
                     editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
                 }
+                Point location = new Point(minX, minY);
+                newGroup.Location = location;
+                editor.SchemeView.Components[newGroup.ID] = newGroup;
+                editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
             }
             editor.History.EndPoint();
             updateSelectionInTree();

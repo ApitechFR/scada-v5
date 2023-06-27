@@ -33,6 +33,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Windows.Forms;
 using Utils;
 
 namespace Scada.Scheme.Editor
@@ -965,7 +966,8 @@ namespace Scada.Scheme.Editor
             {
                 case SelectAction.Select:
                     SchemeView.Components.TryGetValue(componentID, out BaseComponent component);
-                    List<BaseComponent> groupedComponents = getGroupedComponents((getHihghestGroup(component).ID));
+                    BaseComponent group = getHihghestGroup(component);
+                    List<BaseComponent> groupedComponents = getGroupedComponents(group.ID);
                     if (groupedComponents.Count != 0)
                     {
                         DeselectAll();
@@ -973,6 +975,7 @@ namespace Scada.Scheme.Editor
                         {
                             SelectComponent(comp.ID, true);                            
                         }
+                        SelectComponent(group.ID, true);
                         break;
                     }
                     SelectComponent(componentID);
@@ -1060,11 +1063,34 @@ namespace Scada.Scheme.Editor
 
                             int inCnlOffset = pasteSpecial ? PasteSpecialParams.InCnlOffset : 0;
                             int ctrlCnlOffset = pasteSpecial ? PasteSpecialParams.CtrlCnlOffset : 0;
+                            int newID;
 
-                            foreach (BaseComponent srcComponent in clipboard)
+                            List<BaseComponent> components = new List<BaseComponent>();
+                            clipboard.ForEach(comp=> { components.Add(comp.Clone()); });
+
+                            List<BaseComponent> groups = components.Where(gr => gr is ComponentGroup).ToList();
+
+                            foreach (BaseComponent group in groups) 
+                            {
+                                newID = SchemeView.GetNextComponentID();
+                                foreach(BaseComponent component in components)
+                                {
+                                    if(component.GroupId == group.ID && !groups.Contains(component)) component.GroupId = newID;
+                                }
+                                group.ID = newID;
+
+                            }
+
+                            foreach (BaseComponent srcComponent in components.ToList())
                             {
                                 BaseComponent newComponent = srcComponent.Clone();
-                                newComponent.ID = SchemeView.GetNextComponentID();
+                                if (newComponent is ComponentGroup) { }
+
+                                else
+                                {
+                                    newID = SchemeView.GetNextComponentID();
+                                    newComponent.ID = newID;
+                                }
                                 newComponent.Location = new Point(newComponent.Location.X + x, newComponent.Location.Y + y);
 
                                 if (pasteSpecial && newComponent is IDynamicComponent dynamicComponent)
@@ -1103,6 +1129,42 @@ namespace Scada.Scheme.Editor
                     "Error pasting scheme components from clipboard");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Determines if the selection is an entire group 
+        /// </summary>
+        /// <param name="components"></param>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
+        public bool AreGroups(BaseComponent[] components, out int groupId)
+        {
+            if (components.Length == 0)
+            {
+                groupId = -1;
+                return false;
+            }
+            groupId = getHihghestGroup(components[0]).ID;
+            List<BaseComponent> groupList = getGroupedComponents(groupId);
+            if (components.Length != groupList.Count+1)
+            {
+                groupId = -1;
+                return false;
+            }
+            foreach (BaseComponent comp in components)
+            {
+                if(comp is ComponentGroup group)
+                {
+                    if (comp.ID == groupId) continue;
+                }
+
+                if (!groupList.Contains(comp))
+                {
+                    groupId = -1;
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
