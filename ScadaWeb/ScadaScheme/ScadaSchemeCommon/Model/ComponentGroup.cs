@@ -6,7 +6,7 @@ using System.Text;
 namespace Scada.Scheme.Model
 {
     /// <summary>
-    /// Scheme that represent a group of components
+    /// Scheme that represents a group of components
     /// </summary>
     [Serializable]
     public class ComponentGroup : BaseComponent
