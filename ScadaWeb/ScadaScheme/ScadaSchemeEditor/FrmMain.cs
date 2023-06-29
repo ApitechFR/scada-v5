@@ -38,6 +38,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using Utils;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 namespace Scada.Scheme.Editor
@@ -202,7 +203,8 @@ namespace Scada.Scheme.Editor
 
                     // добавление элемента с указателем
                     lvCompTypes.Items.Add(new ListViewItem(
-                        AppPhrases.PointerItem, "pointer.png", listViewGroup) { IndentCount = 1 });
+                        AppPhrases.PointerItem, "pointer.png", listViewGroup)
+                    { IndentCount = 1 });
 
                     // добавление компонентов
                     foreach (CompItem compItem in spec.CompItems)
@@ -435,10 +437,10 @@ namespace Scada.Scheme.Editor
             }
             else
             {
-                editor.SchemeView.Components.TryGetValue(groupID,out BaseComponent selected);
+                editor.SchemeView.Components.TryGetValue(groupID, out BaseComponent selected);
                 selObjects = new object[] { selected };
             }
-            
+
             // отображение выбранных объектов
             propertyGrid.SelectedObjects = selObjects;
 
@@ -455,12 +457,12 @@ namespace Scada.Scheme.Editor
             {
                 ArrayList newSelectedNodes = new ArrayList();
                 treeView1.SelectedNode = null;
-                
+
                 if (areGroups)
                 {
-                    editor.SchemeView.Components.TryGetValue(groupID,out BaseComponent group);
+                    editor.SchemeView.Components.TryGetValue(groupID, out BaseComponent group);
                     TreeNode nodeToSelect = findNode(treeView1.Nodes, n => ((BaseComponent)n.Tag == group));
-                    if (nodeToSelect!=null) newSelectedNodes.Add(nodeToSelect);
+                    if (nodeToSelect != null) newSelectedNodes.Add(nodeToSelect);
                 }
                 else
                 {
@@ -707,7 +709,6 @@ namespace Scada.Scheme.Editor
 
         public void treeView1_onNodeSelection(object sender, TreeViewEventArgs e)
         {
-            this.noTreeviewSelectionEffect = true;
             List<BaseComponent> compToSelect = new List<BaseComponent>();
             lock (((TreeViewMultipleSelection)treeView1).SelectedNodes)
             {
@@ -720,15 +721,20 @@ namespace Scada.Scheme.Editor
                         compToSelect.Add(component);
                     }
                 }
-                foreach(BaseComponent comp in compToSelect)
+                editor.DeselectAll();
+                foreach (BaseComponent comp in compToSelect)
                 {
-                    if(comp is ComponentGroup)
+                    if (comp is ComponentGroup)
                     {
-                        foreach(BaseComponent child in editor.SchemeView.Components.Values.Where(x=>x.GroupId == comp.ID))
+                        foreach (BaseComponent child in editor.SchemeView.Components.Values.Where(x => x.GroupId == comp.ID))
                         {
+                            this.noTreeviewSelectionEffect = true;
+
                             editor.SelectComponent(child.ID, true);
                         }
                     }
+                    this.noTreeviewSelectionEffect = true;
+
                     editor.SelectComponent(comp.ID, true);
 
                 }
@@ -964,6 +970,7 @@ namespace Scada.Scheme.Editor
             // активировать форму при наведении мыши
             if (ActiveForm != this)
                 BringToFront();
+            bool a = treeView1.SelectedNode != null;
         }
 
         private void FrmMain_Move(object sender, EventArgs e)
@@ -1126,7 +1133,7 @@ namespace Scada.Scheme.Editor
             BaseComponent[] selection = editor.GetSelectedComponents();
 
             bool isUngroupAction = false;
-            if (selection.Where(c=>c.GroupId != -1).Count() > 0)
+            if (selection.Where(c => c.GroupId != -1).Count() > 0)
             {
                 isUngroupAction = true;
             }
@@ -1148,7 +1155,7 @@ namespace Scada.Scheme.Editor
 
                 BaseComponent newGroup = new ComponentGroup();
                 newGroup.ID = editor.SchemeView.GetNextComponentID();
-                
+
                 newGroup.SchemeView = editor.SchemeView;
                 newGroup.ItemChanged += Scheme_ItemChanged;
 
@@ -1156,8 +1163,8 @@ namespace Scada.Scheme.Editor
                 {
                     c.GroupId = newGroup.ID;
 
-                    if(c.Location.X < minX) minX = c.Location.X;
-                    if(c.Location.Y < minY) minY = c.Location.Y;
+                    if (c.Location.X < minX) minX = c.Location.X;
+                    if (c.Location.Y < minY) minY = c.Location.Y;
 
                 }
                 Point location = new Point(minX, minY);
@@ -1165,7 +1172,7 @@ namespace Scada.Scheme.Editor
                 editor.SchemeView.Components[newGroup.ID] = newGroup;
                 editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
 
-                foreach(BaseComponent c in selection)
+                foreach (BaseComponent c in selection)
                 {
                     editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
 
@@ -1244,7 +1251,7 @@ namespace Scada.Scheme.Editor
                 if (propertyGrid.SelectedObject is ComponentGroup group)
                 {
                     List<BaseComponent> components = editor.getGroupedComponents(group.ID);
-                    if (e.ChangedItem.Label == "X" || e.ChangedItem.Label =="Y" || e.ChangedItem.Label =="ZIndex")
+                    if (e.ChangedItem.Label == "X" || e.ChangedItem.Label == "Y" || e.ChangedItem.Label == "ZIndex")
                     {
                         foreach (BaseComponent component in components)
                         {
@@ -1279,4 +1286,5 @@ namespace Scada.Scheme.Editor
             }
         }
     }
+
 }
