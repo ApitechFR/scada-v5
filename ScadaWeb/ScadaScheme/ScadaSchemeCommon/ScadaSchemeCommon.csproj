@@ -76,6 +76,7 @@
     <Compile Include="Model\DataTypes\Font.cs" />
     <Compile Include="Model\DataTypes\HorizontalAlignments.cs" />
     <Compile Include="Model\DynamicPicture.cs" />
+    <Compile Include="Model\DynamicPolygon.cs" />
     <Compile Include="Model\DynamicText.cs" />
     <Compile Include="Model\IDynamicComponent.cs" />
     <Compile Include="Model\Image.cs" />
@@ -146,6 +147,7 @@
     <Compile Include="Model\SchemeChangeTypes.cs" />
     <Compile Include="Model\SchemeDocument.cs" />
     <Compile Include="Model\StaticPicture.cs" />
+    <Compile Include="Model\StaticPolygon.cs" />
     <Compile Include="Model\StaticText.cs" />
     <Compile Include="Model\DataTypes\VerticalAlignments.cs" />
     <Compile Include="Model\UnknownComponent.cs" />

@@ -834,6 +834,89 @@ scada.scheme.DynamicPictureRenderer.prototype.updateData = function (component, 
     }
 };
 
+
+
+/********** Static Polygon Renderer **********/
+
+// Static polygon renderer type extends scada.scheme.ComponentRenderer
+scada.scheme.StaticPolygonRenderer = function () {
+    scada.scheme.ComponentRenderer.call(this);
+};
+
+scada.scheme.StaticPolygonRenderer.prototype = Object.create(scada.scheme.ComponentRenderer.prototype);
+scada.scheme.StaticPolygonRenderer.constructor = scada.scheme.StaticPolygonRenderer;
+
+scada.scheme.StaticPolygonRenderer.prototype.createDom = function (component, renderContext) {
+    var props = component.props;
+
+    var divComp = $("<div id='comp" + component.id + "'></div>");
+    this.prepareComponent(divComp, component);
+
+    divComp.css({
+        "width": "200px",
+        "height": "200px",
+        "background": "#007BFF",
+        "clip-path": "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)"
+    });
+
+    component.dom = divComp;
+};
+
+/********** Dynamic Polygon Renderer **********/
+
+// Dynamic polygon renderer type extends scada.scheme.StaticPolygonRenderer
+scada.scheme.DynamicPolygonRenderer = function () {
+    scada.scheme.StaticPolygonRenderer.call(this);
+};
+
+scada.scheme.DynamicPolygonRenderer.prototype = Object.create(scada.scheme.StaticPolygonRenderer.prototype);
+scada.scheme.DynamicPolygonRenderer.constructor = scada.scheme.DynamicPolygonRenderer;
+
+scada.scheme.DynamicPolygonRenderer.prototype.createDom = function (component, renderContext) {
+    scada.scheme.StaticPolygonRenderer.prototype.createDom.call(this, component, renderContext);
+
+    var props = component.props;
+    var divComp = component.dom;
+
+    this.bindAction(divComp, component, renderContext);
+
+    // apply properties on hover
+    var thisRenderer = this;
+    var cnlNum = props.InCnlNum;
+
+    divComp.hover(
+        function () {
+            thisRenderer.setDynamicBackColor(divComp, props.BackColorOnHover, cnlNum, renderContext);
+            thisRenderer.setDynamicBorderColor(divComp, props.BorderColorOnHover, cnlNum, renderContext);
+        },
+        function () {
+            thisRenderer.setDynamicBackColor(divComp, props.BackColor, cnlNum, renderContext, true);
+            thisRenderer.setDynamicBorderColor(divComp, props.BorderColor, cnlNum, renderContext, true);
+        }
+    );
+};
+
+scada.scheme.DynamicPolygonRenderer.prototype.updateData = function (component, renderContext) {
+    var props = component.props;
+
+    if (props.InCnlNum > 0) {
+        var divComp = component.dom;
+        var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
+
+        // choose and set colors of the component
+        var statusColor = cnlDataExt.Color;
+        var isHovered = divComp.is(":hover");
+
+        var backColor = this.chooseColor(isHovered, props.BackColor, props.BackColorOnHover);
+        var borderColor = this.chooseColor(isHovered, props.BorderColor, props.BorderColorOnHover);
+
+        this.setBackColor(divComp, backColor, true, statusColor);
+        this.setBorderColor(divComp, borderColor, true, statusColor);
+    }
+};
+
+
+
 /********** Unknown Component Renderer **********/
 
 scada.scheme.UnknownComponentRenderer = function () {
@@ -881,5 +964,7 @@ scada.scheme.rendererMap = new Map([
     ["Scada.Scheme.Model.DynamicText", new scada.scheme.DynamicTextRenderer()],
     ["Scada.Scheme.Model.StaticPicture", new scada.scheme.StaticPictureRenderer()],
     ["Scada.Scheme.Model.DynamicPicture", new scada.scheme.DynamicPictureRenderer()],
+    ["Scada.Scheme.Model.StaticPolygon", new scada.scheme.StaticPolygonRenderer()],
+    ["Scada.Scheme.Model.DynamicPolygon", new scada.scheme.DynamicPolygonRenderer()],
     ["Scada.Scheme.Model.UnknownComponent", new scada.scheme.UnknownComponentRenderer()]
 ]);
