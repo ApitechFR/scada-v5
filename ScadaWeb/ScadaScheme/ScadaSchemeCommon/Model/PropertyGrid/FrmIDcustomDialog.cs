@@ -20,11 +20,13 @@ namespace Scada.Scheme.Model.PropertyGrid
 
         private DataTable _dataTable = new DataTable();
         private string _value = "";
+        private int _numValue;
         private string _projectPath = "";
         private string _projectXMLPath = "";
         private List<string[]> _lstProperties = new List<string[]>();
         private string[] _xmlNames = { "Cnl.xml", "CnlType.xml", "Device.xml", "Obj.xml" };
         private string _errFolder = "Aucun dossier sélectionné.";
+        private string _errProject = "Veuillez sélectionner un dossier projet valide.";
 
         Scada.Scheme.SchemeContext context = Scada.Scheme.SchemeContext.GetInstance();
 
@@ -53,8 +55,8 @@ namespace Scada.Scheme.Model.PropertyGrid
             List<string> lstNameDevices = new List<string>();
             foreach (string[] tab in _lstProperties)
             {
-                if (!String.IsNullOrEmpty(tab[7]) && !lstNameDevices.Contains(tab[7]))
-                    lstNameDevices.Add(tab[7]);
+                if (!String.IsNullOrEmpty(tab[8]) && !lstNameDevices.Contains(tab[8]))
+                    lstNameDevices.Add(tab[8]);
             }
             foreach(string device in lstNameDevices)
             {
@@ -66,8 +68,8 @@ namespace Scada.Scheme.Model.PropertyGrid
             List<string> lstNameObjets = new List<string>();
             foreach (string[] tab in _lstProperties)
             {
-                if (!String.IsNullOrEmpty(tab[8]) && !lstNameObjets.Contains(tab[8]))
-                    lstNameObjets.Add(tab[8]);
+                if (!String.IsNullOrEmpty(tab[9]) && !lstNameObjets.Contains(tab[9]))
+                    lstNameObjets.Add(tab[9]);
             }
             foreach (string objet in lstNameObjets)
             {
@@ -79,6 +81,7 @@ namespace Scada.Scheme.Model.PropertyGrid
 
         private void fillDataGridView()
         {
+            _dataTable.Columns.Add("NumCln", typeof(int));
             _dataTable.Columns.Add("Name", typeof(string));
             _dataTable.Columns.Add("Tag_Num", typeof(string));
             _dataTable.Columns.Add("Tag_Code", typeof(string));
@@ -88,11 +91,12 @@ namespace Scada.Scheme.Model.PropertyGrid
 
             foreach (string[] tab in _lstProperties)
             {
-                _dataTable.Rows.Add(String.IsNullOrEmpty(tab[0]) ? "" : tab[0], String.IsNullOrEmpty(tab[4]) ? "" : tab[4], String.IsNullOrEmpty(tab[5]) ? "" : tab[5], String.IsNullOrEmpty(tab[6]) ? "" : tab[6], String.IsNullOrEmpty(tab[7]) ? "" : tab[7], String.IsNullOrEmpty(tab[8]) ? "" : tab[8]);
+                _dataTable.Rows.Add(tab[0] == null ? "" : tab[0],String.IsNullOrEmpty(tab[1]) ? "" : tab[1], String.IsNullOrEmpty(tab[5]) ? "" : tab[5], String.IsNullOrEmpty(tab[6]) ? "" : tab[6], String.IsNullOrEmpty(tab[7]) ? "" : tab[7], String.IsNullOrEmpty(tab[8]) ? "" : tab[8], String.IsNullOrEmpty(tab[9]) ? "" : tab[9]);
             }
 
             dataGridView1.DataSource = _dataTable;
             dataGridView1.Columns[dataGridView1.Columns.Count - 1].Visible = false;
+            dataGridView1.Columns[0].Visible = false;
         }
 
         private void buttonSearch_Click(object sender, EventArgs e)
@@ -103,16 +107,18 @@ namespace Scada.Scheme.Model.PropertyGrid
         private void buttonOK_Click(object sender, EventArgs e)
         {
             if (dataGridView1.SelectedRows.Count != 0)
-                _value = dataGridView1.SelectedRows[0].Cells[0].Value.ToString();
-            else _value = "";
+            {
+                _numValue = int.Parse(dataGridView1.SelectedRows[0].Cells[0].Value.ToString());
+                _value = $"{dataGridView1.SelectedRows[0].Cells[1].Value.ToString()} ({_numValue})";
+            }
+            else _value = "NA (0)";
             DialogResult = DialogResult.OK;
 
         }
 
-        public string getValue()
-        {
-            return _value;
-        }
+        public string getValue(){return _value;}
+
+        public int getNumValue() { return _numValue; }
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -125,7 +131,7 @@ namespace Scada.Scheme.Model.PropertyGrid
         private void search()
         {
             DataView dataView = _dataTable.DefaultView;
-            dataView.RowFilter = string.Format(@"Name LIKE '%{0}%'", textBox1.Text);
+            dataView.RowFilter = string.Format(@"Name LIKE '%{0}%' OR Tag_Num LIKE '%{0}%' OR Tag_Code LIKE '%{0}%' OR Type LIKE '%{0}%' OR Device LIKE '%{0}%'", textBox1.Text);
             dataGridView1.DataSource = dataView;
         }
 
@@ -138,17 +144,21 @@ namespace Scada.Scheme.Model.PropertyGrid
             if(result == DialogResult.OK)
             {
                 _projectPath = folderBrowserDialog.SelectedPath;
-                labelPath.Text = _projectPath;
-                Scada.Scheme.SchemeContext.GetInstance().SchemePath = _projectPath;
-                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
-
-                foreach (string name in _xmlNames)
+                if (Directory.Exists(Path.Combine(_projectPath, "BaseXML")))
                 {
-                    xmlReader(name);
-                }
+                    textBox2.Text = _projectPath;
+                    Scada.Scheme.SchemeContext.GetInstance().SchemePath = _projectPath;
+                    _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
 
-                fillDataGridView();
-                updateTreeView(treeView1);
+                    foreach (string name in _xmlNames)
+                    {
+                        xmlReader(name);
+                    }
+
+                    fillDataGridView();
+                    updateTreeView(treeView1);
+                }
+                else MessageBox.Show(_errProject);
             }
             else
                 Console.WriteLine(_errFolder);
@@ -166,13 +176,14 @@ namespace Scada.Scheme.Model.PropertyGrid
                 case "Cnl.xml":
                     foreach (XmlNode cnlNode in root.SelectNodes("Cnl"))
                     {
-                        string[] tab = new string[9];
-                        tab[0] = cnlNode.SelectSingleNode("Name").InnerText;
-                        tab[1] = cnlNode.SelectSingleNode("CnlTypeID").InnerText;
-                        tab[2] = cnlNode.SelectSingleNode("ObjNum").InnerText;
-                        tab[3] = cnlNode.SelectSingleNode("DeviceNum").InnerText;
-                        tab[4] = cnlNode.SelectSingleNode("TagNum").InnerText;
-                        tab[5] = cnlNode.SelectSingleNode("TagCode").InnerText;
+                        string[] tab = new string[10];
+                        tab[0] = cnlNode.SelectSingleNode("CnlNum").InnerText;
+                        tab[1] = cnlNode.SelectSingleNode("Name").InnerText;
+                        tab[2] = cnlNode.SelectSingleNode("CnlTypeID").InnerText;
+                        tab[3] = cnlNode.SelectSingleNode("ObjNum").InnerText;
+                        tab[4] = cnlNode.SelectSingleNode("DeviceNum").InnerText;
+                        tab[5] = cnlNode.SelectSingleNode("TagNum").InnerText;
+                        tab[6] = cnlNode.SelectSingleNode("TagCode").InnerText;
                         _lstProperties.Add(tab);
                     }
                     break;
@@ -182,8 +193,8 @@ namespace Scada.Scheme.Model.PropertyGrid
                     {
                         foreach (XmlNode cnlTypeNode in root.SelectNodes("CnlType"))
                         {
-                            if (tab[1] == cnlTypeNode.SelectSingleNode("CnlTypeID").InnerText)
-                                tab[6] = cnlTypeNode.SelectSingleNode("Name").InnerText;
+                            if (tab[2] == cnlTypeNode.SelectSingleNode("CnlTypeID").InnerText)
+                                tab[7] = cnlTypeNode.SelectSingleNode("Name").InnerText;
                         }
                     }
                     break;
@@ -193,8 +204,8 @@ namespace Scada.Scheme.Model.PropertyGrid
                     {
                         foreach (XmlNode deviceNode in root.SelectNodes("Device"))
                         {
-                            if (tab[3] == deviceNode.SelectSingleNode("DeviceNum").InnerText)
-                                tab[7] = deviceNode.SelectSingleNode("Name").InnerText;
+                            if (tab[4] == deviceNode.SelectSingleNode("DeviceNum").InnerText)
+                                tab[8] = deviceNode.SelectSingleNode("Name").InnerText;
                         }
                     }
                     break;
@@ -205,8 +216,8 @@ namespace Scada.Scheme.Model.PropertyGrid
                     {
                         foreach (XmlNode objNode in root.SelectNodes("Obj"))
                         {
-                            if (tab[2] == objNode.SelectSingleNode("ObjNum").InnerText)
-                                tab[8] = objNode.SelectSingleNode("Name").InnerText;
+                            if (tab[3] == objNode.SelectSingleNode("ObjNum").InnerText)
+                                tab[9] = objNode.SelectSingleNode("Name").InnerText;
                         }
                     }
                     break;
@@ -220,39 +231,55 @@ namespace Scada.Scheme.Model.PropertyGrid
         {
             if (Directory.Exists(context.SchemePath))
             {
-                labelPath.Text = context.SchemePath;
-                _projectXMLPath = Path.Combine(context.SchemePath, "BaseXML");
-
-                foreach (string name in _xmlNames)
+                if (Directory.Exists(Path.Combine(context.SchemePath, "BaseXML")))
                 {
-                    xmlReader(name);
+                    textBox2.Text = context.SchemePath;
+                    _projectXMLPath = Path.Combine(context.SchemePath, "BaseXML");
+
+                    foreach (string name in _xmlNames)
+                    {
+                        xmlReader(name);
+                    }
+                    fillDataGridView();
+                    updateTreeView(treeView1);
                 }
-                fillDataGridView();
-                updateTreeView(treeView1);
             }
             else if (File.Exists(context.SchemePath))
             {
                 _projectPath = context.SchemePath;
+                _projectPath = Path.GetDirectoryName(_projectPath);
 
-                while (Path.GetFileName(_projectPath) != "Views")
+                if (Directory.GetParent(_projectPath) != null)
                 {
-                    string dossierParent = Directory.GetParent(_projectPath).FullName;
-                    if (string.IsNullOrEmpty(dossierParent))
+                    while (true)
                     {
-                        return;
-                    }
-                    _projectPath = dossierParent;
-                }
-                _projectPath = Directory.GetParent(_projectPath).FullName;
-                labelPath.Text = _projectPath;
-                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
+                        string[] projectFiles = Directory.GetFiles(_projectPath, "*.rsproj");
 
-                foreach (string name in _xmlNames)
-                {
-                    xmlReader(name);
+                        if (projectFiles.Length > 0)
+                        {
+                            textBox2.Text = _projectPath;
+                            if (Directory.Exists(Path.Combine(_projectPath, "BaseXML")))
+                            {
+                                _projectXMLPath = Path.Combine(_projectPath, "BaseXML");
+
+                                foreach (string name in _xmlNames)
+                                {
+                                    xmlReader(name);
+                                }
+                                fillDataGridView();
+                                updateTreeView(treeView1);
+                            }
+                            break;
+                        }
+
+                        if (_projectPath == Path.GetPathRoot(_projectPath))
+                        {
+                            break;
+                        }
+                        _projectPath = Directory.GetParent(_projectPath).FullName;
+                    }
+
                 }
-                fillDataGridView();
-                updateTreeView(treeView1);
             }
         }
 
@@ -263,7 +290,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 string selectedDevice = e.Node.Text;
 
                 DataView dataView = _dataTable.DefaultView;
-                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'", selectedDevice);
+                dataView.RowFilter = string.Format(@"Device LIKE '%{0}%'",selectedDevice);
                 dataGridView1.DataSource = dataView;
             }
 
