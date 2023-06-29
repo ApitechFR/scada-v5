@@ -28,12 +28,10 @@ using Scada.Scheme.Model.DataTypes;
 using Scada.Web;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Windows.Forms;
 using Utils;
 
 namespace Scada.Scheme.Editor
@@ -855,7 +853,7 @@ namespace Scada.Scheme.Editor
                             }
                         }
 
-                        OnSelectionChanged();                        
+                        OnSelectionChanged();
                     }
                 }
             }
