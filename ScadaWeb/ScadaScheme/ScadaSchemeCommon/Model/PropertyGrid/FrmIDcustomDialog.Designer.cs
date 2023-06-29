@@ -36,8 +36,8 @@
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonOK = new System.Windows.Forms.Button();
             this.labelProjectPath = new System.Windows.Forms.Label();
-            this.labelPath = new System.Windows.Forms.Label();
             this.buttonPorjectPath = new System.Windows.Forms.Button();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -82,6 +82,7 @@
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.dataGridView1.RowTemplate.Height = 24;
+            this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView1.Size = new System.Drawing.Size(767, 379);
             this.dataGridView1.TabIndex = 4;
             // 
@@ -108,43 +109,40 @@
             // labelProjectPath
             // 
             this.labelProjectPath.AutoSize = true;
-            this.labelProjectPath.Location = new System.Drawing.Point(51, 26);
+            this.labelProjectPath.Location = new System.Drawing.Point(12, 5);
             this.labelProjectPath.Name = "labelProjectPath";
-            this.labelProjectPath.Size = new System.Drawing.Size(88, 16);
+            this.labelProjectPath.Size = new System.Drawing.Size(118, 16);
             this.labelProjectPath.TabIndex = 7;
-            this.labelProjectPath.Text = "Project Path : ";
-            // 
-            // labelPath
-            // 
-            this.labelPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelPath.AutoSize = true;
-            this.labelPath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.labelPath.Location = new System.Drawing.Point(145, 24);
-            this.labelPath.Name = "labelPath";
-            this.labelPath.Size = new System.Drawing.Size(175, 18);
-            this.labelPath.TabIndex = 8;
-            this.labelPath.Text = "Please, select project folder";
-            this.labelPath.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.labelProjectPath.Text = "Connecting project";
             // 
             // buttonPorjectPath
             // 
-            this.buttonPorjectPath.BackColor = System.Drawing.Color.White;
+            this.buttonPorjectPath.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonPorjectPath.ForeColor = System.Drawing.SystemColors.ControlDark;
             this.buttonPorjectPath.Image = ((System.Drawing.Image)(resources.GetObject("buttonPorjectPath.Image")));
-            this.buttonPorjectPath.Location = new System.Drawing.Point(12, 21);
+            this.buttonPorjectPath.Location = new System.Drawing.Point(991, 23);
             this.buttonPorjectPath.Name = "buttonPorjectPath";
-            this.buttonPorjectPath.Size = new System.Drawing.Size(33, 27);
+            this.buttonPorjectPath.Size = new System.Drawing.Size(33, 31);
             this.buttonPorjectPath.TabIndex = 9;
             this.buttonPorjectPath.UseVisualStyleBackColor = false;
             this.buttonPorjectPath.Click += new System.EventHandler(this.buttonPorjectPath_Click);
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(12, 28);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
+            this.textBox2.Size = new System.Drawing.Size(973, 22);
+            this.textBox2.TabIndex = 10;
             // 
             // FrmIDcustomDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1036, 523);
+            this.BackColor = System.Drawing.SystemColors.Control;
+            this.ClientSize = new System.Drawing.Size(1045, 519);
+            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.buttonPorjectPath);
-            this.Controls.Add(this.labelPath);
             this.Controls.Add(this.labelProjectPath);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.buttonCancel);
@@ -170,7 +168,7 @@
         private System.Windows.Forms.Button buttonOK;
         public System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Label labelProjectPath;
-        private System.Windows.Forms.Label labelPath;
         private System.Windows.Forms.Button buttonPorjectPath;
+        private System.Windows.Forms.TextBox textBox2;
     }
 }

@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace Scada.Scheme.Model.PropertyGrid
 {
-    internal class IDcustomEditor : UITypeEditor
+    public class IDcustomEditor : UITypeEditor
     {
         public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
         {
@@ -19,10 +19,19 @@ namespace Scada.Scheme.Model.PropertyGrid
             if (context != null && context.Instance != null && editorSvc != null)
             {
                 FrmIDcustomDialog form = new FrmIDcustomDialog();
-
+                
                 if(editorSvc.ShowDialog(form) == DialogResult.OK)
                 {
                     value = form.getValue();
+                    if(context.Instance is IDynamicComponent instance)
+                    {
+                        if (context.ToString().Contains("Input"))
+                        {
+                            instance.InCnlNum = form.getNumValue();
+                        }
+                        else if (context.ToString().Contains("Output"))
+                            instance.CtrlCnlNum = form.getNumValue();
+                    }
                 }
             }
 
