@@ -298,7 +298,7 @@ namespace Scada.Scheme.Editor
             this.tabControl.Controls.Add(this.ComponentsTree);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 55);
-            this.tabControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl.Multiline = true;
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
@@ -310,9 +310,9 @@ namespace Scada.Scheme.Editor
             // 
             this.pageComponents.Controls.Add(this.lvCompTypes);
             this.pageComponents.Location = new System.Drawing.Point(4, 25);
-            this.pageComponents.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pageComponents.Margin = new System.Windows.Forms.Padding(4);
             this.pageComponents.Name = "pageComponents";
-            this.pageComponents.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pageComponents.Padding = new System.Windows.Forms.Padding(4);
             this.pageComponents.Size = new System.Drawing.Size(436, 519);
             this.pageComponents.TabIndex = 2;
             this.pageComponents.Text = "Components";
@@ -352,7 +352,7 @@ namespace Scada.Scheme.Editor
             listViewItem5});
             this.lvCompTypes.LabelWrap = false;
             this.lvCompTypes.Location = new System.Drawing.Point(4, 4);
-            this.lvCompTypes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lvCompTypes.Margin = new System.Windows.Forms.Padding(4);
             this.lvCompTypes.MultiSelect = false;
             this.lvCompTypes.Name = "lvCompTypes";
             this.lvCompTypes.Size = new System.Drawing.Size(428, 511);
@@ -377,9 +377,9 @@ namespace Scada.Scheme.Editor
             this.pageProperties.Controls.Add(this.propertyGrid);
             this.pageProperties.Controls.Add(this.cbSchComp);
             this.pageProperties.Location = new System.Drawing.Point(4, 25);
-            this.pageProperties.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pageProperties.Margin = new System.Windows.Forms.Padding(4);
             this.pageProperties.Name = "pageProperties";
-            this.pageProperties.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pageProperties.Padding = new System.Windows.Forms.Padding(4);
             this.pageProperties.Size = new System.Drawing.Size(436, 519);
             this.pageProperties.TabIndex = 0;
             this.pageProperties.Text = "Properties";
@@ -390,7 +390,7 @@ namespace Scada.Scheme.Editor
             this.propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertyGrid.LineColor = System.Drawing.SystemColors.ControlDark;
             this.propertyGrid.Location = new System.Drawing.Point(4, 28);
-            this.propertyGrid.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.propertyGrid.Margin = new System.Windows.Forms.Padding(4);
             this.propertyGrid.Name = "propertyGrid";
             this.propertyGrid.Size = new System.Drawing.Size(428, 487);
             this.propertyGrid.TabIndex = 1;
@@ -402,7 +402,7 @@ namespace Scada.Scheme.Editor
             this.cbSchComp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbSchComp.FormattingEnabled = true;
             this.cbSchComp.Location = new System.Drawing.Point(4, 4);
-            this.cbSchComp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cbSchComp.Margin = new System.Windows.Forms.Padding(4);
             this.cbSchComp.Name = "cbSchComp";
             this.cbSchComp.Size = new System.Drawing.Size(428, 24);
             this.cbSchComp.TabIndex = 0;
@@ -412,10 +412,10 @@ namespace Scada.Scheme.Editor
             // 
             this.ComponentsTree.Controls.Add(this.treeView1);
             this.ComponentsTree.Location = new System.Drawing.Point(4, 25);
-            this.ComponentsTree.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ComponentsTree.Margin = new System.Windows.Forms.Padding(4);
             this.ComponentsTree.Name = "ComponentsTree";
-            this.ComponentsTree.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.ComponentsTree.Size = new System.Drawing.Size(436, 513);
+            this.ComponentsTree.Padding = new System.Windows.Forms.Padding(4);
+            this.ComponentsTree.Size = new System.Drawing.Size(436, 519);
             this.ComponentsTree.TabIndex = 3;
             this.ComponentsTree.Text = "View";
             this.ComponentsTree.UseVisualStyleBackColor = true;
@@ -424,7 +424,7 @@ namespace Scada.Scheme.Editor
             // 
             this.treeView1.BackColor = System.Drawing.SystemColors.MenuBar;
             this.treeView1.Location = new System.Drawing.Point(11, 39);
-            this.treeView1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.treeView1.Margin = new System.Windows.Forms.Padding(4);
             this.treeView1.Name = "treeView1";
             this.treeView1.SelectedNodes = ((System.Collections.ArrayList)(resources.GetObject("treeView1.SelectedNodes")));
             this.treeView1.Size = new System.Drawing.Size(379, 211);
@@ -664,7 +664,7 @@ namespace Scada.Scheme.Editor
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimumSize = new System.Drawing.Size(261, 358);
             this.Name = "FrmMain";

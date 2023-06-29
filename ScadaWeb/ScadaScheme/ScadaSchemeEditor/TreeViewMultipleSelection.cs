@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using Scada.Scheme.Model;
+using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -150,7 +152,6 @@ namespace Scada.Scheme.Editor
             }
             base.OnAfterSelect(e);
         }
-
         protected void paintSelectedNodes()
         {
             foreach (TreeNode n in selectedNodes)
