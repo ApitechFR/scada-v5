@@ -23,6 +23,15 @@ namespace Scada.Scheme.Model.PropertyGrid
                 if(editorSvc.ShowDialog(form) == DialogResult.OK)
                 {
                     value = form.getValue();
+                    if(context.Instance is IDynamicComponent instance)
+                    {
+                        if (context.ToString().Contains("Input"))
+                        {
+                            instance.InCnlNum = form.getNumValue();
+                        }
+                        else if (context.ToString().Contains("Output"))
+                            instance.CtrlCnlNum = form.getNumValue();
+                    }
                 }
             }
 
