@@ -71,6 +71,7 @@
     <Compile Include="Model\DataTypes\ImageStretches.cs" />
     <Compile Include="Model\DataTypes\LogicalOperators.cs" />
     <Compile Include="Model\DataTypes\Point.cs" />
+    <Compile Include="Model\DataTypes\PolygonCondition.cs" />
     <Compile Include="Model\DataTypes\ShowValueKinds.cs" />
     <Compile Include="Model\DataTypes\Size.cs" />
     <Compile Include="Model\DataTypes\Font.cs" />
@@ -97,6 +98,7 @@
       <DependentUpon>FrmIDcustomDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\PropertyGrid\IDcustomEditor.cs" />
+    <Compile Include="Model\PropertyGrid\NumberSelectEditor.cs" />
     <Compile Include="Model\PropertyGrid\RangeEditor.cs" />
     <Compile Include="Model\PropertyGrid\FrmRangeDialog.cs">
       <SubType>Form</SubType>

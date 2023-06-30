@@ -14,60 +14,69 @@ namespace Scada.Scheme.Model
     [Serializable]
 	public class StaticPolygon :BaseComponent
 	{
+        /// <summary>
+        /// Constructor
+        /// </summary>
 		 public StaticPolygon()
         {
-            Points = new List<Point>();
-            BorderColor = "Gray";
-            BorderWidth = 1;
-            BackgroundColor = "Transparent";
+            BackColor = "black";
             RoundedCorners = false;
-            CornerRadius = 0;
-        }
+            NumberOfSides = 4;
+		    CornerRadius = 0;
+		}
 
-        [DisplayName("Points"), Category(Categories.Appearance)]
-        [Description("Les points qui définissent le polygone.")]
-        public List<Point> Points { get; set; }
-        public string Poly { get; set; }
 
-        [DisplayName("Background color"), Category(Categories.Appearance)]
-        [Description("La couleur de fond du polygone.")]
-        [CM.Editor(typeof(ColorEditor), typeof(UITypeEditor))]
-        public string BackgroundColor { get; set; }
+		/// <summary>
+		/// Get or set the Sides that define the Sides of polygon
+		/// </summary>
+		[DisplayName("Sides"), Category(Categories.Appearance)]
+		[Description("The Sides that define the polygon.")]
+		[CM.Editor(typeof(NumberSelectEditor), typeof(UITypeEditor))]
+		[CM.DefaultValue(4)]
+		public int NumberOfSides { get; set; }
 
-        [DisplayName("Rounded corners"), Category(Categories.Appearance)]
-        [Description("Si vrai, les coins du polygone seront arrondis.")]
+		/// <summary>
+		/// Get or set the corners of the polygon
+		/// </summary>
+		[DisplayName("Rounded corners"), Category(Categories.Appearance)]
+        [Description("If true, the corners of the polygon will be rounded.")]
         [CM.DefaultValue(false)]
         public bool RoundedCorners { get; set; }
 
-        [DisplayName("Corner radius"), Category(Categories.Appearance)]
-        [Description("Le rayon des coins arrondis du polygone.")]
+
+
+		/// <summary>
+		/// Get or set the radius of the rounded corners of the polygon
+		/// </summary>
+		[DisplayName("Corner radius"), Category(Categories.Appearance)]
+        [Description("The radius of the rounded corners of the polygon.")]
         [CM.DefaultValue(0)]
         public int CornerRadius { get; set; }
 
-        public override void LoadFromXml(XmlNode xmlNode)
+		/// <summary>
+		/// Load component configuration from XML node
+		/// </summary>
+		public override void LoadFromXml(XmlNode xmlNode)
         {
             base.LoadFromXml(xmlNode);
-            // Points = xmlNode.GetChildAsPointsList("Points");
-            Poly = xmlNode.GetChildAsString("poly");
-            BackgroundColor = xmlNode.GetChildAsString("BackgroundColor");
+          //  PolyName = xmlNode.GetChildAsString("PolyName");
+            NumberOfSides = xmlNode.GetChildAsInt("NumberOfSides");
+			//BackgroundColor = xmlNode.GetChildAsString("BackgroundColor");
             RoundedCorners = xmlNode.GetChildAsBool("RoundedCorners");
             CornerRadius = xmlNode.GetChildAsInt("CornerRadius");
         }
 
-        public override void SaveToXml(XmlElement xmlElem)
+		/// <summary>
+		/// Save the configuration of a component in an XML node
+		/// </summary>
+		public override void SaveToXml(XmlElement xmlElem)
         {
             base.SaveToXml(xmlElem);
-            xmlElem.AppendElem("Points", Points);
-            xmlElem.AppendElem("Poly", Poly);
-            xmlElem.AppendElem("BackgroundColor", BackgroundColor);
+            xmlElem.AppendElem("NumberOfSides", NumberOfSides);
             xmlElem.AppendElem("RoundedCorners", RoundedCorners);
             xmlElem.AppendElem("CornerRadius", CornerRadius);
         }
 
-        public override string ToString()
-        {
-            //return "Polygone: " + Points.Count + " points";
-            return BuildDisplayName(Poly);
-        }
+       
 	}
 }

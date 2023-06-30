@@ -131,8 +131,9 @@ namespace Scada.Scheme.Editor
                 attrTranslator.TranslateAttrs(typeof(DynamicPolygon));
                 attrTranslator.TranslateAttrs(typeof(UnknownComponent));
                 attrTranslator.TranslateAttrs(typeof(Condition));
-                attrTranslator.TranslateAttrs(typeof(ImageCondition));
-                attrTranslator.TranslateAttrs(typeof(Size));
+                attrTranslator.TranslateAttrs(typeof(PolygonCondition));
+				attrTranslator.TranslateAttrs(typeof(ImageCondition));
+				attrTranslator.TranslateAttrs(typeof(Size));
                 attrTranslator.TranslateAttrs(typeof(ImageListItem));
             }
             catch (Exception ex)
