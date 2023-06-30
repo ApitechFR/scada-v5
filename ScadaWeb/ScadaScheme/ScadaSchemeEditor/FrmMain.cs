@@ -182,7 +182,7 @@ namespace Scada.Scheme.Editor
             lvCompTypes.Items[3].ImageKey = "comp_sp.png";
             lvCompTypes.Items[4].ImageKey = "comp_dp.png";
 
-			lvCompTypes.Items[5].ImageKey = "comp_dp.png";
+			lvCompTypes.Items[5].ImageKey = "comp_sp.png";
 			lvCompTypes.Items[6].ImageKey = "comp_dp.png";
 		}
 
