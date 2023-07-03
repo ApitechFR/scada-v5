@@ -1154,9 +1154,19 @@ namespace Scada.Scheme.Editor
             int highestGroupID = -1;
             foreach (BaseComponent comp in compArray)
             {
-                if(compArray.Length == editor.getGroupedComponents(comp.ID).Count()+1) 
+                if (comp is ComponentGroup)
                 {
-                    highestGroupID = comp.ID;
+                    if (compArray.Length == editor.getGroupedComponents(comp.ID).Count() + 1)
+                    {
+                        highestGroupID = comp.ID;
+                    }
+                }
+                else
+                {
+                    if (compArray.Length == editor.getGroupedComponents(comp.GroupId).Count())
+                    {
+                        highestGroupID = comp.ID;
+                    }
                 }
             }
             return highestGroupID;
@@ -1165,32 +1175,13 @@ namespace Scada.Scheme.Editor
         private void miGroup_Click(object sender, EventArgs e)
         {
             BaseComponent[] selection = editor.GetSelectedComponents();
-            int highestSelectedGroupId = -1;
-            bool countCheck = false;
+            int highestSelectedGroupId = getHighestGroupID(selection);
+
+            bool countCheck = highestSelectedGroupId!=-1;
+
             bool containsComponentGroup = selection.Where(x => x is ComponentGroup).Count()>0;
 
-            foreach (BaseComponent comp in selection)
-            {
-                if (comp is ComponentGroup)
-                {
-                    countCheck = selection.Length == editor.getGroupedComponents(comp.ID).Count() + 1;
-                    if (countCheck)
-                    {
-                        highestSelectedGroupId = comp.ID;
-                        break;
-                    }
-                }
-                else 
-                {
-                    countCheck = selection.Length == editor.getGroupedComponents(comp.GroupId).Count();
-                    if (countCheck)
-                    {
-                        highestSelectedGroupId = comp.GroupId;
-                        break;
-                    }
-                }
-
-            }
+            
             bool isUngroupAction = false;
 
             if (countCheck)

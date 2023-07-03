@@ -1074,7 +1074,7 @@ namespace Scada.Scheme.Editor
                                 newID = SchemeView.GetNextComponentID();
                                 foreach(BaseComponent component in components)
                                 {
-                                    if(component.GroupId == group.ID && !groups.Contains(component)) component.GroupId = newID;
+                                    if(component.GroupId == group.ID) component.GroupId = newID;
                                 }
                                 group.ID = newID;
 
