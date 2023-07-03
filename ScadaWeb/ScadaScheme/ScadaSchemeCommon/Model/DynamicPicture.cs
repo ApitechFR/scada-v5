@@ -53,8 +53,8 @@ namespace Scada.Scheme.Model
             Conditions = new List<ImageCondition>();
             InCnlNum = 0;
             CtrlCnlNum = 0;
-            InCnlNumCustom = "NA (0)";
-            CtrlCnlNumCustom = "NA (0)";
+            InCnlNumCustom = "(0) NA";
+            CtrlCnlNumCustom = "(0) NA";
         }
 
 

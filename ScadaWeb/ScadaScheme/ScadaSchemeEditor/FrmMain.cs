@@ -82,6 +82,8 @@ namespace Scada.Scheme.Editor
             editor.SelectionPropsChanged += Editor_SelectionPropsChanged;
             editor.ClipboardChanged += Editor_ClipboardChanged;
             editor.History.HistoryChanged += History_HistoryChanged;
+
+            SchemeContext.GetInstance().SchemePath = editor.FileName;
         }
 
 
@@ -707,6 +709,7 @@ namespace Scada.Scheme.Editor
                 ScadaUiUtils.ShowInfo(string.Format(AppPhrases.FailedToStartEditor, log.FileName));
                 Close();
             }
+            SchemeContext.GetInstance().SchemePath = editor.FileName;
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
