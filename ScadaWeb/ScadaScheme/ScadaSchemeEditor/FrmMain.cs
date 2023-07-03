@@ -681,18 +681,40 @@ namespace Scada.Scheme.Editor
             treeView1.Sort();
         }
 
+
+        private void removeEmptyGroups()
+        {
+            List<BaseComponent> emptyGroups = new List<BaseComponent>();
+            foreach(BaseComponent group in editor.SchemeView.Components.Values.Where(x=>x is ComponentGroup))
+            {
+                if (editor.getGroupedComponents(group.ID).Count == 0)
+                {
+                    emptyGroups.Add(group);
+
+                }
+            }
+            editor.History.BeginPoint();
+            foreach (BaseComponent group in emptyGroups)
+            {
+                editor.SchemeView.Components.Remove(group.ID);
+                group.OnItemChanged(SchemeChangeTypes.ComponentDeleted, group);
+            }
+            editor.History.EndPoint();
+
+        }
         private void removeEmptyGroups(TreeNodeCollection nodes)
         {
-            for (int i = 0; i < nodes.Count; i++)
+            
+            for (int i = 0; i < nodes.Count;)
             {
                 if (nodes[i].Tag != null && ((BaseComponent)(nodes[i].Tag)).GetType() == new ComponentGroup().GetType() && nodes[i].Nodes.Count == 0)
                 {
                     ((BaseComponent)(nodes[i].Tag)).OnItemChanged(SchemeChangeTypes.ComponentDeleted, (BaseComponent)(nodes[i].Tag));
-                    nodes[i].Remove();
                 }
                 else
                 {
                     removeEmptyGroups(nodes[i].Nodes);
+                    i++;
                 }
             }
         }
@@ -726,7 +748,7 @@ namespace Scada.Scheme.Editor
                 {
                     if (comp is ComponentGroup)
                     {
-                        foreach (BaseComponent child in editor.SchemeView.Components.Values.Where(x => x.GroupId == comp.ID))
+                        foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
                         {
                             this.noTreeviewSelectionEffect = true;
 
@@ -1127,35 +1149,50 @@ namespace Scada.Scheme.Editor
             }
             treeView1.SelectedNodes = newSelectedNodes;
         }
+        private int getHighestGroupID(BaseComponent[] compArray)
+        {
+            int highestGroupID = -1;
+            foreach (BaseComponent comp in compArray)
+            {
+                if(compArray.Length == editor.getGroupedComponents(comp.ID).Count()+1) 
+                {
+                    highestGroupID = comp.ID;
+                }
+            }
+            return highestGroupID;
+        }
 
         private void miGroup_Click(object sender, EventArgs e)
         {
             BaseComponent[] selection = editor.GetSelectedComponents();
-            int[] selectedGroupsID = selection.Where(x=>x is ComponentGroup).Select(x=>x.ID).ToArray();
             int highestSelectedGroupId = -1;
             bool countCheck = false;
-            bool containsComponentGroup = false;
+            bool containsComponentGroup = selection.Where(x => x is ComponentGroup).Count()>0;
 
-
-            foreach (int id in selectedGroupsID)
-            {
-                countCheck = selection.Length == editor.getGroupedComponents(id).Count()+1;
-                if (countCheck)
-                {
-                    highestSelectedGroupId = id;
-                    
-                    break;
-                }
-            }
-            bool isUngroupAction = false;
-            foreach(BaseComponent comp in selection)
+            foreach (BaseComponent comp in selection)
             {
                 if (comp is ComponentGroup)
                 {
-                    containsComponentGroup = true;
-                    break;
+                    countCheck = selection.Length == editor.getGroupedComponents(comp.ID).Count() + 1;
+                    if (countCheck)
+                    {
+                        highestSelectedGroupId = comp.ID;
+                        break;
+                    }
                 }
+                else 
+                {
+                    countCheck = selection.Length == editor.getGroupedComponents(comp.GroupId).Count();
+                    if (countCheck)
+                    {
+                        highestSelectedGroupId = comp.GroupId;
+                        break;
+                    }
+                }
+
             }
+            bool isUngroupAction = false;
+
             if (countCheck)
             {
                 isUngroupAction = true;
@@ -1185,17 +1222,26 @@ namespace Scada.Scheme.Editor
                     {
                         foreach (BaseComponent comp in selection)
                         {
-                            comp.GroupId = -1;
+                            if (comp.GroupId == highestSelectedGroupId)
+                            {
+                                comp.GroupId = -1;
+                                editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
+                            }
                         }
+                        editor.SchemeView.Components.Remove(group.ID);
+                        editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentDeleted, group);
+                        
                     }
                 }
                 else
                 {
                     foreach (BaseComponent comp in selection)
                     {
-                        editor.SchemeView.Components.TryGetValue(comp.GroupId, out BaseComponent currentGroup);
-                        comp.GroupId = currentGroup.GroupId;
-                        editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
+                        
+                            editor.SchemeView.Components.TryGetValue(comp.GroupId, out BaseComponent currentGroup);
+                            comp.GroupId = currentGroup.GroupId;
+                            editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
+                        
                     }
                 }
             }
@@ -1229,6 +1275,7 @@ namespace Scada.Scheme.Editor
 
                 }
             }
+            removeEmptyGroups();
             editor.History.EndPoint();
             updateSelectionInTree();
         }

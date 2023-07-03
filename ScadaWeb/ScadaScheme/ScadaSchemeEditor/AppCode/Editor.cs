@@ -871,6 +871,7 @@ namespace Scada.Scheme.Editor
         public List<BaseComponent> getGroupedComponents(int groupID)
         {
             List<BaseComponent> groupedComponents = new List<BaseComponent>();
+            if (groupID == -1) return groupedComponents;
             foreach(BaseComponent component in SchemeView.Components.Values)
             {
                 if (component.GroupId == groupID) { groupedComponents.Add(component); }
