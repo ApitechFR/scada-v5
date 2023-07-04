@@ -1228,11 +1228,11 @@ namespace Scada.Scheme.Editor
                 {
                     foreach (BaseComponent comp in selection)
                     {
-                        
-                            editor.SchemeView.Components.TryGetValue(comp.GroupId, out BaseComponent currentGroup);
+
+                        editor.SchemeView.Components.TryGetValue(comp.GroupId, out BaseComponent currentGroup);
                             comp.GroupId = currentGroup.GroupId;
                             editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
-                        
+                    
                     }
                 }
             }

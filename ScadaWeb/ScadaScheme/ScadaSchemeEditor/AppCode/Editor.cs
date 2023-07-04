@@ -107,7 +107,7 @@ namespace Scada.Scheme.Editor
                 chars[i] = Abc[rand.Next(abcLen)];
 
             return new string(chars);
-    }
+        }
 
 
         /// <summary>
@@ -526,9 +526,9 @@ namespace Scada.Scheme.Editor
                     .Append("</script>");
 
                 // формирование содержимого веб-страницы
-                string webPageContent = string.Format(webPageTemplate, 
-                    sbCompStyles.ToString(), 
-                    sbCompScripts.ToString(), 
+                string webPageContent = string.Format(webPageTemplate,
+                    sbCompStyles.ToString(),
+                    sbCompScripts.ToString(),
                     sbEditorScript.ToString());
 
                 // запись файла веб-страницы
@@ -791,7 +791,7 @@ namespace Scada.Scheme.Editor
                             foreach (BaseComponent selComponent in selComponents)
                             {
                                 if (moved)
-                                    selComponent.Location = 
+                                    selComponent.Location =
                                         new Point(selComponent.Location.X + dx, selComponent.Location.Y + dy);
 
                                 if (resized)
@@ -872,12 +872,12 @@ namespace Scada.Scheme.Editor
         {
             List<BaseComponent> groupedComponents = new List<BaseComponent>();
             if (groupID == -1) return groupedComponents;
-            foreach(BaseComponent component in SchemeView.Components.Values)
+            foreach (BaseComponent component in SchemeView.Components.Values)
             {
                 if (component.GroupId == groupID) { groupedComponents.Add(component); }
             }
-            
-            foreach(BaseComponent componentGroup in SchemeView.Components.Values.Where(x=>x.GroupId == groupID).DefaultIfEmpty().ToList()) 
+
+            foreach (BaseComponent componentGroup in SchemeView.Components.Values.Where(x => x.GroupId == groupID).DefaultIfEmpty().ToList())
             {
                 if (componentGroup == null) break;
                 groupedComponents.AddRange(getGroupedComponents(componentGroup.ID));
@@ -895,9 +895,9 @@ namespace Scada.Scheme.Editor
                 return comp;
             }
 
-            BaseComponent group = SchemeView.Components.Values.Where(x=>x.ID == groupID).FirstOrDefault();
+            BaseComponent group = SchemeView.Components.Values.Where(x => x.ID == groupID).FirstOrDefault();
             if (group == null) return comp;
-            while(group.GroupId != -1)
+            while (group.GroupId != -1)
             {
                 group = getHihghestGroup(group);
             }
@@ -955,7 +955,7 @@ namespace Scada.Scheme.Editor
                     "Error deselecting all scheme components");
             }
         }
-        
+
         /// <summary>
         /// Выполнить действие по выбору компонента
         /// </summary>
@@ -972,7 +972,7 @@ namespace Scada.Scheme.Editor
                         DeselectAll();
                         foreach (BaseComponent comp in groupedComponents)
                         {
-                            SelectComponent(comp.ID, true);                            
+                            SelectComponent(comp.ID, true);
                         }
                         SelectComponent(group.ID, true);
                         break;
@@ -1065,16 +1065,16 @@ namespace Scada.Scheme.Editor
                             int newID;
 
                             List<BaseComponent> components = new List<BaseComponent>();
-                            clipboard.ForEach(comp=> { components.Add(comp.Clone()); });
+                            clipboard.ForEach(comp => { components.Add(comp.Clone()); });
 
                             List<BaseComponent> groups = components.Where(gr => gr is ComponentGroup).ToList();
 
-                            foreach (BaseComponent group in groups) 
+                            foreach (BaseComponent group in groups)
                             {
                                 newID = SchemeView.GetNextComponentID();
-                                foreach(BaseComponent component in components)
+                                foreach (BaseComponent component in components)
                                 {
-                                    if(component.GroupId == group.ID) component.GroupId = newID;
+                                    if (component.GroupId == group.ID) component.GroupId = newID;
                                 }
                                 group.ID = newID;
 
@@ -1145,14 +1145,14 @@ namespace Scada.Scheme.Editor
             }
             groupId = getHihghestGroup(components[0]).ID;
             List<BaseComponent> groupList = getGroupedComponents(groupId);
-            if (components.Length != groupList.Count+1)
+            if (components.Length != groupList.Count + 1)
             {
                 groupId = -1;
                 return false;
             }
             foreach (BaseComponent comp in components)
             {
-                if(comp is ComponentGroup group)
+                if (comp is ComponentGroup group)
                 {
                     if (comp.ID == groupId) continue;
                 }
