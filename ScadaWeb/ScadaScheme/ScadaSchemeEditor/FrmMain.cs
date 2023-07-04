@@ -1149,56 +1149,58 @@ namespace Scada.Scheme.Editor
             }
             treeView1.SelectedNodes = newSelectedNodes;
         }
-        private int getHighestGroupID(BaseComponent[] compArray)
+        private int getHighestGroupID(BaseComponent[] compArray,out bool countCheck)
         {
             int highestGroupID = -1;
+            int diff = int.MaxValue;
             foreach (BaseComponent comp in compArray)
             {
                 if (comp is ComponentGroup)
                 {
-                    if (compArray.Length == editor.getGroupedComponents(comp.ID).Count() + 1)
+                    if ( Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() + 1) < diff)
                     {
+                        diff = Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() + 1);
                         highestGroupID = comp.ID;
                     }
                 }
                 else
                 {
-                    if (compArray.Length == editor.getGroupedComponents(comp.GroupId).Count())
+                    if (Math.Abs(compArray.Length - editor.getGroupedComponents(comp.GroupId).Count()) < diff)
                     {
-                        highestGroupID = comp.ID;
+                        diff = Math.Abs(compArray.Length - editor.getGroupedComponents(comp.GroupId).Count());
+                        highestGroupID = comp.GroupId;
                     }
                 }
             }
+            countCheck = diff == 0;
             return highestGroupID;
         }
 
         private void miGroup_Click(object sender, EventArgs e)
         {
             BaseComponent[] selection = editor.GetSelectedComponents();
-            int highestSelectedGroupId = getHighestGroupID(selection);
+            int highestSelectedGroupId = getHighestGroupID(selection,out bool countCheck);
 
-            bool countCheck = highestSelectedGroupId!=-1;
 
             bool containsComponentGroup = selection.Where(x => x is ComponentGroup).Count()>0;
 
             
-            bool isUngroupAction = false;
+            bool allSelectedAreTheSameGroup = false;
 
-            if (countCheck)
-            {
-                isUngroupAction = true;
-                foreach (BaseComponent comp in editor.getGroupedComponents(highestSelectedGroupId))
+            
+                allSelectedAreTheSameGroup = true;
+                foreach (BaseComponent comp in selection)
                 {
-                    if (!selection.Contains(comp))
+                    if (!editor.getGroupedComponents(highestSelectedGroupId).Contains(comp))
                     {
-                        isUngroupAction = false;
+                        allSelectedAreTheSameGroup = false;
                         break;
                     }
                 }
-            }
+            
 
             editor.History.BeginPoint();
-            if (isUngroupAction)
+            if (allSelectedAreTheSameGroup && countCheck)
             {
                 if (containsComponentGroup)
                 {
@@ -1238,6 +1240,8 @@ namespace Scada.Scheme.Editor
             }
             else
             {
+
+
                 int minX = int.MaxValue;
                 int minY = int.MaxValue;
 
@@ -1247,23 +1251,35 @@ namespace Scada.Scheme.Editor
                 newGroup.SchemeView = editor.SchemeView;
                 newGroup.ItemChanged += Scheme_ItemChanged;
 
-                foreach (BaseComponent c in selection)
+                if (!allSelectedAreTheSameGroup)
                 {
-                    if (c.GroupId == -1)c.GroupId = newGroup.ID;
-
-                    if (c.Location.X < minX) minX = c.Location.X;
-                    if (c.Location.Y < minY) minY = c.Location.Y;
+                    MessageBox.Show("Cannot group component from different groups", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 }
-                Point location = new Point(minX, minY);
-                newGroup.Location = location;
-                editor.SchemeView.Components[newGroup.ID] = newGroup;
-                editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
-
-                foreach (BaseComponent c in selection)
+                else
                 {
-                    editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+                    foreach (BaseComponent c in selection)
+                    {
+                        editor.SchemeView.Components.TryGetValue(c.GroupId, out BaseComponent cGroup);
 
+                        if (c.Location.X < minX) minX = c.Location.X;
+                        if (c.Location.Y < minY) minY = c.Location.Y;
+
+                        if (selection.Contains(cGroup)) continue;
+
+                        c.GroupId = newGroup.ID;
+                    }
+                    newGroup.GroupId = highestSelectedGroupId;
+                    Point location = new Point(minX, minY);
+                    newGroup.Location = location;
+                    editor.SchemeView.Components[newGroup.ID] = newGroup;
+                    editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, newGroup);
+
+                    foreach (BaseComponent c in selection)
+                    {
+                        editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+
+                    }
                 }
             }
             removeEmptyGroups();
