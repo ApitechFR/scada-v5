@@ -485,10 +485,9 @@ scada.scheme.EditableScheme.prototype._processSelection = function (selCompIDs) 
     var divScheme = this._getSchemeDiv();
 
     for (var selCompID of selCompIDs) {
+        divScheme.find("#comp" + selCompID).parent(".comp-wrapper").addClass("selected");
         if (idSet.has(selCompID)) {
             idSet.delete(selCompID);
-        } else {
-            divScheme.find("#comp" + selCompID).parent(".comp-wrapper").addClass("selected");
         }
     }
 

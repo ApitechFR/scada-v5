@@ -642,14 +642,7 @@ namespace Scada.Scheme.Editor
         {
             TreeNode tn = null;
             bool isGroup = component.GetType() == new ComponentGroup().GetType();
-            if (isGroup)
-            {
-                tn = new TreeNode(string.Format("Group {0} ({1}) {2}", component.Name, component.ID, component.GroupId));
-            }
-            else
-            {
-                tn = new TreeNode(string.Format("{0} ({1})  {2}", component.Name, component.GetType().Name, component.GroupId));
-            }
+            tn = new TreeNode(component.ToString());
 
             tn.Tag = component;
 
@@ -771,16 +764,7 @@ namespace Scada.Scheme.Editor
                 return;
             }
             tn.Tag = component;
-
-            bool isGroup = component.GetType() == new ComponentGroup().GetType();
-            if (isGroup)
-            {
-                tn.Text = string.Format("Group {0} ({1}) {2}", component.Name, component.ID, component.GroupId);
-            }
-            else
-            {
-                tn.Text = string.Format("{0} ({1}) {2}", component.Name, component.GetType().Name, component.GroupId);
-            }
+            tn.Text = component.ToString();
             tn.Remove();
             if (component.GroupId == -1)
             {
@@ -1230,11 +1214,11 @@ namespace Scada.Scheme.Editor
                 {
                     foreach (BaseComponent comp in selection)
                     {
-                        
-                            editor.SchemeView.Components.TryGetValue(comp.GroupId, out BaseComponent currentGroup);
+
+                        editor.SchemeView.Components.TryGetValue(comp.GroupId, out BaseComponent currentGroup);
                             comp.GroupId = currentGroup.GroupId;
                             editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
-                        
+                    
                     }
                 }
             }

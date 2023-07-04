@@ -92,12 +92,15 @@ namespace Scada.Scheme.Editor
                     if (bParent)
                     {
                         TreeNode n = bottomnode;
-                        while (n != uppernode.Parent)
+                        if (uppernode != null)
                         {
-                            if (!selectedNodes.Contains(n))
-                                myQueue.Enqueue(n);
+                            while (n != uppernode.Parent)
+                            {
+                                if (!selectedNodes.Contains(n))
+                                    myQueue.Enqueue(n);
 
-                            n = n.Parent;
+                                n = n.Parent;
+                            }
                         }
                     }
                     else
