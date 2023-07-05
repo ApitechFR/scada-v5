@@ -1168,19 +1168,34 @@ namespace Scada.Scheme.Editor
 
             bool containsComponentGroup = selection.Where(x => x is ComponentGroup).Count()>0;
 
-            
-            bool allSelectedAreTheSameGroup = false;
+
+            bool allSelectedAreTheSameGroup = true;
 
             
+            foreach (BaseComponent comp in selection)
+            {
+                if (!editor.getGroupedComponents(highestSelectedGroupId).Contains(comp))
+                {
+                    allSelectedAreTheSameGroup = false;
+                    break;
+                }
+            }
+            if (!allSelectedAreTheSameGroup)
+            {
                 allSelectedAreTheSameGroup = true;
                 foreach (BaseComponent comp in selection)
                 {
-                    if (!editor.getGroupedComponents(highestSelectedGroupId).Contains(comp))
-                    {
-                        allSelectedAreTheSameGroup = false;
-                        break;
-                    }
+                    if (comp.GroupId == -1) continue;
+
+                    BaseComponent group = selection.Where(x=>x.ID == comp.GroupId).FirstOrDefault();
+                    if(group!=null) continue;
+
+                    allSelectedAreTheSameGroup = false;
+                    break;
                 }
+                highestSelectedGroupId = -1;
+            }
+
             
 
             editor.History.BeginPoint();
@@ -1234,7 +1249,9 @@ namespace Scada.Scheme.Editor
 
                 newGroup.SchemeView = editor.SchemeView;
                 newGroup.ItemChanged += Scheme_ItemChanged;
-
+                int zIndex = editor.SchemeView.Components.Values.Select(x=>x.ZIndex).OrderByDescending(x=>x).FirstOrDefault()+1;
+                newGroup.ZIndex = zIndex;
+                zIndex *= 100;
                 if (!allSelectedAreTheSameGroup)
                 {
                     MessageBox.Show("Cannot group component from different groups", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -1242,10 +1259,11 @@ namespace Scada.Scheme.Editor
                 }
                 else
                 {
-                    foreach (BaseComponent c in selection)
+                    foreach (BaseComponent c in selection.OrderBy(x=>x.ZIndex))
                     {
                         editor.SchemeView.Components.TryGetValue(c.GroupId, out BaseComponent cGroup);
-
+                        c.ZIndex = zIndex;
+                        zIndex++;
                         if (c.Location.X < minX) minX = c.Location.X;
                         if (c.Location.Y < minY) minY = c.Location.Y;
 
@@ -1349,7 +1367,7 @@ namespace Scada.Scheme.Editor
 
                             if (e.ChangedItem.Label == "X") location.X += valueDiff;
                             else if (e.ChangedItem.Label == "Y") location.Y += valueDiff;
-                            else component.ZIndex += valueDiff;
+                            else component.ZIndex += valueDiff*100;
 
                             component.Location = location;
 
