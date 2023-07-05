@@ -281,7 +281,8 @@ scada.scheme.Dragging.prototype.continueDragging = function (pageX, pageY) {
             var elem = this.draggedElem.eq(0);
             var startSize = elem.data("start-size");
             if (!startSize) {
-                elem.data("start-size", component.renderer.getSize(component));
+                startSize = component.renderer.getSize(component);
+                elem.data("start-size", startSize);
             }
             var newWidth = startSize.width;
             var newHeight = startSize.height;
