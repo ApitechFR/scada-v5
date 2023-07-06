@@ -244,7 +244,8 @@ scada.scheme.Dragging.prototype.startDragging = function (captCompJqObj, selComp
 
 // Continue dragging
 scada.scheme.Dragging.prototype.continueDragging = function (pageX, pageY) {
-    if ($(".comp-wrapper.selected .comp").lenght !== this.draggedElem.length) {
+    // handle selection change while moving
+    if ($(".comp-wrapper.selected .comp").length !== this.draggedElem.length) {
         this.draggedElem = $(".comp-wrapper.selected .comp");
     }
     var DragModes = scada.scheme.DragModes;
