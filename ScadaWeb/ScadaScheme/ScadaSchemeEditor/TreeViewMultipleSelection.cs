@@ -77,7 +77,10 @@ namespace Scada.Scheme.Editor
 
                     TreeNode uppernode = firstNode;
                     TreeNode bottomnode = e.Node;
-
+                    if(uppernode == null)
+                    {
+                        return;
+                    }
                     bool bParent = e.Node.Parent == firstNode;
                     if (!bParent)
                     {
@@ -92,15 +95,12 @@ namespace Scada.Scheme.Editor
                     if (bParent)
                     {
                         TreeNode n = bottomnode;
-                        if (uppernode != null)
+                        while (n != uppernode.Parent)
                         {
-                            while (n != uppernode.Parent)
-                            {
-                                if (!selectedNodes.Contains(n))
-                                    myQueue.Enqueue(n);
+                            if (!selectedNodes.Contains(n))
+                                myQueue.Enqueue(n);
 
-                                n = n.Parent;
-                            }
+                            n = n.Parent;
                         }
                     }
                     else
