@@ -6,16 +6,25 @@ using System.Windows.Forms;
 
 namespace Scada.Scheme.Editor
 {
+    /// <summary>
+    /// A treeview that allows for the selection of multiple rows
+    /// </summary>
     public class TreeViewMultipleSelection : TreeView
     {
         protected ArrayList selectedNodes;
         protected TreeNode lastNode, firstNode;
 
+        /// <summary>
+        /// Initialze the class
+        /// </summary>
         public TreeViewMultipleSelection()
         {
             selectedNodes = new ArrayList();
         }
 
+        /// <summary>
+        /// get or set the selected nodes in the treeview
+        /// </summary>
         public ArrayList SelectedNodes
         {
             get
@@ -155,6 +164,9 @@ namespace Scada.Scheme.Editor
             }
             base.OnAfterSelect(e);
         }
+        /// <summary>
+        /// Highlights the selected nodes
+        /// </summary>
         protected void paintSelectedNodes()
         {
             foreach (TreeNode n in selectedNodes)
@@ -163,7 +175,9 @@ namespace Scada.Scheme.Editor
                 n.ForeColor = SystemColors.HighlightText;
             }
         }
-
+        /// <summary>
+        /// Removes unnecessary highlights from nodes
+        /// </summary>
         protected void removePaintFromNodes()
         {
             if (selectedNodes.Count == 0) return;
