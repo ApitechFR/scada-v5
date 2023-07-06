@@ -109,7 +109,7 @@ namespace Scada.Scheme.Model.PropertyGrid
             if (dataGridView1.SelectedRows.Count != 0)
             {
                 _numValue = int.Parse(dataGridView1.SelectedRows[0].Cells[0].Value.ToString());
-                _value = $"{dataGridView1.SelectedRows[0].Cells[1].Value.ToString()} ({_numValue})";
+                _value = $"({_numValue}) {dataGridView1.SelectedRows[0].Cells[1].Value.ToString()}";
             }
             else _value = "NA (0)";
             DialogResult = DialogResult.OK;
