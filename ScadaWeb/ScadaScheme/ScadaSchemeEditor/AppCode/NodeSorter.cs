@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Scada.Scheme.Model;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,9 +19,19 @@ namespace Scada.Scheme.Editor.AppCode
             TreeNode otherNode = otherObj as TreeNode;
             if(thisNode.Tag != null && otherNode.Tag != null)
             {
-                return thisNode.Text.CompareTo(otherNode.Text);
+                Type thisComponentType = ((BaseComponent)(thisNode.Tag)).GetType();
+                Type otherComponentType = ((BaseComponent)(otherNode.Tag)).GetType();
+                Type componentGroupType = new ComponentGroup().GetType();
+                if (thisComponentType == componentGroupType && otherComponentType != componentGroupType)
+                {
+                    return -1;
+                }
+                if(otherComponentType == componentGroupType && thisComponentType != componentGroupType)
+                {
+                    return 1;
+                }
             }
-            return -thisNode.Text.CompareTo(otherNode.Text);
+            return thisNode.Text.CompareTo(otherNode.Text);
         }
     }
 }

@@ -72,7 +72,8 @@ namespace Scada.Scheme
                 { typeof(StaticText).FullName, typeof(StaticText) },
                 { typeof(DynamicText).FullName, typeof(DynamicText) },
                 { typeof(StaticPicture).FullName, typeof(StaticPicture) },
-                { typeof(DynamicPicture).FullName, typeof(DynamicPicture) }
+                { typeof(DynamicPicture).FullName, typeof(DynamicPicture) },
+                { typeof(ComponentGroup).FullName, typeof(ComponentGroup) }
             };
 
             instance = new CompManager();
@@ -151,7 +152,7 @@ namespace Scada.Scheme
         private bool TypeIsStrandard(Type compType)
         {
             return compType == typeof(StaticText) || compType == typeof(DynamicText) || 
-                compType == typeof(StaticPicture) || compType == typeof(DynamicPicture);
+                compType == typeof(StaticPicture) || compType == typeof(DynamicPicture) || compType == typeof(ComponentGroup);
         }
 
 
@@ -287,6 +288,8 @@ namespace Scada.Scheme
                             return new StaticPicture();
                         else if (localName == "dynamicpicture")
                             return new DynamicPicture();
+                        else if (localName == "componentgroup")
+                            return new ComponentGroup();
                         else
                             errMsg = string.Format(SchemePhrases.UnknownComponent, nodeName);
                     }
