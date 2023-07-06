@@ -1141,9 +1141,9 @@ namespace Scada.Scheme.Editor
             {
                 if (comp is ComponentGroup)
                 {
-                    if ( Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() + 1) < diff)
+                    if ( Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() - 1) < diff)
                     {
-                        diff = Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() + 1);
+                        diff = Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() - 1);
                         highestGroupID = comp.ID;
                     }
                 }
@@ -1176,6 +1176,10 @@ namespace Scada.Scheme.Editor
             {
                 if (!editor.getGroupedComponents(highestSelectedGroupId).Contains(comp))
                 {
+                    if(comp is ComponentGroup)
+                    {
+                        if (comp.ID == highestSelectedGroupId) continue;
+                    }
                     allSelectedAreTheSameGroup = false;
                     break;
                 }
@@ -1235,6 +1239,12 @@ namespace Scada.Scheme.Editor
                             editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
                     
                     }
+
+                    editor.SchemeView.Components.TryGetValue(highestSelectedGroupId, out BaseComponent group);
+                    editor.SchemeView.Components.Remove(highestSelectedGroupId);
+
+                    editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentDeleted, group);
+
                 }
             }
             else
