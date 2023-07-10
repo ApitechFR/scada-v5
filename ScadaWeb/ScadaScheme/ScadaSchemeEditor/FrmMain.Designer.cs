@@ -41,6 +41,7 @@ namespace Scada.Scheme.Editor
 			System.Windows.Forms.ListViewItem listViewItem5 = new System.Windows.Forms.ListViewItem("Dynamic Picture", "(none)");
 			System.Windows.Forms.ListViewItem listViewItem6 = new System.Windows.Forms.ListViewItem("Static Polygon", "(none)");
 			System.Windows.Forms.ListViewItem listViewItem7 = new System.Windows.Forms.ListViewItem("Dynamic Polygon", "(none)");
+			System.Windows.Forms.ListViewItem listViewItem8 = new System.Windows.Forms.ListViewItem("Static Svg Shape ", "(none)");
 
 
 			this.toolStrip = new System.Windows.Forms.ToolStrip();
@@ -342,6 +343,9 @@ namespace Scada.Scheme.Editor
 			listViewItem7.Group = listViewGroup1;
 			listViewItem7.IndentCount = 1;
 			listViewItem7.Tag = "Scada.Scheme.Model.DynamicPolygon";
+			listViewItem8.Group = listViewGroup1;
+			listViewItem8.IndentCount = 1;
+			listViewItem8.Tag = "Scada.Scheme.Model.StaticSvgShape";
 
 			this.lvCompTypes.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
             listViewItem1,
@@ -351,6 +355,7 @@ namespace Scada.Scheme.Editor
             listViewItem5,
 			listViewItem6,
 			listViewItem7,
+			listViewItem8,
 			});
 			this.lvCompTypes.LabelWrap = false;
 			this.lvCompTypes.Location = new System.Drawing.Point(4, 4);

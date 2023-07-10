@@ -129,6 +129,7 @@ namespace Scada.Scheme.Editor
                 attrTranslator.TranslateAttrs(typeof(DynamicPicture));
                 attrTranslator.TranslateAttrs(typeof(StaticPolygon));
                 attrTranslator.TranslateAttrs(typeof(DynamicPolygon));
+                attrTranslator.TranslateAttrs(typeof(StaticSvgShape));
                 attrTranslator.TranslateAttrs(typeof(UnknownComponent));
                 attrTranslator.TranslateAttrs(typeof(Condition));
                 attrTranslator.TranslateAttrs(typeof(PolygonCondition));
@@ -184,6 +185,7 @@ namespace Scada.Scheme.Editor
 
 			lvCompTypes.Items[5].ImageKey = "comp_sp.png";
 			lvCompTypes.Items[6].ImageKey = "comp_dp.png";
+			lvCompTypes.Items[7].ImageKey = "comp_dt.png";
 		}
 
         /// <summary>

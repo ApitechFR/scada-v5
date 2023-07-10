@@ -91,6 +91,12 @@
     <Compile Include="Model\PropertyGrid\CategoryAttribute.cs" />
     <Compile Include="Model\PropertyGrid\ComponentConverter.cs" />
     <Compile Include="Model\PropertyGrid\ComponentEditor.cs" />
+    <Compile Include="Model\PropertyGrid\FrmCustomShape.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\PropertyGrid\FrmCustomShape.Designer.cs">
+      <DependentUpon>FrmCustomShape.cs</DependentUpon>
+    </Compile>
     <Compile Include="Model\PropertyGrid\FrmIDcustomDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,11 +151,13 @@
     <Compile Include="Model\PropertyGrid\ImageListItem.cs" />
     <Compile Include="Model\PropertyGrid\PointConverter.cs" />
     <Compile Include="Model\PropertyGrid\SizeConverter.cs" />
+    <Compile Include="Model\PropertyGrid\SvgShapeSelectEditor.cs" />
     <Compile Include="Model\PropertyGrid\UniqueStringConverter.cs" />
     <Compile Include="Model\SchemeChangeTypes.cs" />
     <Compile Include="Model\SchemeDocument.cs" />
     <Compile Include="Model\StaticPicture.cs" />
     <Compile Include="Model\StaticPolygon.cs" />
+    <Compile Include="Model\StaticSvgShape.cs" />
     <Compile Include="Model\StaticText.cs" />
     <Compile Include="Model\DataTypes\VerticalAlignments.cs" />
     <Compile Include="Model\UnknownComponent.cs" />
@@ -173,6 +181,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Model\PropertyGrid\FrmCollectionDialog.resx">
       <DependentUpon>FrmCollectionDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\PropertyGrid\FrmCustomShape.resx">
+      <DependentUpon>FrmCustomShape.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Model\PropertyGrid\FrmFontDialog.resx">
       <DependentUpon>FrmFontDialog.cs</DependentUpon>

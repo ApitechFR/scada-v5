@@ -75,7 +75,8 @@ namespace Scada.Scheme
                 { typeof(DynamicPicture).FullName, typeof(DynamicPicture) },
                 {typeof(StaticPolygon).FullName, typeof(StaticPolygon) },
                 {typeof(DynamicPolygon).FullName, typeof(DynamicPolygon) },
-            };
+				{typeof(StaticSvgShape).FullName, typeof(StaticSvgShape) },
+			};
 
             instance = new CompManager();
         }
@@ -294,6 +295,8 @@ namespace Scada.Scheme
                             return new StaticPolygon();
                         else if (localName == "dynamicpolygon")
                             return new DynamicPolygon();
+                        else if(localName == "staticsvgshape")
+                            return new StaticSvgShape();
                         else
                             errMsg = string.Format(SchemePhrases.UnknownComponent, nodeName);
                     }
