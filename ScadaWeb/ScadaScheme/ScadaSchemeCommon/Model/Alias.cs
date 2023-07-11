@@ -12,7 +12,7 @@ namespace Scada.Scheme.Model
     {
         Couleur,
         Nombre,
-        Texte,
+        Text,
         ChannelID
     }
     public class Alias
@@ -20,7 +20,7 @@ namespace Scada.Scheme.Model
         private Dictionary<AliasTypeEnum, Type> TypeDictionary = new Dictionary<AliasTypeEnum, Type>{
             {AliasTypeEnum.Couleur, typeof(string)},
             {AliasTypeEnum.Nombre, typeof(int) },
-            {AliasTypeEnum.Texte, typeof(string) },
+            {AliasTypeEnum.Text, typeof(string) },
             {AliasTypeEnum.ChannelID, typeof(int) },
         };
         private Dictionary<AliasTypeEnum, Func<object, bool>> PredicateDictionnary = 
@@ -46,6 +46,7 @@ namespace Scada.Scheme.Model
 
         public string Name { get; set; }
         public AliasTypeEnum AliasType { get; set; }
+        public bool isCnlLinked { get; set; }
         public object Value { get { return Value; } set { 
                 //if(value.GetType() == TypeDictionary[AliasType])
                 //{
@@ -57,7 +58,9 @@ namespace Scada.Scheme.Model
             } }
         public Alias()
         {
-
+            Name = "";
+            AliasType = AliasTypeEnum.Text;
+            isCnlLinked = false;
         }
     }
 }
