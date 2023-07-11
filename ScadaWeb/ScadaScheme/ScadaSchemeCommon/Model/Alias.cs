@@ -15,7 +15,7 @@ namespace Scada.Scheme.Model
         Texte,
         ChannelID
     }
-    internal class Alias
+    public class Alias
     {
         private Dictionary<AliasTypeEnum, Type> TypeDictionary = new Dictionary<AliasTypeEnum, Type>{
             {AliasTypeEnum.Couleur, typeof(string)},
