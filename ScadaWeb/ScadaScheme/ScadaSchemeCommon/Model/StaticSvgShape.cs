@@ -13,7 +13,7 @@ namespace Scada.Scheme.Model
 	{
 		public StaticSvgShape()
 		{
-			ShapeType = "circle";
+			ShapeType = "Circle";
 			BackColor = "black";
 		}
 

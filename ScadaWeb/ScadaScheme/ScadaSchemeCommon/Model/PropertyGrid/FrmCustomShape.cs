@@ -26,11 +26,11 @@ namespace Scada.Scheme.Model.PropertyGrid
 			//this.btnSave.Enabled = false;
 		}
 
-		private void btnSave_Click(object sender, EventArgs e)
+		private void BtnSave_Click(object sender, EventArgs e)
 		{
 			//if (ValidateSvgCode(textBox1.Text));
 			string svg = richTextBox1.Text;
-			HighlightXmlErrors(richTextBox1 as RichTextBox, svg);
+			if (HighlightXmlErrors(richTextBox1 as RichTextBox, svg)) ;
 			
 
 		}
@@ -80,8 +80,10 @@ namespace Scada.Scheme.Model.PropertyGrid
 
 
 
-		private void HighlightXmlErrors(RichTextBox richTextBox, string xml)
+		private bool HighlightXmlErrors(RichTextBox richTextBox, string xml)
 		{
+			bool hasErrors = false;
+
 			XmlReaderSettings settings = new XmlReaderSettings();
 			settings.ConformanceLevel = ConformanceLevel.Document;
 			settings.ValidationType = ValidationType.Schema;
@@ -95,6 +97,7 @@ namespace Scada.Scheme.Model.PropertyGrid
 					{
 						HighlightError(richTextBox, errorIndex, args.Message.Length);
 						richTextBox.Refresh();
+						hasErrors = true;	
 					}
 				}
 			};
@@ -106,6 +109,7 @@ namespace Scada.Scheme.Model.PropertyGrid
 					while (reader.Read()) { /* Just read */ }
 				}
 			}
+			return hasErrors;
 		}
 
 		//private void richTextBox1_TextChanged(object sender, EventArgs e)

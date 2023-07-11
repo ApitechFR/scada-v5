@@ -23,22 +23,23 @@ namespace Scada.Scheme.Model.PropertyGrid
 		{
 			return UITypeEditorEditStyle.DropDown;
 		}
+       
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="provider"></param>
-		/// <param name="value"></param>
-		/// <returns></returns>
-		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="provider"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
 		{
 			IWindowsFormsEditorService editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
 
 			if (editorService != null)
 			{
 				ListBox listBox = new ListBox();
-				string[] svgShapes = { "Polygon", "Triangle", "Rectangle", "Circle", "Custom ..." };
+				string[] svgShapes = { "Polygon", "Triangle", "Rectangle", "Circle", "Line", "Polyline", "Custom ..." };
 
 				foreach (string shape in svgShapes)
 				{
