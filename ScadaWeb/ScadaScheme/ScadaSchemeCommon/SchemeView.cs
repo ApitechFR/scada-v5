@@ -28,6 +28,7 @@ using Scada.Scheme.Model;
 using Scada.Scheme.Template;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Xml;
 
@@ -244,6 +245,33 @@ namespace Scada.Scheme
                 }
             }
 
+            // load groups
+            if(rootElem.SelectSingleNode("Groups") is XmlNode groupsNode)
+            {
+                HashSet<string> errNodeNames = new HashSet<string>(); 
+                CompManager compManager = CompManager.GetInstance();
+                LoadErrors.AddRange(compManager.LoadErrors);
+
+                foreach( XmlNode grpNode in groupsNode.ChildNodes)
+                {
+                    BaseComponent group = compManager.CreateComponent(grpNode, out string errMsg);
+                    if (group == null)
+                    {
+                        group = new UnknownComponent { XmlNode = grpNode };
+                        if (errNodeNames.Add(grpNode.Name))
+                            LoadErrors.Add(errMsg);
+                    }
+
+                    group.SchemeView = this;
+                    group.LoadFromXml(grpNode);
+                    Components[group.ID] = group;
+                    AddInCnlNums(group.GetInCnlNums(), inCnlOffset);
+                    AddCtrlCnlNums(group.GetCtrlCnlNums(), ctrlCnlOffset);
+
+                    if(group.ID > maxComponentID) maxComponentID = group.ID;
+                }
+            }
+
             // load scheme images
             if (rootElem.SelectSingleNode("Images") is XmlNode imagesNode)
             {
@@ -307,7 +335,9 @@ namespace Scada.Scheme
                 CompManager compManager = CompManager.GetInstance();
                 HashSet<string> prefixes = new HashSet<string>();
                 XmlElement componentsElem = xmlDoc.CreateElement("Components");
+                XmlElement groupsElem = xmlDoc.CreateElement("Groups");
                 rootElem.AppendChild(componentsElem);
+                rootElem.AppendChild(groupsElem);
 
                 foreach (BaseComponent component in Components.Values)
                 {
@@ -332,7 +362,9 @@ namespace Scada.Scheme
                             xmlDoc.CreateElement(compType.Name) /*стандартный компонент*/ :
                             xmlDoc.CreateElement(compLibSpec.XmlPrefix, compType.Name, compLibSpec.XmlNs);
 
-                        componentsElem.AppendChild(componentElem);
+                        if (compType == typeof(ComponentGroup)) groupsElem.AppendChild(componentElem);
+                        else componentsElem.AppendChild(componentElem);
+
                         component.SaveToXml(componentElem);
                     }
                 }
