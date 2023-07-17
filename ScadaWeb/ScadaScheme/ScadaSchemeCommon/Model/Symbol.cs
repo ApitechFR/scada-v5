@@ -11,6 +11,9 @@ namespace Scada.Scheme.Model
     /// </summary>
     public class Symbol : ComponentGroup
     {
+        /// <summary>
+        /// Dictionnary of Alias/cnlId
+        /// </summary>
         public Dictionary<Alias, int> AliasList { get; set; }
         public Guid SymbolId {get;}
         public DateTime LastModificationDate { get; set;}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExCSS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +18,7 @@ namespace Scada.Scheme.Model
     }
     public class Alias
     {
-        private Dictionary<AliasTypeEnum, Type> TypeDictionary = new Dictionary<AliasTypeEnum, Type>{
+        public Dictionary<AliasTypeEnum, Type> TypeDictionary = new Dictionary<AliasTypeEnum, Type>{
             {AliasTypeEnum.Couleur, typeof(string)},
             {AliasTypeEnum.Nombre, typeof(int) },
             {AliasTypeEnum.Text, typeof(string) },
@@ -42,17 +43,32 @@ namespace Scada.Scheme.Model
                 }
                 return false;
             }},
+            {AliasTypeEnum.Text, (object textValue)=>{
+                bool isValid = false;
+                try
+                {
+                    isValid = textValue.ToString() == (string)textValue;
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                    return false;
+                }
+                return isValid;
+            }},
         };
 
         public string Name { get; set; }
         public AliasTypeEnum AliasType { get; set; }
         public bool isCnlLinked { get; set; }
-        public object Value { get { return Value; } set { 
+
+        private object _value;
+        public object Value { get { return _value; } set { 
                 //if(value.GetType() == TypeDictionary[AliasType])
                 //{
-                    if (PredicateDictionnary[AliasType](value))
+                    if (PredicateDictionnary.Keys.Contains(AliasType) && PredicateDictionnary[AliasType](value))
                     {
-                        Value = value;
+                    _value = value;
                     }
                 //}
             } }
@@ -61,6 +77,10 @@ namespace Scada.Scheme.Model
             Name = "";
             AliasType = AliasTypeEnum.Text;
             isCnlLinked = false;
+        }
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

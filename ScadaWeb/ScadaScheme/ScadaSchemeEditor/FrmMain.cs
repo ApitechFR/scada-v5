@@ -23,6 +23,7 @@
  * Modified : 2019
  */
 
+using Scada.Scheme.DataTransfer;
 using Scada.Scheme.Editor.Properties;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
@@ -1383,11 +1384,36 @@ namespace Scada.Scheme.Editor
             schCompChanging = true;
 
             if (cbSchComp.SelectedItem is BaseComponent component)
+            {
                 editor.SelectComponent(component.ID);
+                if (component.GroupId != -1)
+                {
+                    TreeNode SymbolNode = findNode(treeView1.Nodes, n => 
+                        {
+                            BaseComponent bc = (BaseComponent)n.Tag;
+                            return (bc.ID == component.GroupId && bc.GetType() == typeof(Symbol));
+                        }
+                    );
+                    if(SymbolNode != null)
+                    {
+                        toolStripButton1.Enabled = true;
+                        toolStripButton1.ToolTipText = "Link to a symbol property";
+                    }
+                    else
+                    {
+                        // todo : set to false
+                        toolStripButton1.Enabled = true;
+                        toolStripButton1.ToolTipText = "The component has to be a symbol child";
+                    }
+                }
+            }
             else
+            { 
                 editor.DeselectAll();
+            }
 
-            schCompChanging = false;
+
+                schCompChanging = false;
         }
 
         private void propertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
@@ -1432,6 +1458,48 @@ namespace Scada.Scheme.Editor
                 }
 
                 editor.History.EndPoint();
+            }
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            //todo: remove tis part from here
+            Alias al = new Alias();
+            al.Name = "alias Test";
+            al.AliasType = AliasTypeEnum.Text;
+            al.Value = "Louis";
+            Debug.WriteLine(al.Value.ToString());
+            al.isCnlLinked = false;
+
+            Symbol s = new Symbol();
+            s.Name = "okok";
+            s.AliasList.Add(al, -1);
+            //to here
+
+
+            BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
+            GridItem selectedProperty = propertyGrid.SelectedGridItem;
+            List<Alias> availableAlias = new List<Alias>();
+            TreeNode SymbolNode = findNode(treeView1.Nodes, n =>
+                {
+                    BaseComponent bc = (BaseComponent)n.Tag;
+                    return (bc.ID == selectedComponent.GroupId && bc.GetType() == typeof(Symbol));
+                }
+            );
+            //todo: uncomment
+            //if(SymbolNode == null)
+            //{
+            //    return;
+            //}
+            
+            //todo: uncomment first line and delete second one
+            //Symbol parentSymbol = SymbolNode.Tag as Symbol;
+            Symbol parentSymbol = s;
+
+            availableAlias = parentSymbol.AliasList.Keys.Where(a => a.TypeDictionary[a.AliasType] == selectedProperty.Value.GetType()).ToList();
+            if (new FrmAliasSelection(selectedProperty.Label, availableAlias).ShowDialog() == DialogResult.OK)
+            {
+                return;
             }
         }
     }
