@@ -1460,8 +1460,7 @@ namespace Scada.Scheme.Editor
                 editor.History.EndPoint();
             }
         }
-
-        private void toolStripButton1_Click(object sender, EventArgs e)
+            private void toolStripButton1_Click(object sender, EventArgs e)
         {
             //todo: remove tis part from here
             Alias al = new Alias();
@@ -1486,19 +1485,23 @@ namespace Scada.Scheme.Editor
                     return (bc.ID == selectedComponent.GroupId && bc.GetType() == typeof(Symbol));
                 }
             );
-            //todo: uncomment
-            //if(SymbolNode == null)
-            //{
-            //    return;
-            //}
+            /*todo: uncomment from here
+            if(SymbolNode == null)
+            {
+                return;
+            }
+            to here*/
             
             //todo: uncomment first line and delete second one
             //Symbol parentSymbol = SymbolNode.Tag as Symbol;
             Symbol parentSymbol = s;
 
             availableAlias = parentSymbol.AliasList.Keys.Where(a => a.AliasType == selectedProperty.PropertyDescriptor.PropertyType).ToList();
-            if (new FrmAliasSelection(selectedProperty.Label, availableAlias).ShowDialog() == DialogResult.OK)
+            FrmAliasSelection frmAliasSelection = new FrmAliasSelection(selectedProperty.Label, availableAlias);
+            if (frmAliasSelection.ShowDialog() == DialogResult.OK)
             {
+                selectedComponent.AliasDictionnary.Add(selectedProperty.Label, frmAliasSelection.selectedAlias);
+                //todo: refresh property table and highlight alias-related values
                 return;
             }
         }

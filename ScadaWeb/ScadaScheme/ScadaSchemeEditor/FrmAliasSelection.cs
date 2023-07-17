@@ -1,4 +1,5 @@
 ﻿using Scada.Scheme.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -7,6 +8,7 @@ namespace Scada.Scheme.Editor
 {
     public partial class FrmAliasSelection : Form
     {
+        public Alias selectedAlias { get; private set; }
         public FrmAliasSelection(string PropertyName, List<Alias> availableAlias)
         {
             InitializeComponent();
@@ -26,6 +28,11 @@ namespace Scada.Scheme.Editor
         private void button2_Click(object sender, System.EventArgs e)
         {
             DialogResult = DialogResult.OK;
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            selectedAlias = (Alias)comboBox1.SelectedItem;
         }
     }
 }
