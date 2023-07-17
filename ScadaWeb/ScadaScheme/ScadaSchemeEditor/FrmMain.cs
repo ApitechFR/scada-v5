@@ -1466,7 +1466,7 @@ namespace Scada.Scheme.Editor
             //todo: remove tis part from here
             Alias al = new Alias();
             al.Name = "alias Test";
-            al.AliasType = AliasTypeEnum.Text;
+            al.AliasType = typeof(string);
             al.Value = "Louis";
             Debug.WriteLine(al.Value.ToString());
             al.isCnlLinked = false;
@@ -1496,7 +1496,7 @@ namespace Scada.Scheme.Editor
             //Symbol parentSymbol = SymbolNode.Tag as Symbol;
             Symbol parentSymbol = s;
 
-            availableAlias = parentSymbol.AliasList.Keys.Where(a => a.TypeDictionary[a.AliasType] == selectedProperty.Value.GetType()).ToList();
+            availableAlias = parentSymbol.AliasList.Keys.Where(a => a.AliasType == selectedProperty.PropertyDescriptor.PropertyType).ToList();
             if (new FrmAliasSelection(selectedProperty.Label, availableAlias).ShowDialog() == DialogResult.OK)
             {
                 return;
