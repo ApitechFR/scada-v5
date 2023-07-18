@@ -80,8 +80,6 @@
     <Content Include="plugins\SchSvgComp\css\svgcomp.css" />
     <Content Include="plugins\SchSvgComp\js\svgcomprender.js" />
     <None Include="Resources\svg.png" />
-    <Content Include="Ressources\button.png" />
-    <Content Include="Ressources\svg.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -131,6 +129,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
