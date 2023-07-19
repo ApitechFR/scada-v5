@@ -314,7 +314,7 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Сохранить схему.
         /// </summary>
-        private bool SaveScheme(bool saveAs)
+        private bool SaveScheme(bool saveAs,bool asSymbol = false)
         {
             bool result = false;
             bool refrPropGrid = propertyGrid.SelectedObject is SchemeDocument document &&
@@ -323,7 +323,9 @@ namespace Scada.Scheme.Editor
 
             if (string.IsNullOrEmpty(editor.FileName))
             {
-                sfdScheme.FileName = Editor.DefSchemeFileName;
+                sfdScheme.FileName = !asSymbol ? Editor.DefSchemeFileName : Editor.DefSymbolFileName;
+                sfdScheme.RestoreDirectory = false;
+                if (asSymbol) sfdScheme.InitialDirectory = Path.GetFullPath(appData.AppDirs.SymbolDir);
                 saveAs = true;
             }
             else
@@ -339,7 +341,7 @@ namespace Scada.Scheme.Editor
             if (!string.IsNullOrEmpty(fileName))
             {
                 // сохранение схемы
-                if (editor.SaveSchemeToFile(fileName, out string errMsg))
+                if (editor.SaveSchemeToFile(fileName, out string errMsg,asSymbol))
                 {
                     result = true;
                 }
@@ -356,6 +358,8 @@ namespace Scada.Scheme.Editor
 
             return result;
         }
+
+
 
         /// <summary>
         /// Подтвердить возможность закрыть схему.
@@ -1433,6 +1437,17 @@ namespace Scada.Scheme.Editor
 
                 editor.History.EndPoint();
             }
+        }
+
+        private void miSaveSymbol_ButtonClick(object sender, EventArgs e)
+        {
+            SaveScheme(saveAs: false, asSymbol: true);
+        }
+
+        private void miSaveSymbolAs_Click(object sender, EventArgs e)
+        {
+            SaveScheme(saveAs: true, asSymbol: true);
+
         }
     }
 

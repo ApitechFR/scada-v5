@@ -43,6 +43,7 @@ namespace Scada.Scheme.Editor
             LangDir = "";
             LogDir = "";
             WebDir = "";
+            SymbolDir = "";
         }
 
 
@@ -71,6 +72,10 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public string WebDir { get; set; }
 
+        /// <summary>
+        /// Get or set the directory where the symbols are stored
+        /// </summary>
+        public string SymbolDir { get; set; }
 
         /// <summary>
         /// Инициализировать директории на основе директории исполняемого файла приложения
@@ -79,9 +84,16 @@ namespace Scada.Scheme.Editor
         {
             ExeDir = ScadaUtils.NormalDir(exeDir);
             ConfigDir = ExeDir + "Config" + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(ConfigDir);
             LangDir = ExeDir + "Lang" + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(LangDir);
             LogDir = ExeDir + "Log" + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(LogDir);
             WebDir = ExeDir + "Web" + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(WebDir);
+            SymbolDir = ExeDir + "Symbols" + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(SymbolDir);
+
         }
     }
 }

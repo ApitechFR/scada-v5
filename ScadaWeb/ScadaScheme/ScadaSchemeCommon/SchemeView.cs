@@ -30,6 +30,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml;
 
 namespace Scada.Scheme
@@ -313,7 +315,7 @@ namespace Scada.Scheme
         /// <summary>
         /// Сохранить схему в файле.
         /// </summary>
-        public bool SaveToFile(string fileName, out string errMsg)
+        public bool SaveToFile(string fileName ,out string errMsg, bool asSymbol = false)
         {
             try
             {
@@ -322,7 +324,10 @@ namespace Scada.Scheme
                 xmlDoc.AppendChild(xmlDecl);
 
                 // запись заголовка представления
-                XmlElement rootElem = xmlDoc.CreateElement("SchemeView");
+                XmlElement rootElem = asSymbol ? xmlDoc.CreateElement("SchemeView") : xmlDoc.CreateElement("SchemeSymbol");
+
+
+
                 rootElem.SetAttribute("title", SchemeDoc.Title);
                 xmlDoc.AppendChild(rootElem);
 

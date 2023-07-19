@@ -58,6 +58,10 @@ namespace Scada.Scheme.Editor
         /// Имя файла схемы по умолчанию
         /// </summary>
         public const string DefSchemeFileName = "NewScheme.sch";
+        /// <summary>
+        /// Default file name of symbols
+        /// </summary>
+        public const string DefSymbolFileName = "NewSymbol.sch";
 
         private readonly CompManager compManager;  // менеджер компонентов
         private readonly Log log;                  // журнал приложения
@@ -567,8 +571,18 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Записать схему в файл
         /// </summary>
-        public bool SaveSchemeToFile(string fileName, out string errMsg)
+        public bool SaveSchemeToFile(string fileName, out string errMsg, bool asSymbol = false)
         {
+            Symbol symbol = compManager.CreateComponent(typeof(Symbol).FullName) as Symbol;
+            if (asSymbol)
+            {
+
+                foreach (BaseComponent comp in SchemeView.Components.Values.Where(x => x.GroupId == -1))
+                {
+                    comp.GroupId = symbol.ID;
+                }
+            }
+
             FileName = fileName;
 
             if (SchemeView == null)
@@ -582,7 +596,7 @@ namespace Scada.Scheme.Editor
 
                 lock (SchemeView.SyncRoot)
                 {
-                    saveOK = SchemeView.SaveToFile(fileName, out errMsg);
+                    saveOK = SchemeView.SaveToFile(fileName, out errMsg, asSymbol);
                 }
 
                 if (saveOK)
