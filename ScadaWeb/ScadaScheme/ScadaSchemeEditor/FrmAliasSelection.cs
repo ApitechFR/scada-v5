@@ -9,7 +9,7 @@ namespace Scada.Scheme.Editor
     public partial class FrmAliasSelection : Form
     {
         public Alias selectedAlias { get; private set; }
-        public FrmAliasSelection(string PropertyName, List<Alias> availableAlias)
+        public FrmAliasSelection(string PropertyName, List<Alias> availableAlias, int defaultSelectionIndex=-1)
         {
             InitializeComponent();
             label2.Text = PropertyName;
@@ -17,6 +17,12 @@ namespace Scada.Scheme.Editor
             foreach (Alias alias in availableAlias)
             {
                 comboBox1.Items.Add(alias);
+            }
+            selectedAlias = defaultSelectionIndex>=0 ? availableAlias[defaultSelectionIndex]:null;
+            comboBox1.SelectedIndex = defaultSelectionIndex;
+            if(selectedAlias == null)
+            {
+                button2.Enabled = false;
             }
         }
 
@@ -33,6 +39,7 @@ namespace Scada.Scheme.Editor
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             selectedAlias = (Alias)comboBox1.SelectedItem;
+            button2.Enabled = selectedAlias != null;
         }
     }
 }

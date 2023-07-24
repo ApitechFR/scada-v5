@@ -1478,7 +1478,7 @@ namespace Scada.Scheme.Editor
 
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
             GridItem selectedProperty = propertyGrid.SelectedGridItem;
-            List<Alias> availableAlias = new List<Alias>();
+            List<Alias> availableAliases = new List<Alias>();
             TreeNode SymbolNode = findNode(treeView1.Nodes, n =>
                 {
                     BaseComponent bc = (BaseComponent)n.Tag;
@@ -1496,15 +1496,33 @@ namespace Scada.Scheme.Editor
             //Symbol parentSymbol = SymbolNode.Tag as Symbol;
             Symbol parentSymbol = s;
 
-            availableAlias = parentSymbol.AliasList.Keys.Where(a => a.AliasType == selectedProperty.PropertyDescriptor.PropertyType).ToList();
-            FrmAliasSelection frmAliasSelection = new FrmAliasSelection(selectedProperty.Label, availableAlias);
+            availableAliases = parentSymbol.AliasList.Keys.Where(a => a.AliasType == selectedProperty.PropertyDescriptor.PropertyType).ToList();
+            string selectedPropertyName = selectedProperty.PropertyDescriptor.Name;
+            int defaultSelectionIndex = -1;
+            if (selectedComponent.AliasesDictionnary.ContainsKey(selectedPropertyName))
+            {
+                defaultSelectionIndex = availableAliases.FindIndex(a=>a.Name == selectedComponent.AliasesDictionnary[selectedPropertyName].Name);
+            }
+            FrmAliasSelection frmAliasSelection = new FrmAliasSelection(selectedProperty.Label, availableAliases, defaultSelectionIndex);
             if (frmAliasSelection.ShowDialog() == DialogResult.OK)
             {
-                selectedComponent.AliasDictionnary.Add(selectedProperty.Label, frmAliasSelection.selectedAlias);
-                //todo: refresh property table and highlight alias-related values
+                //find component property to update
+                var componentProperty = selectedComponent.GetType().GetProperty(selectedPropertyName);
+                if(componentProperty == null)
+                {
+                    return;
+                }
+                //update mapping between compoennt properties and alias
+                selectedComponent.AliasesDictionnary.Remove(selectedPropertyName);
+                selectedComponent.AliasesDictionnary.Add(selectedPropertyName, frmAliasSelection.selectedAlias);
+
+                //todo: highlight alias-related values in propertyGrid
+                //addattribute n'a pas l'air de fonctionner
+                TypeDescriptor.AddAttributes(componentProperty, new Attribute[] { new Scada.Scheme.Model.PropertyGrid.DisplayNameAttribute("test nouveau nom") });
+                componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
+
                 return;
             }
         }
     }
-
 }

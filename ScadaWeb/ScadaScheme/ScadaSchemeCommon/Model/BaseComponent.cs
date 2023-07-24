@@ -79,13 +79,16 @@ namespace Scada.Scheme.Model
             ZIndex = 0;
             GroupId = -1;
 
-            AliasDictionnary = new Dictionary<string, Alias>();
+            AliasesDictionnary = new Dictionary<string, Alias>();
         }
 
         /// <summary>
         /// List of component_parameter_name/associated_alias pairs
         /// </summary>
-        public Dictionary<string, Alias> AliasDictionnary { get; set; }
+        #region Attributes
+        [CM.Browsable(false)]
+        #endregion
+        public Dictionary<string, Alias> AliasesDictionnary { get; set; }
 
         /// <summary>
         /// Получить или установить цвет фона.
