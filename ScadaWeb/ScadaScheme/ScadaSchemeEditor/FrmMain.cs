@@ -36,6 +36,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using Utils;
@@ -1517,12 +1518,134 @@ namespace Scada.Scheme.Editor
                 selectedComponent.AliasesDictionnary.Add(selectedPropertyName, frmAliasSelection.selectedAlias);
 
                 //todo: highlight alias-related values in propertyGrid
-                //addattribute n'a pas l'air de fonctionner
-                TypeDescriptor.AddAttributes(componentProperty, new Attribute[] { new Scada.Scheme.Model.PropertyGrid.DisplayNameAttribute("test nouveau nom") });
-                componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
+                PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(selectedComponent);
+                PropertyDescriptor agePropertyDescriptor = properties[selectedPropertyName];
+                if (agePropertyDescriptor != null)
+                {
+                    // Update DisplayName Property of selected row in propertyGrid
+                    PropertyDescriptor customAgePropertyDescriptor = new CustomPropertyDescriptor(agePropertyDescriptor, "--> "+selectedProperty.Label);
+                    ICustomTypeDescriptor customTypeDescriptor = TypeDescriptor.GetProvider(selectedComponent).GetTypeDescriptor(selectedComponent);
+                    PropertyDescriptorCollection newProperties = new PropertyDescriptorCollection(new PropertyDescriptor[] { customAgePropertyDescriptor });
+                    foreach (PropertyDescriptor prop in properties)
+                    {
+                        if (prop != agePropertyDescriptor)
+                        {
+                            newProperties.Add(prop);
+                        }
+                    }
 
+                    // Update display of propertyGrid
+                    propertyGrid.SelectedObject = new CustomTypeDescriptor(customTypeDescriptor, newProperties);
+                }
+
+                //Copy alias value in component parameter
+                componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
                 return;
             }
+        }
+    }
+    public class CustomPropertyDescriptor : PropertyDescriptor
+    {
+        private PropertyDescriptor basePropertyDescriptor;
+        private string displayName;
+
+        public CustomPropertyDescriptor(PropertyDescriptor basePropertyDescriptor, string displayName)
+            : base(basePropertyDescriptor)
+        {
+            this.basePropertyDescriptor = basePropertyDescriptor;
+            this.displayName = displayName;
+        }
+
+        public override string DisplayName
+        {
+            get { return displayName; }
+        }
+
+        public override Type ComponentType => basePropertyDescriptor.ComponentType;
+
+        public override bool IsReadOnly => basePropertyDescriptor.IsReadOnly;
+
+        public override Type PropertyType => basePropertyDescriptor.PropertyType;
+
+        public override bool CanResetValue(object component) => basePropertyDescriptor.CanResetValue(component);
+
+        public override object GetValue(object component) => basePropertyDescriptor.GetValue(component);
+
+        public override void ResetValue(object component) => basePropertyDescriptor.ResetValue(component);
+
+        public override void SetValue(object component, object value) => basePropertyDescriptor.SetValue(component, value);
+
+        public override bool ShouldSerializeValue(object component) => basePropertyDescriptor.ShouldSerializeValue(component);
+}
+    public class CustomTypeDescriptor : ICustomTypeDescriptor
+    {
+        private ICustomTypeDescriptor baseTypeDescriptor;
+        private PropertyDescriptorCollection properties;
+
+        public CustomTypeDescriptor(ICustomTypeDescriptor baseTypeDescriptor, PropertyDescriptorCollection properties)
+        {
+            this.baseTypeDescriptor = baseTypeDescriptor;
+            this.properties = properties;
+        }
+
+        public AttributeCollection GetAttributes()
+        {
+            return baseTypeDescriptor.GetAttributes();
+        }
+
+        public string GetClassName()
+        {
+            return baseTypeDescriptor.GetClassName();
+        }
+
+        public string GetComponentName()
+        {
+            return baseTypeDescriptor.GetComponentName();
+        }
+
+        public TypeConverter GetConverter()
+        {
+            return baseTypeDescriptor.GetConverter();
+        }
+
+        public EventDescriptor GetDefaultEvent()
+        {
+            return baseTypeDescriptor.GetDefaultEvent();
+        }
+
+        public PropertyDescriptor GetDefaultProperty()
+        {
+            return baseTypeDescriptor.GetDefaultProperty();
+        }
+
+        public object GetEditor(Type editorBaseType)
+        {
+            return baseTypeDescriptor.GetEditor(editorBaseType);
+        }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes)
+        {
+            return baseTypeDescriptor.GetEvents(attributes);
+        }
+
+        public EventDescriptorCollection GetEvents()
+        {
+            return baseTypeDescriptor.GetEvents();
+        }
+
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
+        {
+            return properties;
+        }
+
+        public PropertyDescriptorCollection GetProperties()
+        {
+            return properties;
+        }
+
+        public object GetPropertyOwner(PropertyDescriptor pd)
+        {
+            return baseTypeDescriptor.GetPropertyOwner(pd);
         }
     }
 }
