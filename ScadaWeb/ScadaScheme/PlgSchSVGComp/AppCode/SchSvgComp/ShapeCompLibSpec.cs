@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace Scada.Web.Plugins.SchSvgComp
 {
-	public class SvgCompLibSpec : CompLibSpec
+	public class ShapeCompLibSpec : CompLibSpec
 	{
 		public override string XmlPrefix => "svg";
 		public override string XmlNs => "urn:rapidscada:scheme:svg";
-		public override string GroupHeader => "Svg Shape";
+		public override string GroupHeader => "Shape";
 
 		public override List<string> Styles
 		{
@@ -36,12 +36,14 @@ namespace Scada.Web.Plugins.SchSvgComp
 		{
 			return new List<CompItem>()
 			{
-				new CompItem(Resources.svg,typeof(SvgShape))
+				new CompItem(Resources.svg,typeof(SvgShape)),
+				new CompItem(Resources.polygon, typeof(Polygon)),
+				new CompItem(Resources.svg,	typeof(CustomSVG)),
 			};
 		}
 		protected override CompFactory CreateCompFactory()
 		{
-			return new SvgCompFactory();
+			return new ShapeCompFactory();
 		}
 	}
 

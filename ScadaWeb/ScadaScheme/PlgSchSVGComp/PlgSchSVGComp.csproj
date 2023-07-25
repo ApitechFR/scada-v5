@@ -80,12 +80,16 @@
     <Content Include="plugins\SchSvgComp\css\svgcomp.css" />
     <Content Include="plugins\SchSvgComp\js\svgcomprender.js" />
     <None Include="Resources\svg.png" />
+    <None Include="Resources\polygon.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppCode\PlgSchSVGCompSpec.cs" />
     <Compile Include="AppCode\SchSvgComp\BoundProperties.cs" />
-    <Compile Include="AppCode\SchSvgComp\ColorCondition.cs" />
+    <Compile Include="AppCode\SchSvgComp\CustomSVG.cs" />
+    <Compile Include="AppCode\SchSvgComp\PropertyGrid\Conditions\ColorCondition.cs" />
+    <Compile Include="AppCode\SchSvgComp\Polygon.cs" />
+    <Compile Include="AppCode\SchSvgComp\PropertyGrid\Conditions\PolygonCondition.cs" />
     <Compile Include="AppCode\SchSvgComp\PropertyGrid\Forms\FrmCustomShape.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,9 +100,11 @@
     <Compile Include="AppCode\SchSvgComp\PopupSize.cs" />
     <Compile Include="AppCode\SchSvgComp\PopupSizeConverter.cs" />
     <Compile Include="AppCode\SchSvgComp\PopupWidth.cs" />
+    <Compile Include="AppCode\SchSvgComp\PropertyGrid\NumberSelectEditor.cs" />
     <Compile Include="AppCode\SchSvgComp\PropertyGrid\SvgShapeSelectEditor.cs" />
-    <Compile Include="AppCode\SchSvgComp\SvgCompFactory.cs" />
-    <Compile Include="AppCode\SchSvgComp\SvgCompLibSpec.cs" />
+    <Compile Include="AppCode\SchSvgComp\ShapeCompFactory.cs" />
+    <Compile Include="AppCode\SchSvgComp\ShapeCompLibSpec.cs" />
+    <Compile Include="AppCode\SchSvgComp\PropertyGrid\SVGEditor.cs" />
     <Compile Include="AppCode\SchSvgComp\SvgShape.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

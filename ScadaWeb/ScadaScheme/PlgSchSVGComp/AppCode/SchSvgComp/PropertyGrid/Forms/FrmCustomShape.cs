@@ -17,134 +17,118 @@ namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
 	/// </summary>
 	public partial class FrmCustomShape : Form
 	{
-		/// <summary>
-		/// 
-		/// </summary>
+		public string ShapeType { get; set; }
+		public bool Saved { get; private set; }
+
 		public FrmCustomShape()
 		{
 			InitializeComponent();
-			//this.btnSave.Enabled = false;
+		}
+
+		public FrmCustomShape(string existingShapeType) : this()
+		{
+			ShapeType = existingShapeType;
+			richTextBox1.Text = ShapeType;
+			Saved = false;
 		}
 
 		private void BtnSave_Click(object sender, EventArgs e)
 		{
-			//if (ValidateSvgCode(textBox1.Text));
 			string svg = richTextBox1.Text;
-			if (HighlightXmlErrors(richTextBox1 as RichTextBox, svg)) ;
-			
-
+			if (ValidateAndHighlightErrors(svg))
+			{
+				MessageBox.Show("The SVG code contains errors. Please correct them before saving.");
+			}
+			else
+			{
+				ShapeType = svg;
+				Saved = true;
+				this.DialogResult = DialogResult.OK;
+				this.Close();
+			}
 		}
+
 		private void btnImport_Click(object sender, EventArgs e)
 		{
-			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "SVG files (*.svg)|*.svg|All files (*.*)|*.*";
-			if (openFileDialog.ShowDialog() == DialogResult.OK)
+			using (OpenFileDialog openFileDialog = new OpenFileDialog())
 			{
-				txtFilePath.Text = openFileDialog.FileName;
-				try
+				openFileDialog.Filter = "SVG files (*.svg)|*.svg|All files (*.*)|*.*";
+				if (openFileDialog.ShowDialog() == DialogResult.OK)
 				{
-					string svgCode = File.ReadAllText(openFileDialog.FileName);
-					if (ValidateSvgCode(svgCode))
+					txtFilePath.Text = openFileDialog.FileName;
+					try
 					{
-						//textBox1.Text = svgCode;
+						string svgCode = File.ReadAllText(openFileDialog.FileName);
 						richTextBox1.Text = svgCode;
 					}
-				}
-				catch
-				{
-					MessageBox.Show("An error occurred while reading the file.");
+					catch
+					{
+						MessageBox.Show("An error occurred while reading the file.");
+					}
 				}
 			}
-
-		}
-		private void HighlightError(RichTextBox richTextBox, int startIndex, int length)
-		{
-			// Save the current state of the selection
-			var selectionStartOriginal = richTextBox.SelectionStart;
-			var selectionLengthOriginal = richTextBox.SelectionLength;
-			var selectionColorOriginal = richTextBox.SelectionBackColor;
-
-			// Select the part of the text to highlight
-			richTextBox.SelectionStart = startIndex;
-			richTextBox.SelectionLength = length;
-
-			// Change the background color of the selection
-			richTextBox.SelectionBackColor = Color.Red;
-
-			
-			// Restore the original state of the selection
-			richTextBox.SelectionStart = selectionStartOriginal;
-			richTextBox.SelectionLength = selectionLengthOriginal;
-			richTextBox.SelectionBackColor = selectionColorOriginal;
 		}
 
-
-
-		private bool HighlightXmlErrors(RichTextBox richTextBox, string xml)
+		private bool ValidateAndHighlightErrors(string svgCode)
 		{
 			bool hasErrors = false;
-
-			XmlReaderSettings settings = new XmlReaderSettings();
-			settings.ConformanceLevel = ConformanceLevel.Document;
-			settings.ValidationType = ValidationType.Schema;
+			XmlReaderSettings settings = new XmlReaderSettings
+			{
+				ConformanceLevel = ConformanceLevel.Document,
+				ValidationType = ValidationType.Schema
+			};
 
 			settings.ValidationEventHandler += (object sender, ValidationEventArgs args) =>
 			{
 				if (args.Severity == XmlSeverityType.Error)
 				{
-					int errorIndex = xml.IndexOf(args.Message, StringComparison.InvariantCulture);
+					int errorIndex = svgCode.IndexOf(args.Message, StringComparison.InvariantCulture);
 					if (errorIndex >= 0)
 					{
-						HighlightError(richTextBox, errorIndex, args.Message.Length);
-						richTextBox.Refresh();
-						hasErrors = true;	
+						HighlightError(richTextBox1, errorIndex, args.Message.Length);
+						richTextBox1.Refresh();
+						hasErrors = true;
 					}
 				}
 			};
 
-			using (StringReader stringReader = new StringReader(xml))
+			using (StringReader stringReader = new StringReader(svgCode))
 			{
 				using (XmlReader reader = XmlReader.Create(stringReader, settings))
 				{
-					while (reader.Read()) { /* Just read */ }
+					try
+					{
+						while (reader.Read()) { /* Just read */ }
+					}
+					catch (XmlException)
+					{
+						hasErrors = true;
+					}
 				}
 			}
+
 			return hasErrors;
 		}
 
-		//private void richTextBox1_TextChanged(object sender, EventArgs e)
-		//{
-		//	string svg = richTextBox1.Text;
-		//	HighlightXmlErrors(richTextBox1 as RichTextBox, svg);
-
-		//}
-
-		//private void textBox1_TextChanged(object sender, EventArgs e)
-		//{
-		//	ValidateSvgCode(textBox1.Text);
-		//}
-
-		private bool ValidateSvgCode(string svgCode)
+		private void HighlightError(RichTextBox richTextBox, int startIndex, int length)
 		{
-			XmlDocument xmlDocument = new XmlDocument();
-			try
-			{
-				xmlDocument.LoadXml(svgCode);
-				if (xmlDocument.DocumentElement.Name == "svg")
-				{
-					//btnSave.Enabled = true;
-					return true;
-				}
-			}
-			catch (XmlException)
-			{
-				// No action needed
-			}
+			int selectionStartOriginal = richTextBox.SelectionStart;
+			int selectionLengthOriginal = richTextBox.SelectionLength;
+			Color selectionColorOriginal = richTextBox.SelectionBackColor;
 
-			//btnSave.Enabled = false;
-			return false;
+			richTextBox.SelectionStart = startIndex;
+			richTextBox.SelectionLength = length;
+			richTextBox.SelectionBackColor = Color.Red;
+
+			richTextBox.SelectionStart = selectionStartOriginal;
+			richTextBox.SelectionLength = selectionLengthOriginal;
+			richTextBox.SelectionBackColor = selectionColorOriginal;
 		}
 
-		
+		private void richTextBox1_TextChanged(object sender, EventArgs e)
+		{
+			ValidateAndHighlightErrors(richTextBox1.Text);
+		}
+
 	}
 }

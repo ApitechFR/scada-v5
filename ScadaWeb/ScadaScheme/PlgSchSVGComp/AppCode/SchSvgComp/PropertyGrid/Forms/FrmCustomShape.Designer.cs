@@ -117,6 +117,8 @@
 			this.richTextBox1.Size = new System.Drawing.Size(402, 224);
 			this.richTextBox1.TabIndex = 8;
 			this.richTextBox1.Text = "";
+			this.richTextBox1.TextChanged += richTextBox1_TextChanged;
+
 			// 
 			// FrmCustomShape
 			// 

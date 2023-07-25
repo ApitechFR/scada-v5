@@ -2,6 +2,7 @@
 using Scada.Web.Plugins.SchSvgComp;
 using System.IO;
 using Scada.Scheme.Model.PropertyGrid;
+using Scada.Web.Plugins.SchSvgComp.PropertyGrid;
 
 namespace Scada.Web.Plugins
 {
@@ -13,11 +14,11 @@ namespace Scada.Web.Plugins
 		public override string Version =>  PlgVersion; 
 
 		
-		public override string Name => "SVG Scheme Components";
+		public override string Name => "Shape Scheme Components";
 			
-		public override string Descr => "A set of SVG components for display on schemes.";
+		public override string Descr => "A set of Shape components for display on schemes.";
 
-		CompLibSpec ISchemeComp.CompLibSpec => new SvgCompLibSpec(); 
+		CompLibSpec ISchemeComp.CompLibSpec => new ShapeCompLibSpec(); 
 		
 
 		public override void Init()
@@ -31,6 +32,7 @@ namespace Scada.Web.Plugins
                 }
 				AttrTranslator attrTranslator = new AttrTranslator();
 				attrTranslator.TranslateAttrs(typeof(ColorCondition));
+				attrTranslator.TranslateAttrs(typeof(PolygonCondition));
 				attrTranslator.TranslateAttrs(typeof(PopupSize));
 
 
