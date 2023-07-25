@@ -317,6 +317,6 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 /********** Renderer Map **********/
 
 // Add components to the renderer map
-scada.scheme.rendererMap.set("Scada.Web.Plugins.SchSvgComp.SvgShape", new scada.scheme.SvgShapeRenderer);
-scada.scheme.rendererMap.set("Scada.Web.Plugins.SchSvgComp.CustomSVG", new scada.scheme.CustomSVGRenderer);
-scada.scheme.rendererMap.set("Scada.Web.Plugins.SchSvgComp.Polygon", new scada.scheme.PolygonRenderer);
+scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.SvgShape", new scada.scheme.SvgShapeRenderer);
+scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.CustomSVG", new scada.scheme.CustomSVGRenderer);
+scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.Polygon", new scada.scheme.PolygonRenderer);

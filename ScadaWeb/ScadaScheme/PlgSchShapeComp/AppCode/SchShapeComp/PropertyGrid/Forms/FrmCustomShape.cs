@@ -1,20 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.IO;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Schema;
 
-namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
+namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
-	/// <summary>
-	/// 
-	/// </summary>
+
 	public partial class FrmCustomShape : Form
 	{
 		public string ShapeType { get; set; }
@@ -48,7 +41,7 @@ namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
 			}
 		}
 
-		private void btnImport_Click(object sender, EventArgs e)
+		private void BtnImport_Click(object sender, EventArgs e)
 		{
 			using (OpenFileDialog openFileDialog = new OpenFileDialog())
 			{
@@ -125,7 +118,7 @@ namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
 			richTextBox.SelectionBackColor = selectionColorOriginal;
 		}
 
-		private void richTextBox1_TextChanged(object sender, EventArgs e)
+		private void RichTextBox1_TextChanged(object sender, EventArgs e)
 		{
 			ValidateAndHighlightErrors(richTextBox1.Text);
 		}

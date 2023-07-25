@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 
 
-namespace Scada.Web.Plugins.SchSvgComp
+namespace Scada.Web.Plugins.SchShapeComp
 {
 	internal class PopupSizeConverter : TypeConverter
 	{

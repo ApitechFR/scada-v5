@@ -5,7 +5,7 @@ using System.Drawing.Design;
 using System.Xml;
 using CM = System.ComponentModel;
 
-namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
+namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
 	[Serializable]
 	public class ColorCondition : Condition

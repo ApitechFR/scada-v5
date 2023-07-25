@@ -1,4 +1,4 @@
-﻿namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
+﻿namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
 	partial class FrmCustomShape
 	{
@@ -59,7 +59,7 @@
 			this.btnImport.TabIndex = 1;
 			this.btnImport.Text = "...";
 			this.btnImport.UseVisualStyleBackColor = true;
-			this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
+			this.btnImport.Click += new System.EventHandler(this.BtnImport_Click);
 			// 
 			// btnCancel
 			// 
@@ -117,7 +117,7 @@
 			this.richTextBox1.Size = new System.Drawing.Size(402, 224);
 			this.richTextBox1.TabIndex = 8;
 			this.richTextBox1.Text = "";
-			this.richTextBox1.TextChanged += richTextBox1_TextChanged;
+			this.richTextBox1.TextChanged += RichTextBox1_TextChanged;
 
 			// 
 			// FrmCustomShape

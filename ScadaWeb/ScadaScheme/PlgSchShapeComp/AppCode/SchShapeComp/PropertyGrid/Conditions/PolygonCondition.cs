@@ -1,14 +1,11 @@
 ﻿using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
 using System;
-using System.Collections.Generic;
 using System.Drawing.Design;
-using System.Linq;
-using System.Web;
 using System.Xml;
 using CM = System.ComponentModel;
 
-namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
+namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
 	/// <summary>
 	/// additional properties specific to polygons.

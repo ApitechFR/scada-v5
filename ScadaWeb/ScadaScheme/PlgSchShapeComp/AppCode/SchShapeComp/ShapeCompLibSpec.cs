@@ -3,12 +3,12 @@ using Scada.Web.Properties;
 using System.Collections.Generic;
 
 
-namespace Scada.Web.Plugins.SchSvgComp
+namespace Scada.Web.Plugins.SchShapeComp
 {
 	public class ShapeCompLibSpec : CompLibSpec
 	{
-		public override string XmlPrefix => "svg";
-		public override string XmlNs => "urn:rapidscada:scheme:svg";
+		public override string XmlPrefix => "shape";
+		public override string XmlNs => "urn:rapidscada:scheme:shape";
 		public override string GroupHeader => "Shape";
 
 		public override List<string> Styles
@@ -17,7 +17,7 @@ namespace Scada.Web.Plugins.SchSvgComp
 			{
 				return new List<string>()
 				{
-					"SchSvgComp/css/svgcomp.min.css"
+					"SchShapeComp/css/shapecomp.min.css"
 				};
 			}
 		}
@@ -27,7 +27,7 @@ namespace Scada.Web.Plugins.SchSvgComp
 			{
 				return new List<string>()
 				{
-					"SchSvgComp/js/svgcomprender.js"
+					"SchShapeComp/js/shapecomprender.js"
 				};
 			}
 		}

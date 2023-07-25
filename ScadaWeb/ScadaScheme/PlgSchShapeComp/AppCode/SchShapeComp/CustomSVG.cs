@@ -1,26 +1,25 @@
 ﻿using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
-using Scada.Web.Plugins.SchSvgComp.PropertyGrid;
+using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Design;
-using System.Linq;
-using System.Web;
 using System.Xml;
 using CM = System.ComponentModel;
 
-namespace Scada.Web.Plugins.SchSvgComp
+namespace Scada.Web.Plugins.SchShapeComp
 {
 	[Serializable]
 	public class CustomSVG : BaseComponent, IDynamicComponent
 	{
-		public CustomSVG() {
-			
+		public CustomSVG()
+		{
+
 			serBinder = PlgUtils.SerializationBinder;
 			Action = Actions.None;
 			Conditions = new List<PolygonCondition>();
-			
+
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "NA (0)";
@@ -34,14 +33,14 @@ namespace Scada.Web.Plugins.SchSvgComp
 			Height = 100;
 			SvgCode = "";
 		}
-		
+
 		private string _svgCode;
 
 
 		//[DisplayName("SVG Code"), Category(Categories.Design), CM.ReadOnly(true)]
 		[DisplayName("SVG Code"), Category(Categories.Design)]
 		[Description("SVG code .")]
-		[CM.Editor(typeof(SVGEditor),typeof(UITypeEditor))]
+		[CM.Editor(typeof(SVGEditor), typeof(UITypeEditor))]
 		[CM.DefaultValue("")]
 		public string SvgCode
 		{
@@ -63,7 +62,7 @@ namespace Scada.Web.Plugins.SchSvgComp
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
 		public List<PolygonCondition> Conditions { get; protected set; }
 
-		
+
 		/// <summary>
 		/// Get or set the input channel number
 		/// </summary>
@@ -113,8 +112,8 @@ namespace Scada.Web.Plugins.SchSvgComp
 		[Description("The width of the SVG image as specified in the SVG code.")]
 		[CM.DefaultValue(100)]
 		public int Width { get; set; }
-		
-		
+
+
 		[DisplayName("SVG Height"), Category(Categories.Appearance)]
 		[Description("The height of the SVG image as specified in the SVG code.")]
 		[CM.DefaultValue(100)]
@@ -155,7 +154,7 @@ namespace Scada.Web.Plugins.SchSvgComp
 			}
 
 			// Extract width and height attributes
-			
+
 			if (svgElement.Attributes["width"] != null && int.TryParse(svgElement.Attributes["width"].Value, out int width))
 			{
 				Width = width;

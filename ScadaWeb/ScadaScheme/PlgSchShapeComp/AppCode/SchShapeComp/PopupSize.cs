@@ -3,7 +3,7 @@ using System;
 using System.Xml;
 using CM = System.ComponentModel;
 
-namespace Scada.Web.Plugins.SchSvgComp
+namespace Scada.Web.Plugins.SchShapeComp
 {
 	[CM.TypeConverter(typeof(PopupSizeConverter))]
 	[Serializable]

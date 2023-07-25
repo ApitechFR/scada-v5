@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Design;
-
 using System.Windows.Forms.Design;
 
 using ListBox = System.Windows.Forms.ListBox;
 
-namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
+namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
 	public class SvgShapeSelectEditor : UITypeEditor
 	{
-		/// <summary>
-		/// 
-		/// </summary>
+
 		/// <param name="context"></param>
 		/// <returns></returns>
 		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
@@ -21,10 +17,6 @@ namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
 			return UITypeEditorEditStyle.DropDown;
 		}
 
-
-		/// <summary>
-		/// 
-		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="provider"></param>
 		/// <param name="value"></param>
@@ -36,7 +28,7 @@ namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
 			if (editorService != null)
 			{
 				ListBox listBox = new ListBox();
-				string[] svgShapes = { "Polygon", "Triangle", "Rectangle", "Circle", "Line", "Polyline", "Custom ..." };
+				string[] svgShapes = { "Polygon", "Triangle", "Rectangle", "Circle", "Line", "Polyline" };
 
 				foreach (string shape in svgShapes)
 				{
@@ -45,12 +37,6 @@ namespace Scada.Web.Plugins.SchSvgComp.PropertyGrid
 
 				listBox.SelectedIndexChanged += delegate (object sender, EventArgs e)
 				{
-					if (listBox.SelectedItem.ToString().Contains("Custom"))
-					{
-						FrmCustomShape frmCustomShape = new FrmCustomShape();
-						frmCustomShape.ShowDialog();
-
-					}
 					editorService.CloseDropDown();
 				};
 

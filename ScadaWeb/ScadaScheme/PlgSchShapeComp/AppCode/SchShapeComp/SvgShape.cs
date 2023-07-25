@@ -1,15 +1,12 @@
 ﻿using Scada.Scheme.Model.PropertyGrid;
 using Scada.Scheme.Model;
 using System;
-using System.Collections.Generic;
 using System.Drawing.Design;
-using System.Linq;
-using System.Web;
 using System.Xml;
 using CM = System.ComponentModel;
-using Scada.Web.Plugins.SchSvgComp.PropertyGrid;
+using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 
-namespace Scada.Web.Plugins.SchSvgComp
+namespace Scada.Web.Plugins.SchShapeComp
 {
 	[Serializable]
 	public class SvgShape : BaseComponent

@@ -2,7 +2,7 @@
 using Scada.Scheme.Model;
 
 
-namespace Scada.Web.Plugins.SchSvgComp
+namespace Scada.Web.Plugins.SchShapeComp
 {
 	public class ShapeCompFactory : CompFactory
 	{

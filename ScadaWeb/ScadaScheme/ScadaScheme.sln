@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlgSchBasicComp", "PlgSchBa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateBindingEditor", "TemplateBindingEditor\TemplateBindingEditor.csproj", "{D9EECC27-1120-432D-9DC4-3DA1BA875E85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlgSchSVGComp", "PlgSchSVGComp\PlgSchSVGComp.csproj", "{42531425-B844-4CC3-A9EA-124B7714B65F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlgSchShapeComp", "PlgSchShapeComp\PlgSchShapeComp.csproj", "{42531425-B844-4CC3-A9EA-124B7714B65F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

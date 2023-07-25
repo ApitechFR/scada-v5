@@ -1,14 +1,14 @@
 ﻿using Scada.Scheme;
-using Scada.Web.Plugins.SchSvgComp;
+using Scada.Web.Plugins.SchShapeComp;
 using System.IO;
 using Scada.Scheme.Model.PropertyGrid;
-using Scada.Web.Plugins.SchSvgComp.PropertyGrid;
+using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 
 namespace Scada.Web.Plugins
 {
-	public class PlgSchSVGCompSpec : PluginSpec, ISchemeComp
+	public class PlgSchShapeCompSpec : PluginSpec, ISchemeComp
 	{
-		internal const string PlgVersion = "1.0.0.0";
+		internal const string PlgVersion = "1.0.5.0";
 
 
 		public override string Version =>  PlgVersion; 
@@ -25,7 +25,7 @@ namespace Scada.Web.Plugins
 		{
             if (SchemeContext.GetInstance().EditorMode)
             {
-                if (!Localization.LoadDictionaries(Path.Combine(AppDirs.PluginsDir, "SchSvgComp","lang"),"PlgSvgComponent", out string errMsg))
+                if (!Localization.LoadDictionaries(Path.Combine(AppDirs.PluginsDir, "SchShapeComp","lang"),"PlgSvgComponent", out string errMsg))
                 {
 					Log.WriteError(errMsg);
                     

@@ -1,7 +1,7 @@
 ﻿using Scada.Scheme.Model.PropertyGrid;
 using CM = System.ComponentModel;
 
-namespace Scada.Web.Plugins.SchSvgComp
+namespace Scada.Web.Plugins.SchShapeComp
 {
 	[CM.TypeConverter(typeof(EnumConverter))]
 	public enum PopupWidth

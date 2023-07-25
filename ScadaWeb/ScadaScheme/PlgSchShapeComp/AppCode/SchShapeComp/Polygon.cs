@@ -8,14 +8,15 @@ using System.Linq;
 using System.Web;
 using System.Xml;
 using CM = System.ComponentModel;
-using Scada.Web.Plugins.SchSvgComp.PropertyGrid;
+using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 
-namespace Scada.Web.Plugins.SchSvgComp
+namespace Scada.Web.Plugins.SchShapeComp
 {
 	[Serializable]
 	public class Polygon : BaseComponent, IDynamicComponent
 	{
-		public Polygon() {
+		public Polygon()
+		{
 			serBinder = PlgUtils.SerializationBinder;
 			BackColorOnHover = "";
 			BorderColorOnHover = "";
