@@ -28,10 +28,12 @@ using Scada.Scheme.Model;
 using Scada.Web;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
 using System.ServiceModel.Web;
 using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 
 namespace Scada.Scheme.Editor
 {
@@ -246,13 +248,40 @@ namespace Scada.Scheme.Editor
                     Editor.Status = status;
                 }
 
-                return JsSerializer.Serialize(dto);
+                var settings = new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore, // Ignore les boucles de référence
+                    MaxDepth = 10, // Spécifiez une profondeur maximale pour éviter les boucles infinies, si nécessaire
+                                             // D'autres paramètres de configuration si nécessaire
+                };
+
+
+                //if (dto != null && dto.Changes != null)
+                //{
+                //    foreach (var change in dto.Changes)
+                //    {
+                //        //Debug.WriteLine(JsSerializer.Serialize(((BaseComponent)(change.ChangedObject)).Name));
+                //        //Debug.WriteLine(JsSerializer.Serialize(((BaseComponent)(change.ChangedObject)).AliasesDictionnary));
+                //        //Debug.WriteLine(JsSerializer.Serialize(change.ChangedObject));
+                //        //Debug.WriteLine(JsSerializer.Serialize(change));
+
+                //        var json = JsonConvert.SerializeObject(((BaseComponent)(change.ChangedObject)).AliasesDictionnary, settings);
+                //        Debug.WriteLine(json);
+                //    }
+                //}
+               
+                //Debug.WriteLine(JsSerializer.Serialize(dto.Changes));
+                //if(dto != null && dto.Changes != null)
+                //{
+
+                //}
+                return JsonConvert.SerializeObject(dto, settings);
             }
             catch (Exception ex)
             {
                 AppData.Log.WriteException(ex, Localization.UseRussian ?
                     "Ошибка при получении изменений схемы" :
-                    "Error getting scheme chages");
+                    "Error getting scheme changes");
                 return JsSerializer.GetErrorJson(ex);
             }
         }
