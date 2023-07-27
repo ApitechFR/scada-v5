@@ -88,6 +88,12 @@ namespace Scada.Scheme
         /// <remarks>Необходимо для контроля загрузки библиотек и компонентов.</remarks>
         public List<string> LoadErrors { get; protected set; }
 
+        /// <summary>
+        /// Get or set whether the current scheme is a symbol or a regular scheme
+        /// </summary>
+        public bool isSymbol { get; set; } = false;
+
+        public Symbol MainSymbol { get; set; }
 
         /// <summary>
         /// Adds the input channels to the view.

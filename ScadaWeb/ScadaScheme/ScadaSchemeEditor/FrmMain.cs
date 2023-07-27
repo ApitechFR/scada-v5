@@ -284,7 +284,7 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла.
         /// </summary>
-        private void InitScheme(string fileName = "")
+        private void InitScheme(string fileName = "", bool isSymbol = false)
         {
             bool loadOK;
             string errMsg;
@@ -293,11 +293,12 @@ namespace Scada.Scheme.Editor
             {
                 loadOK = true;
                 errMsg = "";
-                editor.NewScheme();
+                editor.NewScheme(isSymbol);
+
             }
             else
             {
-                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg);
+                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg,isSymbol);
             }
 
             appData.AssignViewStamp(editor.SchemeView);
@@ -1448,6 +1449,13 @@ namespace Scada.Scheme.Editor
         {
             SaveScheme(saveAs: true, asSymbol: true);
 
+        }
+
+        private void newSymbolToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // создание новой схемы
+            if (ConfirmCloseScheme())
+                InitScheme(isSymbol:true);
         }
     }
 
