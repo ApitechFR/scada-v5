@@ -766,11 +766,14 @@ namespace Scada.Scheme.Editor
                 {
                     if (comp is ComponentGroup)
                     {
-                        foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
+                        if (comp.ID != editor.SchemeView.MainSymbol.ID)
                         {
-                            this.noTreeviewSelectionEffect = true;
+                            foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
+                            {
+                                this.noTreeviewSelectionEffect = true;
 
-                            editor.SelectComponent(child.ID, true);
+                                editor.SelectComponent(child.ID, true);
+                            }
                         }
                     }
                     this.noTreeviewSelectionEffect = true;

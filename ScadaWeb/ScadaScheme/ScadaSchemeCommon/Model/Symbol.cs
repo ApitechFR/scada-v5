@@ -9,6 +9,7 @@ namespace Scada.Scheme.Model
     /// <summary>
     /// Scheme that represents a group of components
     /// </summary>
+    [Serializable]
     public class Symbol : ComponentGroup
     {
         /// <summary>
