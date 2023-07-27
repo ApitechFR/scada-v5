@@ -37,6 +37,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
@@ -485,7 +486,7 @@ namespace Scada.Scheme.Editor
             this.noTreeviewSelectionEffect = false;
 
             // установка доступности кнопок
-            SetButtonsEnabled();
+             SetButtonsEnabled();
         }
 
 
@@ -1428,7 +1429,6 @@ namespace Scada.Scheme.Editor
             {
 
                 editor.History.BeginPoint();
-
                 if (propertyGrid.SelectedObject is ComponentGroup group)
                 {
                     //Edit all the components within the group
@@ -1496,7 +1496,7 @@ namespace Scada.Scheme.Editor
         private void updateAliasParametersDisplay()
         {
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
-            if(selectedComponent == null)
+            if (selectedComponent == null)
             {
                 return;
             }
@@ -1504,22 +1504,22 @@ namespace Scada.Scheme.Editor
             var aliasRelatedPropertiesNames = selectedComponent.AliasesDictionnary.Keys.ToArray();
             PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(selectedComponent);
             var aliasRelatedProperties = GetPropertyGridItems(propertyGrid);
-            aliasRelatedProperties = aliasRelatedProperties.Where(item=> aliasRelatedPropertiesNames.Contains(item.PropertyDescriptor.Name)).ToList();
+            aliasRelatedProperties = aliasRelatedProperties.Where(item => aliasRelatedPropertiesNames.Contains(item.PropertyDescriptor.Name)).ToList();
             ICustomTypeDescriptor customTypeDescriptor = TypeDescriptor.GetProvider(selectedComponent).GetTypeDescriptor(selectedComponent);
-            PropertyDescriptorCollection newProperties = new PropertyDescriptorCollection(new PropertyDescriptor[] {  });
+            PropertyDescriptorCollection newProperties = new PropertyDescriptorCollection(new PropertyDescriptor[] { });
             foreach (PropertyDescriptor prop in properties)
             {
-                if (!aliasRelatedPropertiesNames.Contains( prop.Name))
+                if (!aliasRelatedPropertiesNames.Contains(prop.Name))
                 {
                     newProperties.Add(prop);
                 }
             }
-            foreach ( var aliasProperty in aliasRelatedProperties)
+            foreach (var aliasProperty in aliasRelatedProperties)
             {
                 PropertyDescriptor aliasRelatedPropDescriptor = aliasProperty.PropertyDescriptor;
                 if (aliasRelatedPropDescriptor != null)
                 {
-                    PropertyDescriptor customPropertyDescriptor = new CustomPropertyDescriptor(aliasRelatedPropDescriptor, aliasProperty.Label+" (Alias)", true);
+                    PropertyDescriptor customPropertyDescriptor = new CustomPropertyDescriptor(aliasRelatedPropDescriptor, aliasProperty.Label + " (Alias)", true);
                     newProperties.Add(customPropertyDescriptor);
                 }
             }
@@ -1613,7 +1613,12 @@ namespace Scada.Scheme.Editor
                 {
                     componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
                 }
+
+                //beginpoint
+                //onchange(aliasesdictionnary)
                 propertyGrid_PropertyValueChanged(propertyGrid, new PropertyValueChangedEventArgs(selectedProperty, oldProperty));
+                //EndPoint 
+
                 return;
             }
         }
