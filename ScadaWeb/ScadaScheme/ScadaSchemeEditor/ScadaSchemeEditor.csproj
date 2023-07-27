@@ -80,6 +80,8 @@
     <Compile Include="AppCode\AppDirs.cs" />
     <Compile Include="AppCode\AppPhrases.cs" />
     <Compile Include="AppCode\Change.cs" />
+    <Compile Include="AppCode\CustomPropertyDescriptor.cs" />
+    <Compile Include="AppCode\CustomTypeDescriptor.cs" />
     <Compile Include="AppCode\Editor.cs" />
     <Compile Include="AppCode\ChangesDTO.cs" />
     <Compile Include="AppCode\FormActions.cs" />

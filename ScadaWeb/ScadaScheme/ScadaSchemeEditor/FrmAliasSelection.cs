@@ -14,16 +14,13 @@ namespace Scada.Scheme.Editor
             InitializeComponent();
             label2.Text = PropertyName;
             comboBox1.Items.Clear();
+            comboBox1.Items.Add("None");
             foreach (Alias alias in availableAlias)
             {
                 comboBox1.Items.Add(alias);
             }
             selectedAlias = defaultSelectionIndex>=0 ? availableAlias[defaultSelectionIndex]:null;
-            comboBox1.SelectedIndex = defaultSelectionIndex;
-            if(selectedAlias == null)
-            {
-                button2.Enabled = false;
-            }
+            comboBox1.SelectedIndex = defaultSelectionIndex+1;
         }
 
         private void button1_Click(object sender, System.EventArgs e)
@@ -38,8 +35,7 @@ namespace Scada.Scheme.Editor
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            selectedAlias = (Alias)comboBox1.SelectedItem;
-            button2.Enabled = selectedAlias != null;
+            selectedAlias = comboBox1.SelectedIndex == 0 ? null : (Alias)comboBox1.SelectedItem;
         }
     }
 }

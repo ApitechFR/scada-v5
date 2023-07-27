@@ -448,6 +448,7 @@ namespace Scada.Scheme.Editor
             this.propertyGrid.Size = new System.Drawing.Size(396, 416);
             this.propertyGrid.TabIndex = 1;
             this.propertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid_PropertyValueChanged);
+            this.propertyGrid.SelectedGridItemChanged += new System.Windows.Forms.SelectedGridItemChangedEventHandler(this.propertyGrid_SelectedGridItemChanged);
             // 
             // toolStrip1
             // 

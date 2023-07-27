@@ -24,6 +24,7 @@
  */
 
 using Scada.Scheme.DataTransfer;
+using Scada.Scheme.Editor.AppCode;
 using Scada.Scheme.Editor.Properties;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
@@ -1113,6 +1114,7 @@ namespace Scada.Scheme.Editor
             // обновление списка компонентов, т.к. при отмене происходит подмена объектов
             FillSchemeComponents();
             ShowSchemeSelection();
+            //updateAliasParametersDisplay();
         }
 
         private void miEditRedo_Click(object sender, EventArgs e)
@@ -1125,6 +1127,7 @@ namespace Scada.Scheme.Editor
             // обновление списка компонентов, т.к. при возврате происходит подмена объектов
             FillSchemeComponents();
             ShowSchemeSelection();
+            //updateAliasParametersDisplay();
         }
 
         private void miEditPointer_Click(object sender, EventArgs e)
@@ -1407,6 +1410,7 @@ namespace Scada.Scheme.Editor
                         toolStripButton1.ToolTipText = "The component has to be a symbol child";
                     }
                 }
+                //updateAliasParametersDisplay();
             }
             else
             { 
@@ -1457,11 +1461,94 @@ namespace Scada.Scheme.Editor
                             component.OnItemChanged(SchemeChangeTypes.ComponentChanged, selObj);
                     }
                 }
-
                 editor.History.EndPoint();
+                //updateAliasParametersDisplay();
             }
         }
-            private void toolStripButton1_Click(object sender, EventArgs e)
+        public GridItem GetRootGridItem(GridItem gridItem)
+        {
+            return gridItem.Parent != null ? GetRootGridItem(gridItem.Parent) : gridItem;
+        }
+        public List<GridItem> GetPropertyGridItems(PropertyGrid propertyGrid)
+        {
+            List<GridItem> gridItems = new List<GridItem>();
+            var rootItem = GetRootGridItem(propertyGrid.SelectedGridItem);
+            if (propertyGrid != null && rootItem != null)
+            {
+                GetSubGridItems(rootItem, gridItems);
+            }
+            return gridItems;
+        }
+        private void GetSubGridItems(GridItem gridItem, List<GridItem> gridItems)
+        {
+            if (gridItem != null)
+            {
+                foreach (GridItem item in gridItem.GridItems)
+                {
+                    if(item.PropertyDescriptor != null)
+                    {
+                        gridItems.Add(item);
+                    }
+                    GetSubGridItems(item, gridItems);
+                }
+            }
+        }
+        private void updateAliasParametersDisplay()
+        {
+            BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
+            if(selectedComponent == null)
+            {
+                return;
+            }
+            propertyGrid.SelectedObject = selectedComponent;
+            var aliasRelatedPropertiesNames = selectedComponent.AliasesDictionnary.Keys.ToArray();
+            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(selectedComponent);
+            var aliasRelatedProperties = GetPropertyGridItems(propertyGrid);
+            aliasRelatedProperties = aliasRelatedProperties.Where(item=> aliasRelatedPropertiesNames.Contains(item.PropertyDescriptor.Name)).ToList();
+            ICustomTypeDescriptor customTypeDescriptor = TypeDescriptor.GetProvider(selectedComponent).GetTypeDescriptor(selectedComponent);
+            PropertyDescriptorCollection newProperties = new PropertyDescriptorCollection(new PropertyDescriptor[] {  });
+            foreach (PropertyDescriptor prop in properties)
+            {
+                if (!aliasRelatedPropertiesNames.Contains( prop.Name))
+                {
+                    newProperties.Add(prop);
+                }
+            }
+            foreach ( var aliasProperty in aliasRelatedProperties)
+            {
+                PropertyDescriptor aliasRelatedPropDescriptor = aliasProperty.PropertyDescriptor;
+                if (aliasRelatedPropDescriptor != null)
+                {
+                    PropertyDescriptor customPropertyDescriptor = new CustomPropertyDescriptor(aliasRelatedPropDescriptor, aliasProperty.Label+" (Alias)", true);
+                    newProperties.Add(customPropertyDescriptor);
+                }
+            }
+            propertyGrid.SelectedObject = new AppCode.CustomTypeDescriptor(customTypeDescriptor, newProperties);
+        }
+        private void propertyGrid_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
+        {
+            string selectedPropertyName = e.NewSelection.PropertyDescriptor.Name;
+            BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
+            if(selectedComponent == null)
+            {
+                toolStripButton1.Enabled = false;
+                toolStripButton1.ToolTipText = "Select a component property to link an alias";
+                return;
+            }
+            if (e.NewSelection.PropertyDescriptor.IsReadOnly && !selectedComponent.AliasesDictionnary.Keys.Contains(selectedPropertyName))
+            {
+
+                toolStripButton1.Enabled = false;
+                toolStripButton1.ToolTipText = "This property cannot be modified";
+            }
+            else
+            {
+                // todo : set to false
+                toolStripButton1.Enabled = true;
+                toolStripButton1.ToolTipText = "Link to a symbol property";
+            }
+        }
+        private void toolStripButton1_Click(object sender, EventArgs e)
         {
             //todo: remove tis part from here
             Alias al = new Alias();
@@ -1476,10 +1563,7 @@ namespace Scada.Scheme.Editor
             s.AliasList.Add(al, -1);
             //to here
 
-
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
-            GridItem selectedProperty = propertyGrid.SelectedGridItem;
-            List<Alias> availableAliases = new List<Alias>();
             TreeNode SymbolNode = findNode(treeView1.Nodes, n =>
                 {
                     BaseComponent bc = (BaseComponent)n.Tag;
@@ -1497,6 +1581,8 @@ namespace Scada.Scheme.Editor
             //Symbol parentSymbol = SymbolNode.Tag as Symbol;
             Symbol parentSymbol = s;
 
+            GridItem selectedProperty = propertyGrid.SelectedGridItem;
+            List<Alias> availableAliases = new List<Alias>();
             availableAliases = parentSymbol.AliasList.Keys.Where(a => a.AliasType == selectedProperty.PropertyDescriptor.PropertyType).ToList();
             string selectedPropertyName = selectedProperty.PropertyDescriptor.Name;
             int defaultSelectionIndex = -1;
@@ -1515,137 +1601,21 @@ namespace Scada.Scheme.Editor
                 }
                 //update mapping between compoennt properties and alias
                 selectedComponent.AliasesDictionnary.Remove(selectedPropertyName);
-                selectedComponent.AliasesDictionnary.Add(selectedPropertyName, frmAliasSelection.selectedAlias);
-
-                //todo: highlight alias-related values in propertyGrid
-                PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(selectedComponent);
-                PropertyDescriptor agePropertyDescriptor = properties[selectedPropertyName];
-                if (agePropertyDescriptor != null)
+                if(frmAliasSelection.selectedAlias != null)
                 {
-                    // Update DisplayName Property of selected row in propertyGrid
-                    PropertyDescriptor customAgePropertyDescriptor = new CustomPropertyDescriptor(agePropertyDescriptor, "--> "+selectedProperty.Label);
-                    ICustomTypeDescriptor customTypeDescriptor = TypeDescriptor.GetProvider(selectedComponent).GetTypeDescriptor(selectedComponent);
-                    PropertyDescriptorCollection newProperties = new PropertyDescriptorCollection(new PropertyDescriptor[] { customAgePropertyDescriptor });
-                    foreach (PropertyDescriptor prop in properties)
-                    {
-                        if (prop != agePropertyDescriptor)
-                        {
-                            newProperties.Add(prop);
-                        }
-                    }
-
-                    // Update display of propertyGrid
-                    propertyGrid.SelectedObject = new CustomTypeDescriptor(customTypeDescriptor, newProperties);
+                    selectedComponent.AliasesDictionnary.Add(selectedPropertyName, frmAliasSelection.selectedAlias);
                 }
 
+                
                 //Copy alias value in component parameter
-                componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
+                var oldProperty = selectedProperty.Value;
+                if(frmAliasSelection.selectedAlias != null)
+                {
+                    componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
+                }
+                propertyGrid_PropertyValueChanged(propertyGrid, new PropertyValueChangedEventArgs(selectedProperty, oldProperty));
                 return;
             }
-        }
-    }
-    public class CustomPropertyDescriptor : PropertyDescriptor
-    {
-        private PropertyDescriptor basePropertyDescriptor;
-        private string displayName;
-
-        public CustomPropertyDescriptor(PropertyDescriptor basePropertyDescriptor, string displayName)
-            : base(basePropertyDescriptor)
-        {
-            this.basePropertyDescriptor = basePropertyDescriptor;
-            this.displayName = displayName;
-        }
-
-        public override string DisplayName
-        {
-            get { return displayName; }
-        }
-
-        public override Type ComponentType => basePropertyDescriptor.ComponentType;
-
-        public override bool IsReadOnly => basePropertyDescriptor.IsReadOnly;
-
-        public override Type PropertyType => basePropertyDescriptor.PropertyType;
-
-        public override bool CanResetValue(object component) => basePropertyDescriptor.CanResetValue(component);
-
-        public override object GetValue(object component) => basePropertyDescriptor.GetValue(component);
-
-        public override void ResetValue(object component) => basePropertyDescriptor.ResetValue(component);
-
-        public override void SetValue(object component, object value) => basePropertyDescriptor.SetValue(component, value);
-
-        public override bool ShouldSerializeValue(object component) => basePropertyDescriptor.ShouldSerializeValue(component);
-}
-    public class CustomTypeDescriptor : ICustomTypeDescriptor
-    {
-        private ICustomTypeDescriptor baseTypeDescriptor;
-        private PropertyDescriptorCollection properties;
-
-        public CustomTypeDescriptor(ICustomTypeDescriptor baseTypeDescriptor, PropertyDescriptorCollection properties)
-        {
-            this.baseTypeDescriptor = baseTypeDescriptor;
-            this.properties = properties;
-        }
-
-        public AttributeCollection GetAttributes()
-        {
-            return baseTypeDescriptor.GetAttributes();
-        }
-
-        public string GetClassName()
-        {
-            return baseTypeDescriptor.GetClassName();
-        }
-
-        public string GetComponentName()
-        {
-            return baseTypeDescriptor.GetComponentName();
-        }
-
-        public TypeConverter GetConverter()
-        {
-            return baseTypeDescriptor.GetConverter();
-        }
-
-        public EventDescriptor GetDefaultEvent()
-        {
-            return baseTypeDescriptor.GetDefaultEvent();
-        }
-
-        public PropertyDescriptor GetDefaultProperty()
-        {
-            return baseTypeDescriptor.GetDefaultProperty();
-        }
-
-        public object GetEditor(Type editorBaseType)
-        {
-            return baseTypeDescriptor.GetEditor(editorBaseType);
-        }
-
-        public EventDescriptorCollection GetEvents(Attribute[] attributes)
-        {
-            return baseTypeDescriptor.GetEvents(attributes);
-        }
-
-        public EventDescriptorCollection GetEvents()
-        {
-            return baseTypeDescriptor.GetEvents();
-        }
-
-        public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
-        {
-            return properties;
-        }
-
-        public PropertyDescriptorCollection GetProperties()
-        {
-            return properties;
-        }
-
-        public object GetPropertyOwner(PropertyDescriptor pd)
-        {
-            return baseTypeDescriptor.GetPropertyOwner(pd);
         }
     }
 }

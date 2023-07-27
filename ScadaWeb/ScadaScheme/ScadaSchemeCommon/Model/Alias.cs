@@ -9,7 +9,8 @@ using System.Xml.Schema;
 
 namespace Scada.Scheme.Model
 {
-   
+
+    [Serializable]
     public class Alias
     {
         public string Name { get; set; }

@@ -245,14 +245,13 @@ namespace Scada.Scheme.Editor
                     dto.FormState = AppData.MainForm.GetFormState();
                     Editor.Status = status;
                 }
-
                 return JsSerializer.Serialize(dto);
             }
             catch (Exception ex)
             {
                 AppData.Log.WriteException(ex, Localization.UseRussian ?
                     "Ошибка при получении изменений схемы" :
-                    "Error getting scheme chages");
+                    "Error getting scheme changes");
                 return JsSerializer.GetErrorJson(ex);
             }
         }
