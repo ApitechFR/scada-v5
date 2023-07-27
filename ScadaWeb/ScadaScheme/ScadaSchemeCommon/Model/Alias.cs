@@ -1,5 +1,4 @@
-﻿using ExCSS;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,33 +8,59 @@ using System.Xml.Schema;
 
 namespace Scada.Scheme.Model
 {
-
-    [Serializable]
+    public enum AliasTypeEnum
+    {
+        Couleur,
+        Nombre,
+        Text,
+        ChannelID
+    }
     public class Alias
     {
-        public string Name { get; set; }
-        public Type AliasType { get; set; }
-        public bool isCnlLinked { get; set; }
+        private Dictionary<AliasTypeEnum, Type> TypeDictionary = new Dictionary<AliasTypeEnum, Type>{
+            {AliasTypeEnum.Couleur, typeof(string)},
+            {AliasTypeEnum.Nombre, typeof(int) },
+            {AliasTypeEnum.Text, typeof(string) },
+            {AliasTypeEnum.ChannelID, typeof(int) },
+        };
+        private Dictionary<AliasTypeEnum, Func<object, bool>> PredicateDictionnary = 
+            new Dictionary<AliasTypeEnum, Func<object, bool>>{
+            {AliasTypeEnum.Couleur, (object colorValue)=>{
+                try
+                {
+                    if(colorValue==null)
+                    {
+                        return false;
+                    }
+                    string colorString = (string)colorValue;
+                    var regex = @"#+([A-Fa-f0-9]){6}";
+                    return Regex.Match(colorString, regex).ToString().Length == colorString.Length ;
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+                return false;
+            }},
+        };
 
-        private object _value;
-        public object Value { get { return _value; } set { 
+        public string Name { get; set; }
+        public AliasTypeEnum AliasType { get; set; }
+        public bool isCnlLinked { get; set; }
+        public object Value { get { return Value; } set { 
                 //if(value.GetType() == TypeDictionary[AliasType])
                 //{
-                    if (value.GetType() == AliasType)
+                    if (PredicateDictionnary[AliasType](value))
                     {
-                        _value = value;
+                        Value = value;
                     }
                 //}
             } }
         public Alias()
         {
             Name = "";
-            AliasType = typeof(string);
+            AliasType = AliasTypeEnum.Text;
             isCnlLinked = false;
-        }
-        public override string ToString()
-        {
-            return Name;
         }
     }
 }
