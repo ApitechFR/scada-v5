@@ -267,6 +267,7 @@ scada.scheme.Scheme.prototype._obtainSchemeDoc = function (parsedData) {
 // callback is a function (success, complete)
 scada.scheme.Scheme.prototype._loadComponents = function (viewOrEditorID, callback) {
     var operation = this.serviceUrl + "GetComponents";
+    console.log(this.serviceUrl)
     var thisScheme = this;
 
     this.ajaxQueue.ajax({

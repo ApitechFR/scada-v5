@@ -1060,13 +1060,13 @@ namespace Scada.Scheme.Editor
         private void miFileSave_Click(object sender, EventArgs e)
         {
             // сохранение схемы
-            SaveScheme(false);
+            SaveScheme(false,editor.SchemeView.isSymbol);
         }
 
         private void miFileSaveAs_Click(object sender, EventArgs e)
         {
             // сохранение схемы с выбором имени файла
-            SaveScheme(true);
+            SaveScheme(true,editor.SchemeView.isSymbol);
         }
 
         private void miFileOpenBrowser_Click(object sender, EventArgs e)

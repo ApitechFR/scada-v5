@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Scada.Data.Tables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,32 +17,45 @@ namespace Scada.Scheme.Model
         /// Dictionnary of Alias/cnlId
         /// </summary>
         public Dictionary<Alias, int> AliasList { get; set; }
-        public Guid SymbolId {get;}
+        public string SymbolId { get; private set; }
         public DateTime LastModificationDate { get; set;}
 
         public Symbol() :base() {
-            SymbolId = Guid.NewGuid();
+            SymbolId = Guid.NewGuid().ToString();
             LastModificationDate = DateTime.Now;
             AliasList = new Dictionary<Alias, int>();
         }
 
         public override void SaveToXml(XmlElement xmlElem)
         {
+            base.SaveToXml(xmlElem);
+
             xmlElem.AppendElem("SymbolId", SymbolId);
             xmlElem.AppendElem("LastModificationDate", LastModificationDate);
-            XmlElement alias = xmlElem.OwnerDocument.CreateElement("Alias");
+            XmlElement aliasList = xmlElem.OwnerDocument.CreateElement("AliasList");
             foreach(var a in AliasList)
             {
-                alias.AppendElem("Name", a.Key.Name);
-                alias.AppendElem("AliasType", a.Key.AliasType);
-                alias.AppendElem("IsCnlLinked", a.Key.isCnlLinked);
-                if(!a.Key.isCnlLinked)
-                {
-                    alias.AppendElem("Value", a.Key.Value.ToString());
-                }
+                XmlElement alias = xmlElem.OwnerDocument.CreateElement("Alias");
+                a.Key.saveToXml(alias);
+                alias.AppendElem("CnlNum", a.Value);
+                aliasList.AppendChild(alias);
             }
-            xmlElem.AppendChild(alias);
-            base.SaveToXml(xmlElem);
+            xmlElem.AppendChild(aliasList);
+        }
+
+        public override void LoadFromXml(XmlNode xmlNode)
+        {
+            base.LoadFromXml(xmlNode);
+
+            SymbolId = xmlNode.GetChildAsString("SymbolId");
+            LastModificationDate = xmlNode.GetChildAsDateTime("LastModificationDate");
+            foreach(XmlNode aliasNode in xmlNode.SelectNodes("AliasList")) 
+            {
+                if (aliasNode == null) continue;
+                Alias alias = new Alias();
+                alias.loadFromXml(aliasNode);
+                AliasList.Add(alias, aliasNode.GetChildAsInt("CnlNum"));
+            }
         }
     }
 }
