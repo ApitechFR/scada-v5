@@ -181,13 +181,19 @@ namespace Scada.Scheme
 
             // check data format
             XmlElement rootElem = xmlDoc.DocumentElement;
-            if (!rootElem.Name.Equals("SchemeView", StringComparison.OrdinalIgnoreCase))
+            if (!rootElem.Name.Equals("SchemeView", StringComparison.OrdinalIgnoreCase)&&
+                !rootElem.Name.Equals("SchemeSymbol",StringComparison.OrdinalIgnoreCase))
                 throw new ScadaException(SchemePhrases.IncorrectFileFormat);
+
+            if (rootElem.Name.Equals("SchemeSymbol", StringComparison.OrdinalIgnoreCase))
+                isSymbol = true;
+
 
             // get channel offsets in template mode
             int inCnlOffset = templateArgs.InCnlOffset;
             int ctrlCnlOffset = templateArgs.CtrlCnlOffset;
 
+            
             // load scheme document
             if (rootElem.SelectSingleNode("Scheme") is XmlNode schemeNode)
             {
@@ -196,6 +202,30 @@ namespace Scada.Scheme
                 Title = SchemeDoc.Title;
                 // добавление входных каналов представления
                 AddInCnlNums(SchemeDoc.CnlFilter, inCnlOffset);
+            }
+
+            if (isSymbol)
+            {
+                if(rootElem.SelectSingleNode("MainSymbol") is XmlNode mainSymbolNode)
+                {
+                    CompManager compManager = CompManager.GetInstance();
+                    MainSymbol = compManager.CreateComponent(mainSymbolNode, out string errMsg) as Symbol;
+                    if (MainSymbol == null)
+                    {
+                        LoadErrors.Add(errMsg);
+                    }
+
+                    MainSymbol.SchemeView = this;
+                    MainSymbol.LoadFromXml(mainSymbolNode);
+                    Components[MainSymbol.ID] = MainSymbol;
+
+                    AddInCnlNums(MainSymbol.GetInCnlNums(), inCnlOffset);
+                    AddCtrlCnlNums(MainSymbol.GetCtrlCnlNums(), ctrlCnlOffset);
+
+                    // определение макс. идентификатора компонентов
+                    if (MainSymbol.ID > maxComponentID)
+                        maxComponentID = MainSymbol.ID;
+                }
             }
 
             // load scheme components
@@ -330,9 +360,9 @@ namespace Scada.Scheme
                 xmlDoc.AppendChild(xmlDecl);
 
                 // запись заголовка представления
-                XmlElement rootElem = asSymbol ? xmlDoc.CreateElement("SchemeView") : xmlDoc.CreateElement("SchemeSymbol");
-
-
+                XmlElement rootElem = xmlDoc.CreateElement("SchemeView");
+                if (asSymbol||isSymbol)
+                    rootElem = xmlDoc.CreateElement("SchemeSymbol");
 
                 rootElem.SetAttribute("title", SchemeDoc.Title);
                 xmlDoc.AppendChild(rootElem);
@@ -372,8 +402,25 @@ namespace Scada.Scheme
                         XmlElement componentElem = compLibSpec == null ?
                             xmlDoc.CreateElement(compType.Name) /*стандартный компонент*/ :
                             xmlDoc.CreateElement(compLibSpec.XmlPrefix, compType.Name, compLibSpec.XmlNs);
+                        if ((isSymbol || asSymbol) && component.ID == MainSymbol.ID)
+                        {
+                            componentElem = xmlDoc.CreateElement("MainSymbol");
+                        }
 
-                        if (compType == typeof(ComponentGroup)) groupsElem.AppendChild(componentElem);
+                        if (component is ComponentGroup) 
+                        { 
+                            if(component is Symbol symbol)
+                            {
+                                componentsElem.AppendChild(componentElem);
+
+                                if ((isSymbol || asSymbol) && symbol.ID == MainSymbol.ID)
+                                {   
+                                    groupsElem.AppendChild(componentElem);
+                                    rootElem.AppendChild(componentElem);
+                                }
+                            }
+                            else groupsElem.AppendChild(componentElem); 
+                        }
                         else componentsElem.AppendChild(componentElem);
 
                         component.SaveToXml(componentElem);

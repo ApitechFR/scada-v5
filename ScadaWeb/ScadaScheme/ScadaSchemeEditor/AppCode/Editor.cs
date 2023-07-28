@@ -592,10 +592,23 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public bool SaveSchemeToFile(string fileName, out string errMsg, bool asSymbol = false)
         {
-            Symbol symbol = compManager.CreateComponent(typeof(Symbol).FullName) as Symbol;
-            if (asSymbol)
-            {
 
+
+
+
+            if ((asSymbol||SchemeView.isSymbol) && SchemeView.MainSymbol==null)
+            {
+                Symbol symbol = new Symbol();
+
+                symbol.ID = SchemeView.GetNextComponentID();
+                symbol.Location = new Point(0, 0);
+                symbol.SchemeView = SchemeView;
+                symbol.ItemChanged += Scheme_ItemChanged;
+                SchemeView.Components[symbol.ID] = symbol;
+                symbol.OnItemChanged(SchemeChangeTypes.ComponentAdded, symbol);
+
+                SchemeView.MainSymbol = symbol;
+                SchemeView.isSymbol = true;
                 foreach (BaseComponent comp in SchemeView.Components.Values.Where(x => x.GroupId == -1))
                 {
                     comp.GroupId = symbol.ID;

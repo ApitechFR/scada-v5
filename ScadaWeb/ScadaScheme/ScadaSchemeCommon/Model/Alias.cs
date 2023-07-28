@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Xml;
 using System.Xml.Schema;
 
 namespace Scada.Scheme.Model
@@ -15,6 +16,7 @@ namespace Scada.Scheme.Model
         Text,
         ChannelID
     }
+    [Serializable]
     public class Alias
     {
         private Dictionary<AliasTypeEnum, Type> TypeDictionary = new Dictionary<AliasTypeEnum, Type>{
@@ -23,7 +25,7 @@ namespace Scada.Scheme.Model
             {AliasTypeEnum.Text, typeof(string) },
             {AliasTypeEnum.ChannelID, typeof(int) },
         };
-        private Dictionary<AliasTypeEnum, Func<object, bool>> PredicateDictionnary = 
+        private Dictionary<AliasTypeEnum, Func<object, bool>> PredicateDictionnary =
             new Dictionary<AliasTypeEnum, Func<object, bool>>{
             {AliasTypeEnum.Couleur, (object colorValue)=>{
                 try
@@ -47,20 +49,48 @@ namespace Scada.Scheme.Model
         public string Name { get; set; }
         public AliasTypeEnum AliasType { get; set; }
         public bool isCnlLinked { get; set; }
-        public object Value { get { return Value; } set { 
+        public object Value
+        {
+            get;set; 
+            /*
+            get { return Value; }
+            set
+            {
                 //if(value.GetType() == TypeDictionary[AliasType])
                 //{
-                    if (PredicateDictionnary[AliasType](value))
-                    {
-                        Value = value;
-                    }
-                //}
-            } }
+                if (PredicateDictionnary[AliasType](value))
+                {
+                    Value = value;
+                }
+                //}*/
+            }
+        
         public Alias()
         {
             Name = "";
             AliasType = AliasTypeEnum.Text;
             isCnlLinked = false;
+        }
+        public void saveToXml(XmlElement xmlElem)
+        {
+            if (xmlElem == null)
+                throw new ArgumentNullException("xmlElem");
+
+            xmlElem.AppendElem("Name", Name);
+            xmlElem.AppendElem("AliasType", AliasType);
+            xmlElem.AppendElem("Value", Value);
+            xmlElem.AppendElem("isCnlLinked", isCnlLinked);
+        }
+        public void loadFromXml(XmlNode xmlNode)
+        {
+            if (xmlNode == null)
+                throw new ArgumentNullException("xmlNode");
+
+            Name = xmlNode.GetChildAsString("Name");
+            AliasType = (AliasTypeEnum) xmlNode.GetChildAsInt("AliasType");
+            Value = xmlNode.GetChildAsString("Value");
+            isCnlLinked = xmlNode.GetChildAsBool("isCnlLinked");
+
         }
     }
 }
