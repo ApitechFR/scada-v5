@@ -1115,7 +1115,7 @@ namespace Scada.Scheme.Editor
             // обновление списка компонентов, т.к. при отмене происходит подмена объектов
             FillSchemeComponents();
             ShowSchemeSelection();
-            //updateAliasParametersDisplay();
+            updateAliasParametersDisplay();
         }
 
         private void miEditRedo_Click(object sender, EventArgs e)
@@ -1128,7 +1128,7 @@ namespace Scada.Scheme.Editor
             // обновление списка компонентов, т.к. при возврате происходит подмена объектов
             FillSchemeComponents();
             ShowSchemeSelection();
-            //updateAliasParametersDisplay();
+            updateAliasParametersDisplay();
         }
 
         private void miEditPointer_Click(object sender, EventArgs e)
@@ -1462,7 +1462,7 @@ namespace Scada.Scheme.Editor
                     }
                 }
                 editor.History.EndPoint();
-                //updateAliasParametersDisplay();
+                updateAliasParametersDisplay();
             }
         }
         public GridItem GetRootGridItem(GridItem gridItem)
@@ -1527,6 +1527,10 @@ namespace Scada.Scheme.Editor
         }
         private void propertyGrid_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
         {
+            if(e.NewSelection == null || e.NewSelection.PropertyDescriptor == null)
+            {
+                return;
+            }
             string selectedPropertyName = e.NewSelection.PropertyDescriptor.Name;
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
             if(selectedComponent == null)

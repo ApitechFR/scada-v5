@@ -255,26 +255,6 @@ namespace Scada.Scheme.Editor
                                              // D'autres paramètres de configuration si nécessaire
                 };
 
-
-                //if (dto != null && dto.Changes != null)
-                //{
-                //    foreach (var change in dto.Changes)
-                //    {
-                //        //Debug.WriteLine(JsSerializer.Serialize(((BaseComponent)(change.ChangedObject)).Name));
-                //        //Debug.WriteLine(JsSerializer.Serialize(((BaseComponent)(change.ChangedObject)).AliasesDictionnary));
-                //        //Debug.WriteLine(JsSerializer.Serialize(change.ChangedObject));
-                //        //Debug.WriteLine(JsSerializer.Serialize(change));
-
-                //        var json = JsonConvert.SerializeObject(((BaseComponent)(change.ChangedObject)).AliasesDictionnary, settings);
-                //        Debug.WriteLine(json);
-                //    }
-                //}
-               
-                //Debug.WriteLine(JsSerializer.Serialize(dto.Changes));
-                //if(dto != null && dto.Changes != null)
-                //{
-
-                //}
                 return JsonConvert.SerializeObject(dto, settings);
             }
             catch (Exception ex)
