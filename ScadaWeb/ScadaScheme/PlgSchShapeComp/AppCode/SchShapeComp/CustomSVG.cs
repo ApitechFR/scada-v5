@@ -5,6 +5,7 @@ using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Design;
+using System.Windows.Forms;
 using System.Xml;
 using CM = System.ComponentModel;
 
@@ -170,13 +171,26 @@ namespace Scada.Web.Plugins.SchShapeComp
 			if (viewBoxAttribute != null)
 			{
 				var viewBoxValues = viewBoxAttribute.Value.Split(' ');
-				if (viewBoxValues.Length == 4)
+				
+				try
 				{
-					ViewBoxX = int.Parse(viewBoxValues[0]);
-					ViewBoxY = int.Parse(viewBoxValues[1]);
-					ViewBoxWidth = int.Parse(viewBoxValues[2]);
-					ViewBoxHeight = int.Parse(viewBoxValues[3]);
+					if (viewBoxValues.Length == 4)
+					{
+						ViewBoxX = int.Parse(viewBoxValues[0]);
+						ViewBoxY = int.Parse(viewBoxValues[1]);
+						ViewBoxWidth = int.Parse(viewBoxValues[2]);
+						ViewBoxHeight = int.Parse(viewBoxValues[3]);
+					}
 				}
+				catch (FormatException ex)
+				{
+					MessageBox.Show( "Une erreur s'est produite lors de la conversion des valeurs de viewBox en entiers. Vérifiez que les valeurs de viewBox sont bien des entiers." + ex);
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show("Une erreur inattendue s'est produite. Veuillez réessayer plus tard." + ex);
+				}
+
 			}
 			foreach (XmlNode childNode in svgElement.ChildNodes)
 			{
