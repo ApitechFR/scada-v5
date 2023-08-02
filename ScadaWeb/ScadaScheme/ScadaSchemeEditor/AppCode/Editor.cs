@@ -612,6 +612,7 @@ namespace Scada.Scheme.Editor
                 foreach (BaseComponent comp in SchemeView.Components.Values.Where(x => x.GroupId == -1))
                 {
                     comp.GroupId = symbol.ID;
+                    comp.OnItemChanged(SchemeChangeTypes.ComponentChanged,comp);
                 }
             }
 

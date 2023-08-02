@@ -13,14 +13,17 @@ namespace Scada.Scheme.Model
     [Serializable]
     public class Symbol : ComponentGroup
     {
-        public Dictionary<Alias, int> AliasList { get; set; }
+        public Dictionary<string,int> AliasCnlDictionary { get; set; }
+
+        public List<Alias> AliasList { get; set; }
         public string SymbolId { get; private set; }
         public DateTime LastModificationDate { get; set;}
 
         public Symbol() :base() {
             SymbolId = Guid.NewGuid().ToString();
             LastModificationDate = DateTime.Now;
-            AliasList = new Dictionary<Alias, int>();
+            AliasCnlDictionary = new Dictionary<string, int>();
+            AliasList = new List<Alias>();
         }
 
         public override void SaveToXml(XmlElement xmlElem)
@@ -30,11 +33,12 @@ namespace Scada.Scheme.Model
             xmlElem.AppendElem("SymbolId", SymbolId);
             xmlElem.AppendElem("LastModificationDate", LastModificationDate);
             XmlElement aliasList = xmlElem.OwnerDocument.CreateElement("AliasList");
-            foreach(var a in AliasList)
+            foreach(Alias a in AliasList)
             {
                 XmlElement alias = xmlElem.OwnerDocument.CreateElement("Alias");
-                a.Key.saveToXml(alias);
-                alias.AppendElem("CnlNum", a.Value);
+                a.saveToXml(alias);
+                AliasCnlDictionary.TryGetValue(a.Name, out int cnlNum);
+                alias.AppendElem("CnlNum",cnlNum);
                 aliasList.AppendChild(alias);
             }
             xmlElem.AppendChild(aliasList);
@@ -51,7 +55,8 @@ namespace Scada.Scheme.Model
                 if (aliasNode == null) continue;
                 Alias alias = new Alias();
                 alias.loadFromXml(aliasNode);
-                AliasList.Add(alias, aliasNode.GetChildAsInt("CnlNum"));
+                AliasCnlDictionary.Add(alias.Name,aliasNode.GetChildAsInt("CnlNum"));
+                AliasList.Add(alias);
             }
         }
     }
