@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="plugins\SchShapeComp\css\shapecomp.css" />
+    <Content Include="plugins\SchShapeComp\css\shapecomp.min.css" />
     <Content Include="plugins\SchShapeComp\js\shapecomprender.js" />
     <None Include="Resources\svg.png" />
     <None Include="Resources\polygon.png" />
@@ -87,6 +88,7 @@
     <Compile Include="AppCode\PlgSchShapeCompSpec.cs" />
     <Compile Include="AppCode\SchShapeComp\BoundProperties.cs" />
     <Compile Include="AppCode\SchShapeComp\CustomSVG.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\AdvancedCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\ColorCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\Polygon.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\PolygonCondition.cs" />

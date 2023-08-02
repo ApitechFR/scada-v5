@@ -27,7 +27,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		}
 
 		[DisplayName("Conditions"), Category(Categories.Behavior)]
-		[Description("The conditions for CustomSVG output depending on the value of the input channel.")]
+		[Description("The conditions for SVG Shape output depending on the value of the input channel.")]
 		[CM.DefaultValue(null), CM.TypeConverter(typeof(CollectionConverter))]
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
 		public List<AdvancedCondition> Conditions { get; protected set; }

@@ -25,7 +25,7 @@ scada.scheme.SvgShapeRenderer.constructor =
 	scada.scheme.SvgShapeRenderer;
 
 
-scada.scheme.SvgShapeRenderer.prototype.createSvgElement = function (shapeType, svgCode, props) {
+scada.scheme.SvgShapeRenderer.prototype.createSvgElement = function (shapeType, props) {
 	var svgElement;
 	var svgNamespace = "http://www.w3.org/2000/svg";
 
@@ -60,10 +60,6 @@ scada.scheme.SvgShapeRenderer.prototype.createSvgElement = function (shapeType, 
 			svgElement = document.createElementNS(svgNamespace, "polyline");
 			svgElement.setAttribute("points", "20,20 40,25 60,40 80,120 120,140 200,180");
 			break;
-		case "Custom ...":
-			var parser = new DOMParser();
-			svgElement = parser.parseFromString(svgCode, "image/svg+xml").documentElement;
-			break;
 		default:
 			console.warn("Unrecognized shape type: " + shapeType);
 			return null;
@@ -83,13 +79,11 @@ scada.scheme.SvgShapeRenderer.prototype.createDom = function (
 ) {
 	var props = component.props;
 	var shapeType = props.ShapeType;
-	var svgCode = props.SvgCode;
-
+	
 	var divComp = $("<div id='comp" + component.id + "'></div>");
-	//this.prepareComponent(divComp, component);
 	this.prepareComponent(divComp, component, false, true);
 
-	var svgElement = this.createSvgElement(shapeType, svgCode, props);
+	var svgElement = this.createSvgElement(shapeType, props);
 
 	var svgNamespace = "http://www.w3.org/2000/svg";
 	var svgContainer = document.createElementNS(svgNamespace, "svg");
@@ -132,9 +126,41 @@ scada.scheme.SvgShapeRenderer.prototype.updateData = function (
 
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
+
+		if (props.Conditions && cnlDataExt.Stat > 0) {
+			var cnlVal = cnlDataExt.Val;
+
+			for (var cond of props.Conditions) {
+				if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
+					// Set CSS properties based on Condition
+					if (cond.Color) {
+						divComp.css("color", cond.Color);
+					}
+					if (cond.BackgroundColor) {
+						divComp.css("background-color", cond.BackgroundColor);
+					}
+					if (cond.TextContent) {
+						divComp.text(cond.TextContent);
+					}
+					divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
+					divComp.css("width", cond.Width);
+					divComp.css("height", cond.Height);
+
+					// Handle Blinking
+					if (cond.Blinking == 1) {
+						divComp.addClass("slow-blink");
+					} else if (cond.Blinking == 2) {
+						divComp.addClass("fast-blink");
+					} else {
+						divComp.removeClass("slow-blink fast-blink");
+					}
+
+					break;
+				}
+			}
+		}
 	}
 };
-
 
 /******* Polygon shape */
 
@@ -224,6 +250,40 @@ scada.scheme.PolygonRenderer.prototype.updateData = function (
 
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
+
+		// Advanced Conditions
+		if (props.Conditions && cnlDataExt.Stat > 0) {
+			var cnlVal = cnlDataExt.Val;
+
+			for (var cond of props.Conditions) {
+				if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
+					// Set CSS properties based on Condition
+					if (cond.Color) {
+						divComp.css("color", cond.Color);
+					}
+					if (cond.BackgroundColor) {
+						divComp.css("background-color", cond.BackgroundColor);
+					}
+					if (cond.TextContent) {
+						divComp.text(cond.TextContent);
+					}
+					divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
+					divComp.css("width", cond.Width);
+					divComp.css("height", cond.Height);
+
+					// Handle Blinking
+					if (cond.Blinking == 1) {
+						divComp.addClass("slow-blink");
+					} else if (cond.Blinking == 2) {
+						divComp.addClass("fast-blink");
+					} else {
+						divComp.removeClass("slow-blink fast-blink");
+					}
+
+					break;
+				}
+			}
+		}
 	}
 };
 /**************** Custom SVG *********************/
@@ -321,8 +381,6 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 ) {
 	var props = component.props;
 
-
-
 	if (props.InCnlNum > 0) {
 		var divComp = component.dom;
 		var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
@@ -344,6 +402,28 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
+
+		divComp.removeClass("no-blink slow-blink fast-blink");
+		if ( props.Conditions && cnlDataExt.Stat > 0) {
+			var cnlVal = cnlDataExt.Val;
+			for (var cond of props.Conditions) {
+				if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
+					divComp.css("background-color", cond.Color);
+					switch (cond.Blinking) {
+						case 0:
+							divComp.addClass("no-blink");
+							break;
+						case 1:
+							divComp.addClass("slow-blink");
+							break;
+						case 2:
+							divComp.addClass("fast-blink");
+							break;
+					}
+					break;
+				}
+			}
+		}
 	}
 };
 

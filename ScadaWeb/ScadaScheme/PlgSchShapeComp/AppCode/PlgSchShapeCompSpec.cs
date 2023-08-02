@@ -33,6 +33,7 @@ namespace Scada.Web.Plugins
 				AttrTranslator attrTranslator = new AttrTranslator();
 				attrTranslator.TranslateAttrs(typeof(ColorCondition));
 				attrTranslator.TranslateAttrs(typeof(PolygonCondition));
+				attrTranslator.TranslateAttrs(typeof(AdvancedCondition));
 				attrTranslator.TranslateAttrs(typeof(PopupSize));
 
 
