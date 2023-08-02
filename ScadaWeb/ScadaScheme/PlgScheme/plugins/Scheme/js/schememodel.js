@@ -282,6 +282,9 @@ scada.scheme.Scheme.prototype._loadComponents = function (viewOrEditorID, callba
     })
     .done(function (data, textStatus, jqXHR) {
         try {
+            console.log(data);
+            console.log(data.d);
+
             var parsedData = $.parseJSON(data.d);
             if (parsedData.Success) {
                 scada.utils.logSuccessfulRequest(operation);
