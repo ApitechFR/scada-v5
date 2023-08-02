@@ -100,6 +100,41 @@ scada.scheme.SvgShapeRenderer.prototype.createDom = function (
 	divComp.append(svgContainer);
 	component.dom = divComp;
 };
+scada.scheme.SvgShapeRenderer.prototype.updateData = function (
+	component,
+	renderContext,
+) {
+	var props = component.props;
+
+	if (props.InCnlNum > 0) {
+		var divComp = component.dom;
+		var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
+
+		// choose and set colors of the component
+		var statusColor = cnlDataExt.Color;
+		var isHovered = divComp.is(":hover");
+
+		var backColor = this.chooseColor(
+			isHovered,
+			props.BackColor,
+			props.BackColorOnHover,
+		);
+		var borderColor = this.chooseColor(
+			isHovered,
+			props.BorderColor,
+			props.BorderColorOnHover,
+		);
+
+		
+		var svgElement = divComp.find("svg > *");
+		svgElement.attr("fill", backColor);
+		svgElement.attr("stroke", borderColor);
+
+		this.setBackColor(divComp, backColor, true, statusColor);
+		this.setBorderColor(divComp, borderColor, true, statusColor);
+	}
+};
+
 
 /******* Polygon shape */
 
@@ -116,7 +151,7 @@ scada.scheme.PolygonRenderer.constructor =
 scada.scheme.PolygonRenderer.prototype.generatePolygonPath = function (
 	numPoints,
 ) {
-	console.log(numPoints);
+	
 	// Check that numPoints is a valid value
 	var validPoints = [3, 4, 5, 6, 8, 10];
 	if (!validPoints.includes(numPoints)) {
@@ -143,9 +178,7 @@ scada.scheme.PolygonRenderer.prototype.createDom = function (
 	renderContext,
 ) {
 	var props = component.props;
-	console.log(props);
-
-
+	
 	var divComp = $("<div id='comp" + component.id + "'></div>");
 	this.prepareComponent(divComp, component);
 
@@ -287,7 +320,7 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 	renderContext,
 ) {
 	var props = component.props;
-	console.log(props);
+
 
 
 	if (props.InCnlNum > 0) {
