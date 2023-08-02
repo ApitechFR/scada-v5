@@ -23,7 +23,6 @@
  * Modified : 2019
  */
 
-using Scada.Scheme.DataTransfer;
 using Scada.Scheme.Editor.AppCode;
 using Scada.Scheme.Editor.Properties;
 using Scada.Scheme.Model;
@@ -37,8 +36,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using Utils;
@@ -1385,7 +1382,6 @@ namespace Scada.Scheme.Editor
 
         private void cbSchComp_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Debug.WriteLine("cbSchComp_SelectedIndexChanged");
             // отображение свойств объекта, выбранного в выпадающем списке
             schCompChanging = true;
 
@@ -1425,7 +1421,6 @@ namespace Scada.Scheme.Editor
 
         private void propertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
-            Debug.WriteLine("propertyGrid_PropertyValueChanged");
             // отслеживание изменений
             if (propertyGrid.SelectedObjects != null)
             {
@@ -1495,9 +1490,11 @@ namespace Scada.Scheme.Editor
                 }
             }
         }
+        /// <summary>
+        /// Updates propertyGrid display, considering links between component parameters and aliases
+        /// </summary>
         private void updateAliasParametersDisplay()
         {
-            Debug.WriteLine("updateAliasParametersDisplay");
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
             if (selectedComponent == null)
             {
@@ -1562,7 +1559,6 @@ namespace Scada.Scheme.Editor
             al.Name = "alias Test";
             al.AliasType = typeof(string);
             al.Value = "Louis";
-            Debug.WriteLine(al.Value.ToString());
             al.isCnlLinked = false;
 
             Symbol s = new Symbol();
@@ -1613,7 +1609,6 @@ namespace Scada.Scheme.Editor
                     selectedComponent.AliasesDictionnary.Add(selectedPropertyName, frmAliasSelection.selectedAlias);
                 }
 
-                
                 //Copy alias value in component parameter
                 var oldProperty = selectedProperty.Value;
                 if(frmAliasSelection.selectedAlias != null)
@@ -1621,12 +1616,8 @@ namespace Scada.Scheme.Editor
                     componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
                 }
 
-                //beginpoint
-                //onchange(aliasesdictionnary)
-
                 propertyGrid.SelectedObject = selectedComponent;
                 propertyGrid_PropertyValueChanged(propertyGrid, new PropertyValueChangedEventArgs(selectedProperty, oldProperty));
-                //EndPoint 
 
                 return;
             }

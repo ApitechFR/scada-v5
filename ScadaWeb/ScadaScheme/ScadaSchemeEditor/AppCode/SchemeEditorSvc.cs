@@ -24,11 +24,8 @@
  */
 
 using Scada.Scheme.DataTransfer;
-using Scada.Scheme.Model;
 using Scada.Web;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
 using System.ServiceModel.Web;
@@ -250,9 +247,8 @@ namespace Scada.Scheme.Editor
 
                 var settings = new JsonSerializerSettings
                 {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore, // Ignore les boucles de référence
-                    MaxDepth = 10, // Spécifiez une profondeur maximale pour éviter les boucles infinies, si nécessaire
-                                             // D'autres paramètres de configuration si nécessaire
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore, 
+                    MaxDepth = 10,
                 };
 
                 return JsonConvert.SerializeObject(dto, settings);

@@ -26,7 +26,6 @@
 using Scada.Scheme.Model;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Utils;
 
 namespace Scada.Scheme.Editor
@@ -323,7 +322,6 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public void Add(SchemeChangeTypes changeType, object changedObject, object oldKey = null)
         {
-            Debug.WriteLine("Add");
             try
             {
                 lock (this)
@@ -379,7 +377,6 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public List<Change> GetUndoChanges()
         {
-            Debug.WriteLine("GetUndoChanges");
             List<Change> changes = new List<Change>();
 
             try
@@ -415,7 +412,6 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public List<Change> GetRedoChanges()
         {
-            Debug.WriteLine("GetRedoChanges");
             try
             {
                 lock (this)

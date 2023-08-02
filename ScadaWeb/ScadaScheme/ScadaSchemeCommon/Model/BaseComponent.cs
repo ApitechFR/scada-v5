@@ -28,7 +28,6 @@ using Scada.Scheme.Model.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.Drawing.Design;
 using System.Text;
 using System.Web.Script.Serialization;
@@ -322,7 +321,6 @@ namespace Scada.Scheme.Model
         /// </summary>
         public void OnItemChanged(SchemeChangeTypes changeType, object changedObject, object oldKey = null)
         {
-            Debug.WriteLine("OnItemChanged");
             ItemChanged?.Invoke(this, changeType, changedObject, oldKey);
         }
 

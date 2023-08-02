@@ -1,7 +1,6 @@
 ﻿using Scada.Scheme.Model;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace Scada.Scheme.Editor

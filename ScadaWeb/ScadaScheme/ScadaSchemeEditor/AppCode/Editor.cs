@@ -28,7 +28,6 @@ using Scada.Scheme.Model.DataTypes;
 using Scada.Web;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -1190,7 +1189,6 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public void Redo()
         {
-            Debug.WriteLine("Redo");
             try
             {
                 if (SchemeView != null)

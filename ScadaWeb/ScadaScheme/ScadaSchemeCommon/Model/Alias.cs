@@ -1,11 +1,4 @@
-﻿using ExCSS;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using System.Xml.Schema;
+﻿using System;
 
 namespace Scada.Scheme.Model
 {
@@ -19,13 +12,10 @@ namespace Scada.Scheme.Model
 
         private object _value;
         public object Value { get { return _value; } set { 
-                //if(value.GetType() == TypeDictionary[AliasType])
-                //{
-                    if (value.GetType() == AliasType)
-                    {
-                        _value = value;
-                    }
-                //}
+                if (value.GetType() == AliasType)
+                {
+                    _value = value;
+                }
             } }
         public Alias()
         {
