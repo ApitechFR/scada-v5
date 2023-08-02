@@ -23,6 +23,7 @@
  * Modified : 2019
  */
 
+using Scada.Scheme.Editor.AppCode;
 using Scada.Scheme.Editor.Properties;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
@@ -1119,6 +1120,7 @@ namespace Scada.Scheme.Editor
             // обновление списка компонентов, т.к. при отмене происходит подмена объектов
             FillSchemeComponents();
             ShowSchemeSelection();
+            updateAliasParametersDisplay();
         }
 
         private void miEditRedo_Click(object sender, EventArgs e)
@@ -1131,6 +1133,7 @@ namespace Scada.Scheme.Editor
             // обновление списка компонентов, т.к. при возврате происходит подмена объектов
             FillSchemeComponents();
             ShowSchemeSelection();
+            updateAliasParametersDisplay();
         }
 
         private void miEditPointer_Click(object sender, EventArgs e)
@@ -1392,7 +1395,30 @@ namespace Scada.Scheme.Editor
 
             if (cbSchComp.SelectedItem is BaseComponent component)
                 editor.SelectComponent(component.ID);
+                if (component.GroupId != -1)
+                {
+                    TreeNode SymbolNode = findNode(treeView1.Nodes, n => 
+                        {
+                            BaseComponent bc = (BaseComponent)n.Tag;
+                            return (bc.ID == component.GroupId && bc.GetType() == typeof(Symbol));
+                        }
+                    );
+                    if(SymbolNode != null)
+                    {
+                        toolStripButton1.Enabled = true;
+                        toolStripButton1.ToolTipText = "Link to a symbol property";
+                    }
+                    else
+                    {
+                        // todo : set to false
+                        toolStripButton1.Enabled = true;
+                        toolStripButton1.ToolTipText = "The component has to be a symbol child";
+                    }
+                }
+                updateAliasParametersDisplay();
+            }
             else
+            { 
                 editor.DeselectAll();
 
             schCompChanging = false;
@@ -1440,6 +1466,88 @@ namespace Scada.Scheme.Editor
                 }
 
                 editor.History.EndPoint();
+                updateAliasParametersDisplay();
+            }
+        }
+        public GridItem GetRootGridItem(GridItem gridItem)
+        {
+            return gridItem.Parent != null ? GetRootGridItem(gridItem.Parent) : gridItem;
+        }
+        public List<GridItem> GetPropertyGridItems(PropertyGrid propertyGrid)
+        {
+            List<GridItem> gridItems = new List<GridItem>();
+            var rootItem = GetRootGridItem(propertyGrid.SelectedGridItem);
+            if (propertyGrid != null && rootItem != null)
+            {
+                GetSubGridItems(rootItem, gridItems);
+            }
+            return gridItems;
+        }
+        private void GetSubGridItems(GridItem gridItem, List<GridItem> gridItems)
+        {
+            if (gridItem != null)
+            {
+                foreach (GridItem item in gridItem.GridItems)
+                {
+                    if(item.PropertyDescriptor != null)
+                    {
+                        gridItems.Add(item);
+                    }
+                    GetSubGridItems(item, gridItems);
+                }
+            }
+        }
+        /// <summary>
+        /// Updates propertyGrid display, considering links between component parameters and aliases
+        /// </summary>
+        private void updateAliasParametersDisplay()
+        {
+            BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
+            if (selectedComponent == null)
+            {
+                return;
+            }
+            propertyGrid.SelectedObject = selectedComponent;
+            var aliasRelatedPropertiesNames = selectedComponent.AliasesDictionnary.Keys.ToArray();
+            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(selectedComponent);
+            var aliasRelatedProperties = GetPropertyGridItems(propertyGrid);
+            aliasRelatedProperties = aliasRelatedProperties.Where(item => aliasRelatedPropertiesNames.Contains(item.PropertyDescriptor.Name)).ToList();
+            ICustomTypeDescriptor customTypeDescriptor = TypeDescriptor.GetProvider(selectedComponent).GetTypeDescriptor(selectedComponent);
+            PropertyDescriptorCollection newProperties = new PropertyDescriptorCollection(new PropertyDescriptor[] { });
+            foreach (PropertyDescriptor prop in properties)
+            {
+                if (!aliasRelatedPropertiesNames.Contains(prop.Name))
+                {
+                    newProperties.Add(prop);
+                }
+            }
+            foreach (var aliasProperty in aliasRelatedProperties)
+            {
+                PropertyDescriptor aliasRelatedPropDescriptor = aliasProperty.PropertyDescriptor;
+                if (aliasRelatedPropDescriptor != null)
+                {
+                    PropertyDescriptor customPropertyDescriptor = new CustomPropertyDescriptor(aliasRelatedPropDescriptor, aliasProperty.Label + " (Alias)", true);
+                    newProperties.Add(customPropertyDescriptor);
+                }
+            }
+            propertyGrid.SelectedObject = new AppCode.CustomTypeDescriptor(customTypeDescriptor, newProperties);
+        }
+        private void propertyGrid_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
+        {
+            if(e.NewSelection == null || e.NewSelection.PropertyDescriptor == null)
+            {
+                return;
+            }
+            string selectedPropertyName = e.NewSelection.PropertyDescriptor.Name;
+            BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
+            if(selectedComponent == null)
+            {
+                toolStripButton1.Enabled = false;
+                toolStripButton1.ToolTipText = "Select a component property to link an alias";
+                return;
+            }
+            if (e.NewSelection.PropertyDescriptor.IsReadOnly && !selectedComponent.AliasesDictionnary.Keys.Contains(selectedPropertyName))
+            {
             }
         }
 
@@ -1451,9 +1559,58 @@ namespace Scada.Scheme.Editor
         private void miSaveSymbolAs_Click(object sender, EventArgs e)
         {
             SaveScheme(saveAs: true, asSymbol: true);
+                toolStripButton1.Enabled = false;
+                toolStripButton1.ToolTipText = "This property cannot be modified";
+            }
+            else
+            {
+                // todo : set to false
+                toolStripButton1.Enabled = true;
+                toolStripButton1.ToolTipText = "Link to a symbol property";
+            }
+        }
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            //todo: remove tis part from here
+            Alias al = new Alias();
+            al.Name = "alias Test";
+            al.AliasType = typeof(string);
+            al.Value = "Louis";
+            al.isCnlLinked = false;
 
         }
 
+            GridItem selectedProperty = propertyGrid.SelectedGridItem;
+            List<Alias> availableAliases = new List<Alias>();
+            availableAliases = parentSymbol.AliasList.Keys.Where(a => a.AliasType == selectedProperty.PropertyDescriptor.PropertyType).ToList();
+            string selectedPropertyName = selectedProperty.PropertyDescriptor.Name;
+            int defaultSelectionIndex = -1;
+            if (selectedComponent.AliasesDictionnary.ContainsKey(selectedPropertyName))
+            {
+                defaultSelectionIndex = availableAliases.FindIndex(a=>a.Name == selectedComponent.AliasesDictionnary[selectedPropertyName].Name);
+            }
+            FrmAliasSelection frmAliasSelection = new FrmAliasSelection(selectedProperty.Label, availableAliases, defaultSelectionIndex);
+            if (frmAliasSelection.ShowDialog() == DialogResult.OK)
+            {
+                //find component property to update
+                var componentProperty = selectedComponent.GetType().GetProperty(selectedPropertyName);
+                if(componentProperty == null)
+                {
+                    return;
+                }
+                //update mapping between compoennt properties and alias
+                selectedComponent.AliasesDictionnary.Remove(selectedPropertyName);
+                if(frmAliasSelection.selectedAlias != null)
+                {
+                    selectedComponent.AliasesDictionnary.Add(selectedPropertyName, frmAliasSelection.selectedAlias);
+                }
+
+                //Copy alias value in component parameter
+                var oldProperty = selectedProperty.Value;
+                if(frmAliasSelection.selectedAlias != null)
+                {
+                    componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
+                }
         private void newSymbolToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // создание новой схемы
@@ -1462,4 +1619,11 @@ namespace Scada.Scheme.Editor
         }
     }
 
+                propertyGrid.SelectedObject = selectedComponent;
+                propertyGrid_PropertyValueChanged(propertyGrid, new PropertyValueChangedEventArgs(selectedProperty, oldProperty));
+
+                return;
+            }
+        }
+    }
 }
