@@ -128,11 +128,6 @@
     <Compile Include="plugins\Scheme\SchemeSvc.svc.cs">
       <DependentUpon>SchemeSvc.svc</DependentUpon>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="plugins\Scheme\css\schemeform.less" />
@@ -162,12 +157,6 @@
       <Project>{b61c631d-5ab8-431a-93c9-3dc8b36878bb}</Project>
       <Name>ScadaSchemeCommon</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
