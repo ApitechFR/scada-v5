@@ -1385,6 +1385,7 @@ namespace Scada.Scheme.Editor
 
         private void cbSchComp_SelectedIndexChanged(object sender, EventArgs e)
         {
+            Debug.WriteLine("cbSchComp_SelectedIndexChanged");
             // отображение свойств объекта, выбранного в выпадающем списке
             schCompChanging = true;
 
@@ -1411,7 +1412,7 @@ namespace Scada.Scheme.Editor
                         toolStripButton1.ToolTipText = "The component has to be a symbol child";
                     }
                 }
-                //updateAliasParametersDisplay();
+                updateAliasParametersDisplay();
             }
             else
             { 
@@ -1424,6 +1425,7 @@ namespace Scada.Scheme.Editor
 
         private void propertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
+            Debug.WriteLine("propertyGrid_PropertyValueChanged");
             // отслеживание изменений
             if (propertyGrid.SelectedObjects != null)
             {
@@ -1495,6 +1497,7 @@ namespace Scada.Scheme.Editor
         }
         private void updateAliasParametersDisplay()
         {
+            Debug.WriteLine("updateAliasParametersDisplay");
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
             if (selectedComponent == null)
             {
@@ -1620,6 +1623,8 @@ namespace Scada.Scheme.Editor
 
                 //beginpoint
                 //onchange(aliasesdictionnary)
+
+                propertyGrid.SelectedObject = selectedComponent;
                 propertyGrid_PropertyValueChanged(propertyGrid, new PropertyValueChangedEventArgs(selectedProperty, oldProperty));
                 //EndPoint 
 
