@@ -1571,7 +1571,8 @@ namespace Scada.Scheme.Editor
 
             Symbol s = new Symbol();
             s.Name = "okok";
-            s.AliasList.Add(al, -1);
+            s.AliasList.Add(al);
+            s.AliasCnlDictionary.Add(s.Name, -1);
             //to here
 
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
@@ -1594,7 +1595,7 @@ namespace Scada.Scheme.Editor
 
             GridItem selectedProperty = propertyGrid.SelectedGridItem;
             List<Alias> availableAliases = new List<Alias>();
-            availableAliases = parentSymbol.AliasList.Keys.Where(a => a.AliasType == selectedProperty.PropertyDescriptor.PropertyType).ToList();
+            availableAliases = parentSymbol.AliasList.Where(a => a.AliasType == selectedProperty.PropertyDescriptor.PropertyType).ToList();
             string selectedPropertyName = selectedProperty.PropertyDescriptor.Name;
             int defaultSelectionIndex = -1;
             if (selectedComponent.AliasesDictionnary.ContainsKey(selectedPropertyName))
