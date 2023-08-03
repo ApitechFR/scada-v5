@@ -592,10 +592,6 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public bool SaveSchemeToFile(string fileName, out string errMsg, bool asSymbol = false)
         {
-
-
-
-
             if ((asSymbol||SchemeView.isSymbol) && SchemeView.MainSymbol==null)
             {
                 Symbol symbol = new Symbol();

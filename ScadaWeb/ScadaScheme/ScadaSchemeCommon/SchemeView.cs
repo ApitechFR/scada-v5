@@ -188,11 +188,9 @@ namespace Scada.Scheme
             if (rootElem.Name.Equals("SchemeSymbol", StringComparison.OrdinalIgnoreCase))
                 isSymbol = true;
 
-
             // get channel offsets in template mode
             int inCnlOffset = templateArgs.InCnlOffset;
-            int ctrlCnlOffset = templateArgs.CtrlCnlOffset;
-
+            int ctrlCnlOffset = templateArgs.CtrlCnlOffset
             
             // load scheme document
             if (rootElem.SelectSingleNode("Scheme") is XmlNode schemeNode)
