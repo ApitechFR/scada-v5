@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -7,23 +7,23 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{36CBF606-7F85-4E46-BC7A-C86CACF675B2}</ProjectGuid>
+    <ProjectGuid>{42531425-B844-4CC3-A9EA-124B7714B65F}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Scada.Web</RootNamespace>
-    <AssemblyName>PlgScheme</AssemblyName>
+    <AssemblyName>PlgSchShapeComp</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
-    <IISExpressSSLPort />
+    <Use64BitIISExpress />
+    <IISExpressSSLPort>44392</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>
-    <Use64BitIISExpress />
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,6 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\</OutputPath>
@@ -43,88 +44,69 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Log, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Log">
       <HintPath>..\..\..\Log\Log\bin\Release\Log.dll</HintPath>
     </Reference>
-    <Reference Include="ScadaData, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="ScadaData">
       <HintPath>..\..\..\ScadaData\ScadaData\bin\Release\ScadaData.dll</HintPath>
     </Reference>
     <Reference Include="ScadaWebCommon">
       <HintPath>..\..\ScadaWeb\ScadaWebCommon\bin\Release\ScadaWebCommon.dll</HintPath>
     </Reference>
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.ServiceModel.Web" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ClientApiSvc.svc" />
-    <Content Include="config\WebSettings.xml" />
-    <Content Include="css\controls\notifier.css">
-      <DependentUpon>notifier.less</DependentUpon>
-    </Content>
-    <Content Include="css\controls\notifier.min.css">
-      <DependentUpon>notifier.css</DependentUpon>
-    </Content>
-    <Content Include="examples\TemplateBindings.xml" />
-    <Content Include="js\api\ajaxqueue.js" />
-    <Content Include="js\api\clientapi.js" />
-    <Content Include="js\api\eventtypes.js" />
-    <Content Include="js\api\notiftypes.js" />
-    <Content Include="js\api\utils.js" />
-    <Content Include="js\api\viewhub.js" />
-    <Content Include="js\controls\notifier.js" />
-    <Content Include="lang\ScadaData.en-GB.xml" />
-    <Content Include="lang\ScadaWeb.en-GB.xml" />
-    <Content Include="lib\font-awesome\css\font-awesome.min.css" />
-    <Content Include="lib\jquery\jquery.min.js" />
-    <Content Include="plugins\Scheme\css\schemeform.css">
-      <DependentUpon>schemeform.less</DependentUpon>
-    </Content>
-    <Content Include="plugins\Scheme\css\schemeform.min.css">
-      <DependentUpon>schemeform.css</DependentUpon>
-    </Content>
-    <Content Include="plugins\Scheme\images\loading.gif" />
-    <Content Include="plugins\Scheme\images\schemeicon.png" />
-    <Content Include="plugins\Scheme\js\schemeform.js" />
-    <Content Include="plugins\Scheme\js\schemecommon.js" />
-    <Content Include="plugins\Scheme\js\schememodel.js" />
-    <Content Include="plugins\Scheme\js\schemerender.js" />
-    <Content Include="plugins\Scheme\lang\ScadaScheme.ru-RU.xml" />
-    <Content Include="plugins\Scheme\lang\ScadaScheme.en-GB.xml" />
-    <Content Include="plugins\Scheme\lang\PlgScheme.en-GB.xml" />
-    <Content Include="plugins\Scheme\lang\PlgScheme.ru-RU.xml" />
-    <Content Include="plugins\Scheme\Scheme.aspx" />
-    <Content Include="plugins\Scheme\SchemeSvc.svc" />
-    <Content Include="Web.config">
-      <SubType>Designer</SubType>
-    </Content>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppCode\PlgSchemeSpec.cs" />
-    <Compile Include="AppCode\Scheme\ScaleType.cs" />
-    <Compile Include="AppCode\Scheme\SchemeOptions.cs" />
-    <Compile Include="AppCode\Scheme\SchemeViewSpec.cs" />
-    <Compile Include="plugins\Scheme\Scheme.aspx.cs">
-      <DependentUpon>Scheme.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
+    <Content Include="plugins\SchShapeComp\css\shapecomp.css" />
+    <Content Include="plugins\SchShapeComp\js\shapecomprender.js" />
+    <None Include="Resources\svg.png" />
+    <None Include="Resources\polygon.png" />
+    <Content Include="Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AppCode\PlgSchShapeCompSpec.cs" />
+    <Compile Include="AppCode\SchShapeComp\BoundProperties.cs" />
+    <Compile Include="AppCode\SchShapeComp\CustomSVG.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\ColorCondition.cs" />
+    <Compile Include="AppCode\SchShapeComp\Polygon.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\PolygonCondition.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Forms\FrmCustomShape.cs">
+      <SubType>Form</SubType>
     </Compile>
-    <Compile Include="plugins\Scheme\Scheme.aspx.designer.cs">
-      <DependentUpon>Scheme.aspx</DependentUpon>
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Forms\FrmCustomShape.Designer.cs">
+      <DependentUpon>FrmCustomShape.cs</DependentUpon>
     </Compile>
+    <Compile Include="AppCode\SchShapeComp\PlgUtils.cs" />
+    <Compile Include="AppCode\SchShapeComp\PopupSize.cs" />
+    <Compile Include="AppCode\SchShapeComp\PopupSizeConverter.cs" />
+    <Compile Include="AppCode\SchShapeComp\PopupWidth.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\NumberSelectEditor.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\SvgShapeSelectEditor.cs" />
+    <Compile Include="AppCode\SchShapeComp\ShapeCompFactory.cs" />
+    <Compile Include="AppCode\SchShapeComp\ShapeCompLibSpec.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\SVGEditor.cs" />
+    <Compile Include="AppCode\SchShapeComp\SvgShape.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="plugins\Scheme\SchemeSvc.svc.cs">
-      <DependentUpon>SchemeSvc.svc</DependentUpon>
-    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -132,18 +114,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="plugins\Scheme\css\schemeform.less" />
     <None Include="compilerconfig.json" />
-    <None Include="compilerconfig.json.defaults">
-      <DependentUpon>compilerconfig.json</DependentUpon>
-    </None>
-    <Content Include="plugins\Scheme\web.config" />
-    <Content Include="css\common\globalvar.less" />
-    <Content Include="lib\font-awesome\fonts\fontawesome-webfont.ttf" />
-    <Content Include="css\controls\notifier.less" />
-    <Content Include="plugins\Scheme\css\scheme.less" />
     <None Include="packages.config" />
-    <None Include="Properties\PublishProfiles\MainProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -152,7 +124,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="log\" />
+    <Folder Include="plugins\SchShapeComp\lang\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ScadaSchemeCommon\ScadaSchemeCommon.csproj">
@@ -163,6 +135,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
@@ -177,11 +150,11 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>False</UseIIS>
+          <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>51034</DevelopmentServerPort>
+          <DevelopmentServerPort>52660</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:51034/</IISUrl>
+          <IISUrl>https://localhost:44392/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
@@ -191,12 +164,11 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <Import Project="..\packages\BuildWebCompiler.1.12.405\build\BuildWebCompiler.targets" Condition="Exists('..\packages\BuildWebCompiler.1.12.405\build\BuildWebCompiler.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\BuildWebCompiler.1.12.405\build\BuildWebCompiler.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\BuildWebCompiler.1.12.405\build\BuildWebCompiler.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
