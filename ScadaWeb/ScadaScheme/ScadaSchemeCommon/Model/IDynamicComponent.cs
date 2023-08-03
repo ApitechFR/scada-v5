@@ -47,6 +47,5 @@ namespace Scada.Scheme.Model
         /// Получить или установить номер канала управления.
         /// </summary>
         int CtrlCnlNum { get; set; }
-
     }
 }
