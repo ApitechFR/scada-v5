@@ -244,6 +244,10 @@ scada.scheme.Dragging.prototype.startDragging = function (captCompJqObj, selComp
 
 // Continue dragging
 scada.scheme.Dragging.prototype.continueDragging = function (pageX, pageY) {
+    // handle selection change while moving
+    if ($(".comp-wrapper.selected .comp").length !== this.draggedElem.length) {
+        this.draggedElem = $(".comp-wrapper.selected .comp");
+    }
     var DragModes = scada.scheme.DragModes;
     var thisObj = this;
     var dx = pageX - this.startX;
@@ -259,9 +263,14 @@ scada.scheme.Dragging.prototype.continueDragging = function (pageX, pageY) {
             this.draggedElem.each(function () {
                 var component = $(this).data("component");
                 var startLocation = $(this).data("start-location");
+                if (!startLocation) {
+                    startLocation = component.renderer.getLocation(component);
+                    $(this).data("start-location", startLocation);
+                }
                 component.renderer.setLocation(component, startLocation.x + dx, startLocation.y + dy);
             });
         } else {
+            var component = $(this).data("component");
             var resizeLeft = this.mode === DragModes.NW_RESIZE ||
                 this.mode === DragModes.SW_RESIZE || this.mode === DragModes.W_RESIZE;
             var resizeRight = this.mode === DragModes.NE_RESIZE ||
@@ -272,6 +281,10 @@ scada.scheme.Dragging.prototype.continueDragging = function (pageX, pageY) {
                 this.mode === DragModes.SE_RESIZE || this.mode === DragModes.S_RESIZE;
             var elem = this.draggedElem.eq(0);
             var startSize = elem.data("start-size");
+            if (!startSize) {
+                startSize = component.renderer.getSize(component);
+                elem.data("start-size", startSize);
+            }
             var newWidth = startSize.width;
             var newHeight = startSize.height;
 
@@ -485,10 +498,9 @@ scada.scheme.EditableScheme.prototype._processSelection = function (selCompIDs) 
     var divScheme = this._getSchemeDiv();
 
     for (var selCompID of selCompIDs) {
+        divScheme.find("#comp" + selCompID).parent(".comp-wrapper").addClass("selected");
         if (idSet.has(selCompID)) {
             idSet.delete(selCompID);
-        } else {
-            divScheme.find("#comp" + selCompID).parent(".comp-wrapper").addClass("selected");
         }
     }
 

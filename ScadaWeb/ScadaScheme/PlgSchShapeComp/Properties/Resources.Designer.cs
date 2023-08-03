@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Scada.Scheme.Editor.Properties {
+namespace Scada.Web.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Scada.Scheme.Editor.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Scada.Scheme.Editor.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Scada.Web.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace Scada.Scheme.Editor.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap comp_dp {
+        internal static System.Drawing.Bitmap polygon {
             get {
-                object obj = ResourceManager.GetObject("comp_dp", resourceCulture);
+                object obj = ResourceManager.GetObject("polygon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,59 +73,9 @@ namespace Scada.Scheme.Editor.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap comp_dt {
+        internal static System.Drawing.Bitmap svg {
             get {
-                object obj = ResourceManager.GetObject("comp_dt", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap comp_sp {
-            get {
-                object obj = ResourceManager.GetObject("comp_sp", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap comp_st {
-            get {
-                object obj = ResourceManager.GetObject("comp_st", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap component {
-            get {
-                object obj = ResourceManager.GetObject("component", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap pointer {
-            get {
-                object obj = ResourceManager.GetObject("pointer", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap shape_square {
-            get {
-                object obj = ResourceManager.GetObject("shape_square", resourceCulture);
+                object obj = ResourceManager.GetObject("svg", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
