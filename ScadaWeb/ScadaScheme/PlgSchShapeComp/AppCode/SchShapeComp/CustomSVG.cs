@@ -37,7 +37,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 		private string _svgCode;
 
 
-		//[DisplayName("SVG Code"), Category(Categories.Design), CM.ReadOnly(true)]
 		[DisplayName("SVG Code"), Category(Categories.Design)]
 		[Description("SVG code .")]
 		[CM.Editor(typeof(SVGEditor), typeof(UITypeEditor))]
