@@ -1649,5 +1649,10 @@ namespace Scada.Scheme.Editor
             if (ConfirmCloseScheme())
                 InitScheme(isSymbol:true);
         }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            new FrmAlias().ShowDialog();
+        }
     }
 }

@@ -32,14 +32,16 @@ namespace Scada.Scheme.Editor
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Standard", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem("Pointer", "(none)");
             System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem("Static Text", "(none)");
             System.Windows.Forms.ListViewItem listViewItem3 = new System.Windows.Forms.ListViewItem("Dynamic Text", "(none)");
             System.Windows.Forms.ListViewItem listViewItem4 = new System.Windows.Forms.ListViewItem("Static Picture", "(none)");
             System.Windows.Forms.ListViewItem listViewItem5 = new System.Windows.Forms.ListViewItem("Dynamic Picture", "(none)");
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.toolStrip = new System.Windows.Forms.ToolStrip();
+            this.btnFileNew = new System.Windows.Forms.ToolStripDropDownButton();
+            this.newSymbolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnFileOpen = new System.Windows.Forms.ToolStripButton();
             this.btnFileSave = new System.Windows.Forms.ToolStripSplitButton();
             this.miFileSaveAs2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -99,8 +101,7 @@ namespace Scada.Scheme.Editor
             this.miToolsOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.miHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.miHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnFileNew = new System.Windows.Forms.ToolStripDropDownButton();
-            this.newSymbolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -111,8 +112,6 @@ namespace Scada.Scheme.Editor
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
-            this.splitContainer2.Panel1.SuspendLayout();
-            this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.ComponentsTree.SuspendLayout();
@@ -138,12 +137,33 @@ namespace Scada.Scheme.Editor
             this.sep3,
             this.btnEditPointer,
             this.btnEditDelete,
-            this.btnGroup});
+            this.btnGroup,
+            this.toolStripButton2});
             this.toolStrip.Location = new System.Drawing.Point(0, 28);
             this.toolStrip.Name = "toolStrip";
             this.toolStrip.Size = new System.Drawing.Size(410, 27);
             this.toolStrip.TabIndex = 0;
             this.toolStrip.MouseEnter += new System.EventHandler(this.FrmMain_MouseEnter);
+            // 
+            // btnFileNew
+            // 
+            this.btnFileNew.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnFileNew.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newSymbolToolStripMenuItem});
+            this.btnFileNew.Image = ((System.Drawing.Image)(resources.GetObject("btnFileNew.Image")));
+            this.btnFileNew.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnFileNew.Name = "btnFileNew";
+            this.btnFileNew.Size = new System.Drawing.Size(34, 24);
+            this.btnFileNew.ToolTipText = "New scheme (Ctrl+N)";
+            this.btnFileNew.Click += new System.EventHandler(this.miFileNew_Click);
+            // 
+            // newSymbolToolStripMenuItem
+            // 
+            this.newSymbolToolStripMenuItem.Image = global::Scada.Scheme.Editor.Properties.Resources.component;
+            this.newSymbolToolStripMenuItem.Name = "newSymbolToolStripMenuItem";
+            this.newSymbolToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.newSymbolToolStripMenuItem.Text = "New symbol";
+            this.newSymbolToolStripMenuItem.Click += new System.EventHandler(this.newSymbolToolStripMenuItem_Click);
             // 
             // btnFileOpen
             // 
@@ -305,10 +325,10 @@ namespace Scada.Scheme.Editor
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblStatus});
-            this.statusStrip.Location = new System.Drawing.Point(0, 558);
+            this.statusStrip.Location = new System.Drawing.Point(0, 554);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip.Size = new System.Drawing.Size(444, 26);
+            this.statusStrip.Size = new System.Drawing.Size(410, 26);
             this.statusStrip.TabIndex = 2;
             this.statusStrip.MouseEnter += new System.EventHandler(this.FrmMain_MouseEnter);
             // 
@@ -329,7 +349,7 @@ namespace Scada.Scheme.Editor
             this.tabControl.Multiline = true;
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(410, 507);
+            this.tabControl.Size = new System.Drawing.Size(410, 499);
             this.tabControl.TabIndex = 1;
             this.tabControl.MouseEnter += new System.EventHandler(this.FrmMain_MouseEnter);
             // 
@@ -340,7 +360,7 @@ namespace Scada.Scheme.Editor
             this.pageComponents.Margin = new System.Windows.Forms.Padding(4);
             this.pageComponents.Name = "pageComponents";
             this.pageComponents.Padding = new System.Windows.Forms.Padding(3);
-            this.pageComponents.Size = new System.Drawing.Size(402, 481);
+            this.pageComponents.Size = new System.Drawing.Size(402, 470);
             this.pageComponents.TabIndex = 2;
             this.pageComponents.Text = "Components";
             this.pageComponents.UseVisualStyleBackColor = true;
@@ -378,11 +398,11 @@ namespace Scada.Scheme.Editor
             listViewItem4,
             listViewItem5});
             this.lvCompTypes.LabelWrap = false;
-            this.lvCompTypes.Location = new System.Drawing.Point(4, 4);
+            this.lvCompTypes.Location = new System.Drawing.Point(3, 3);
             this.lvCompTypes.Margin = new System.Windows.Forms.Padding(4);
             this.lvCompTypes.MultiSelect = false;
             this.lvCompTypes.Name = "lvCompTypes";
-            this.lvCompTypes.Size = new System.Drawing.Size(396, 475);
+            this.lvCompTypes.Size = new System.Drawing.Size(396, 464);
             this.lvCompTypes.SmallImageList = this.ilCompTypes;
             this.lvCompTypes.TabIndex = 0;
             this.lvCompTypes.UseCompatibleStateImageBehavior = false;
@@ -402,14 +422,13 @@ namespace Scada.Scheme.Editor
             // pageProperties
             // 
             this.pageProperties.Controls.Add(this.splitContainer1);
-            this.pageProperties.Location = new System.Drawing.Point(4, 22);
             this.pageProperties.Controls.Add(this.propertyGrid);
             this.pageProperties.Controls.Add(this.cbSchComp);
             this.pageProperties.Location = new System.Drawing.Point(4, 25);
             this.pageProperties.Margin = new System.Windows.Forms.Padding(4);
             this.pageProperties.Name = "pageProperties";
             this.pageProperties.Padding = new System.Windows.Forms.Padding(3);
-            this.pageProperties.Size = new System.Drawing.Size(402, 481);
+            this.pageProperties.Size = new System.Drawing.Size(402, 478);
             this.pageProperties.TabIndex = 0;
             this.pageProperties.Text = "Properties";
             this.pageProperties.UseVisualStyleBackColor = true;
@@ -417,7 +436,7 @@ namespace Scada.Scheme.Editor
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(3, 3);
+            this.splitContainer1.Location = new System.Drawing.Point(3, 27);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -428,8 +447,8 @@ namespace Scada.Scheme.Editor
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
-            this.splitContainer1.Size = new System.Drawing.Size(396, 475);
-            this.splitContainer1.SplitterDistance = 445;
+            this.splitContainer1.Size = new System.Drawing.Size(396, 448);
+            this.splitContainer1.SplitterDistance = 419;
             this.splitContainer1.TabIndex = 3;
             // 
             // splitContainer2
@@ -438,26 +457,19 @@ namespace Scada.Scheme.Editor
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer2.Panel1
-            // 
-            this.splitContainer2.Panel1.Controls.Add(this.cbSchComp);
-            // 
-            // splitContainer2.Panel2
-            // 
-            this.splitContainer2.Panel2.Controls.Add(this.propertyGrid);
-            this.splitContainer2.Size = new System.Drawing.Size(396, 445);
+            this.splitContainer2.Size = new System.Drawing.Size(396, 419);
             this.splitContainer2.SplitterDistance = 25;
             this.splitContainer2.TabIndex = 0;
             // 
             // cbSchComp
             // 
-            this.cbSchComp.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cbSchComp.Dock = System.Windows.Forms.DockStyle.Top;
             this.cbSchComp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbSchComp.FormattingEnabled = true;
-            this.cbSchComp.Location = new System.Drawing.Point(0, 0);
+            this.cbSchComp.Location = new System.Drawing.Point(3, 3);
+            this.cbSchComp.Margin = new System.Windows.Forms.Padding(4);
             this.cbSchComp.Name = "cbSchComp";
-            this.cbSchComp.Size = new System.Drawing.Size(396, 21);
+            this.cbSchComp.Size = new System.Drawing.Size(396, 24);
             this.cbSchComp.TabIndex = 0;
             this.cbSchComp.SelectedIndexChanged += new System.EventHandler(this.cbSchComp_SelectedIndexChanged);
             // 
@@ -465,9 +477,9 @@ namespace Scada.Scheme.Editor
             // 
             this.propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertyGrid.LineColor = System.Drawing.SystemColors.ControlDark;
-            this.propertyGrid.Location = new System.Drawing.Point(0, 0);
+            this.propertyGrid.Location = new System.Drawing.Point(3, 27);
             this.propertyGrid.Name = "propertyGrid";
-            this.propertyGrid.Size = new System.Drawing.Size(396, 416);
+            this.propertyGrid.Size = new System.Drawing.Size(396, 448);
             this.propertyGrid.TabIndex = 1;
             this.propertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid_PropertyValueChanged);
             this.propertyGrid.SelectedGridItemChanged += new System.Windows.Forms.SelectedGridItemChangedEventHandler(this.propertyGrid_SelectedGridItemChanged);
@@ -475,11 +487,12 @@ namespace Scada.Scheme.Editor
             // toolStrip1
             // 
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(396, 26);
+            this.toolStrip1.Size = new System.Drawing.Size(396, 25);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -490,19 +503,10 @@ namespace Scada.Scheme.Editor
             this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(23, 23);
+            this.toolStripButton1.Size = new System.Drawing.Size(29, 22);
             this.toolStripButton1.Text = "toolStripButton1";
             this.toolStripButton1.ToolTipText = "Link to a symbol property";
             this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
-            this.cbSchComp.Dock = System.Windows.Forms.DockStyle.Top;
-            this.cbSchComp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbSchComp.FormattingEnabled = true;
-            this.cbSchComp.Location = new System.Drawing.Point(4, 4);
-            this.cbSchComp.Margin = new System.Windows.Forms.Padding(4);
-            this.cbSchComp.Name = "cbSchComp";
-            this.cbSchComp.Size = new System.Drawing.Size(428, 24);
-            this.cbSchComp.TabIndex = 0;
-            this.cbSchComp.SelectedIndexChanged += new System.EventHandler(this.cbSchComp_SelectedIndexChanged);
             // 
             // ComponentsTree
             // 
@@ -511,7 +515,7 @@ namespace Scada.Scheme.Editor
             this.ComponentsTree.Margin = new System.Windows.Forms.Padding(4);
             this.ComponentsTree.Name = "ComponentsTree";
             this.ComponentsTree.Padding = new System.Windows.Forms.Padding(3);
-            this.ComponentsTree.Size = new System.Drawing.Size(402, 481);
+            this.ComponentsTree.Size = new System.Drawing.Size(402, 478);
             this.ComponentsTree.TabIndex = 3;
             this.ComponentsTree.Text = "View";
             this.ComponentsTree.UseVisualStyleBackColor = true;
@@ -550,7 +554,7 @@ namespace Scada.Scheme.Editor
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip.Size = new System.Drawing.Size(410, 24);
+            this.menuStrip.Size = new System.Drawing.Size(410, 28);
             this.menuStrip.TabIndex = 3;
             // 
             // miFile
@@ -750,25 +754,15 @@ namespace Scada.Scheme.Editor
             this.miHelpAbout.Text = "About";
             this.miHelpAbout.Click += new System.EventHandler(this.miHelpAbout_Click);
             // 
-            // btnFileNew
+            // toolStripButton2
             // 
-            this.btnFileNew.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnFileNew.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.newSymbolToolStripMenuItem});
-            this.btnFileNew.Image = ((System.Drawing.Image)(resources.GetObject("btnFileNew.Image")));
-            this.btnFileNew.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnFileNew.Name = "btnFileNew";
-            this.btnFileNew.Size = new System.Drawing.Size(34, 24);
-            this.btnFileNew.ToolTipText = "New scheme (Ctrl+N)";
-            this.btnFileNew.Click += new System.EventHandler(this.miFileNew_Click);
-            // 
-            // newSymbolToolStripMenuItem
-            // 
-            this.newSymbolToolStripMenuItem.Image = global::Scada.Scheme.Editor.Properties.Resources.component;
-            this.newSymbolToolStripMenuItem.Name = "newSymbolToolStripMenuItem";
-            this.newSymbolToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.newSymbolToolStripMenuItem.Text = "New symbol";
-            this.newSymbolToolStripMenuItem.Click += new System.EventHandler(this.newSymbolToolStripMenuItem_Click);
+            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
+            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton2.Name = "toolStripButton2";
+            this.toolStripButton2.Size = new System.Drawing.Size(29, 24);
+            this.toolStripButton2.Text = "toolStripButton2";
+            this.toolStripButton2.Click += new System.EventHandler(this.toolStripButton2_Click);
             // 
             // FrmMain
             // 
@@ -808,8 +802,6 @@ namespace Scada.Scheme.Editor
             this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            this.splitContainer2.Panel1.ResumeLayout(false);
-            this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
@@ -885,6 +877,7 @@ namespace Scada.Scheme.Editor
         private ToolStripMenuItem miSaveSymbolAs;
         private ToolStripDropDownButton btnFileNew;
         private ToolStripMenuItem newSymbolToolStripMenuItem;
+        private ToolStripButton toolStripButton2;
     }
 }
 
