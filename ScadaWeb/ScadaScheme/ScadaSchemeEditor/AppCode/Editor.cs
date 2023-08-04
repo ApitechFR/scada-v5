@@ -28,6 +28,7 @@ using Scada.Scheme.Model.DataTypes;
 using Scada.Web;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -58,6 +59,10 @@ namespace Scada.Scheme.Editor
         /// Имя файла схемы по умолчанию
         /// </summary>
         public const string DefSchemeFileName = "NewScheme.sch";
+        /// <summary>
+        /// Default file name of symbols
+        /// </summary>
+        public const string DefSymbolFileName = "NewSymbol.sch";
 
         private readonly CompManager compManager;  // менеджер компонентов
         private readonly Log log;                  // журнал приложения
@@ -238,17 +243,34 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла
         /// </summary>
-        private bool InitScheme(string fileName, out string errMsg)
+        private bool InitScheme(string fileName, out string errMsg, bool isSymbol=false)
         {
             ClearChanges();
             ClearSelComponents();
             SchemeView = new SchemeView();
+            SchemeView.isSymbol = isSymbol;
+
             bool loadOK;
 
             if (string.IsNullOrEmpty(fileName))
             {
                 loadOK = true;
                 errMsg = "";
+                if (isSymbol)
+                {
+                    Symbol symbol = new Symbol();
+
+                    symbol.Name = "Symbol";
+                    symbol.ID = SchemeView.GetNextComponentID();
+                    SchemeView.Components[symbol.ID]=symbol;
+
+                    symbol.Location = new Point(0, 0);
+                    symbol.SchemeView = SchemeView;
+                    symbol.ItemChanged += Scheme_ItemChanged;
+
+                    symbol.OnItemChanged(SchemeChangeTypes.ComponentAdded, symbol);
+                    SchemeView.MainSymbol = symbol;
+                }
             }
             else
             {
@@ -260,6 +282,7 @@ namespace Scada.Scheme.Editor
                 if (!loadOK)
                     log.WriteError(errMsg);
             }
+
 
             FileName = fileName;
             Modified = false;
@@ -551,24 +574,44 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Создать новую схему
         /// </summary>
-        public void NewScheme()
+        public void NewScheme(bool isSymbol = false)
         {
-            InitScheme("", out string errMsg);
+            InitScheme("", out string errMsg,isSymbol);
         }
 
         /// <summary>
         /// Загрузить схему из файла
         /// </summary>
-        public bool LoadSchemeFromFile(string fileName, out string errMsg)
+        public bool LoadSchemeFromFile(string fileName, out string errMsg,bool isSymbol=false)
         {
-            return InitScheme(fileName, out errMsg);
+            return InitScheme(fileName, out errMsg,isSymbol);
         }
 
         /// <summary>
         /// Записать схему в файл
         /// </summary>
-        public bool SaveSchemeToFile(string fileName, out string errMsg)
+        public bool SaveSchemeToFile(string fileName, out string errMsg, bool asSymbol = false)
         {
+            if ((asSymbol||SchemeView.isSymbol) && SchemeView.MainSymbol==null)
+            {
+                Symbol symbol = new Symbol();
+
+                symbol.ID = SchemeView.GetNextComponentID();
+                symbol.Location = new Point(0, 0);
+                symbol.SchemeView = SchemeView;
+                symbol.ItemChanged += Scheme_ItemChanged;
+                SchemeView.Components[symbol.ID] = symbol;
+                symbol.OnItemChanged(SchemeChangeTypes.ComponentAdded, symbol);
+
+                SchemeView.MainSymbol = symbol;
+                SchemeView.isSymbol = true;
+                foreach (BaseComponent comp in SchemeView.Components.Values.Where(x => x.GroupId == -1))
+                {
+                    comp.GroupId = symbol.ID;
+                    comp.OnItemChanged(SchemeChangeTypes.ComponentChanged,comp);
+                }
+            }
+
             FileName = fileName;
 
             if (SchemeView == null)
@@ -582,7 +625,7 @@ namespace Scada.Scheme.Editor
 
                 lock (SchemeView.SyncRoot)
                 {
-                    saveOK = SchemeView.SaveToFile(fileName, out errMsg);
+                    saveOK = SchemeView.SaveToFile(fileName, out errMsg, asSymbol);
                 }
 
                 if (saveOK)
@@ -696,6 +739,10 @@ namespace Scada.Scheme.Editor
                     lock (SchemeView.SyncRoot)
                     {
                         SchemeView.Components[component.ID] = component;
+                    }
+                    if (SchemeView.isSymbol)
+                    {
+                        component.GroupId = SchemeView.MainSymbol.ID;
                     }
 
                     SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
@@ -890,7 +937,7 @@ namespace Scada.Scheme.Editor
         public BaseComponent getHihghestGroup(BaseComponent comp)
         {
             int groupID = comp.GroupId;
-            if (groupID == -1)
+            if (groupID == -1 || groupID == SchemeView.MainSymbol.ID)
             {
                 return comp;
             }

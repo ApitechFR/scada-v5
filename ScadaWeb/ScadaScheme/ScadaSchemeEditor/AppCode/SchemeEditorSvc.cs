@@ -24,14 +24,13 @@
  */
 
 using Scada.Scheme.DataTransfer;
-using Scada.Scheme.Model;
 using Scada.Web;
 using System;
-using System.Collections.Generic;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
 using System.ServiceModel.Web;
 using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 
 namespace Scada.Scheme.Editor
 {
@@ -246,13 +245,19 @@ namespace Scada.Scheme.Editor
                     Editor.Status = status;
                 }
 
-                return JsSerializer.Serialize(dto);
+                var settings = new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore, 
+                    MaxDepth = 10,
+                };
+
+                return JsonConvert.SerializeObject(dto, settings);
             }
             catch (Exception ex)
             {
                 AppData.Log.WriteException(ex, Localization.UseRussian ?
                     "Ошибка при получении изменений схемы" :
-                    "Error getting scheme chages");
+                    "Error getting scheme changes");
                 return JsSerializer.GetErrorJson(ex);
             }
         }

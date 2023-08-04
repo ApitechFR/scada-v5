@@ -48,8 +48,5 @@ namespace Scada.Scheme.Model
         /// </summary>
         int CtrlCnlNum { get; set; }
 
-        string InCnlNumCustom { get; set; }
-
-        string CtrlCnlNumCustom { get; set; }
     }
 }
