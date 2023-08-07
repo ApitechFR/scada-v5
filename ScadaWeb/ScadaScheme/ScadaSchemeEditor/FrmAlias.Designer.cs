@@ -45,6 +45,7 @@
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(250, 308);
             this.listBox1.TabIndex = 0;
+            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -73,6 +74,7 @@
             this.button2.Size = new System.Drawing.Size(42, 39);
             this.button2.TabIndex = 3;
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button3
             // 
@@ -82,6 +84,7 @@
             this.button3.Size = new System.Drawing.Size(42, 39);
             this.button3.TabIndex = 4;
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button5
             // 
@@ -91,12 +94,12 @@
             this.button5.Size = new System.Drawing.Size(42, 39);
             this.button5.TabIndex = 6;
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // FrmAlias
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(643, 373);
             this.ClientSize = new System.Drawing.Size(383, 370);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button3);
@@ -106,7 +109,6 @@
             this.Controls.Add(this.listBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "FrmAlias";
-            this.Text = "FrmAlias";
             this.Text = "Alias Manager";
             this.ResumeLayout(false);
             this.PerformLayout();

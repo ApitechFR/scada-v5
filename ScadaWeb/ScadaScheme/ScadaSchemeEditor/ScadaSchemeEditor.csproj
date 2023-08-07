@@ -109,6 +109,12 @@
     <Compile Include="FrmAlias.Designer.cs">
       <DependentUpon>FrmAlias.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmAliasCreation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAliasCreation.Designer.cs">
+      <DependentUpon>FrmAliasCreation.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmAliasSelection.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -144,6 +150,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmAlias.resx">
       <DependentUpon>FrmAlias.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmAliasCreation.resx">
+      <DependentUpon>FrmAliasCreation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmAliasSelection.resx">
       <DependentUpon>FrmAliasSelection.cs</DependentUpon>
