@@ -427,9 +427,112 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 	}
 };
 
+/** BarGraph */
+
+
+scada.scheme.BarGraphRenderer = function () {
+	scada.scheme.ComponentRenderer.call(this);
+};
+
+scada.scheme.BarGraphRenderer.prototype = Object.create(
+	scada.scheme.ComponentRenderer.prototype
+);
+scada.scheme.BarGraphRenderer.constructor = scada.scheme.BarGraphRenderer;
+
+scada.scheme.BarGraphRenderer.prototype.createDom = function (component, renderContext) {
+	var props = component.props;
+	console.log(props);
+
+	
+
+	var divComp = $("<div id='comp" + component.id + "'></div>");
+
+	var bar = $("<div class='bar' style='height:" + props.Value + "%" + ";background-color:" + props.BarColor + "' data-value='" + parseInt(props.Value) + "'></div>");
+	
+	divComp.append(bar);
+
+	this.prepareComponent(divComp, component);
+
+	divComp.css({
+		"border": "1px solid #ccc",
+		"display": "flex",
+		"align-items": "flex-end", 
+		"justify-content": "center" 
+	});
+
+	component.dom = divComp;
+};
+
+//scada.scheme.BarGraphRenderer.prototype.updateData = function (component, renderContext) {
+//	var props = component.props;
+//	console.log(props)
+
+//	if (props.InCnlNum > 0) {
+//		var divComp = component.dom;
+//		var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
+
+//		var statusColor = cnlDataExt.Color;
+//		var isHovered = divComp.is(":hover");
+
+//		var backColor = this.chooseColor(
+//			isHovered,
+//			props.BarColor,
+//			props.BarColorOnHover // Assuming we have a hover color for the bar
+//		);
+
+//		var borderColor = this.chooseColor(
+//			isHovered,
+//			props.BorderColor,
+//			props.BorderColorOnHover
+//		);
+
+//		this.setBackColor(divComp, backColor, true, statusColor);
+//		this.setBorderColor(divComp, borderColor, true, statusColor);
+
+//		// Update bar height based on channel data
+//		var heightPercentage = this.calculateHeight(props.MaxValue, props.MinValue, cnlDataExt.Val);
+//		divComp.css("height", heightPercentage + "%");
+
+//		// Advanced Conditions
+//		if (props.Conditions && cnlDataExt.Stat > 0) {
+//			var cnlVal = cnlDataExt.Val;
+
+//			for (var cond of props.Conditions) {
+//				if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
+//					// Set CSS properties based on Condition
+//					if (cond.Color) {
+//						divComp.css("color", cond.Color);
+//					}
+//					if (cond.BackgroundColor) {
+//						divComp.css("background-color", cond.BackgroundColor);
+//					}
+//					if (cond.TextContent) {
+//						divComp.text(cond.TextContent);
+//					}
+//					divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
+//					divComp.css("width", cond.Width);
+//					divComp.css("height", cond.Height);
+
+//					// Handle Blinking
+//					if (cond.Blinking == 1) {
+//						divComp.addClass("slow-blink");
+//					} else if (cond.Blinking == 2) {
+//						divComp.addClass("fast-blink");
+//					} else {
+//						divComp.removeClass("slow-blink fast-blink");
+//					}
+
+//					break;
+//				}
+//			}
+//		}
+//	}
+//};
+
 /********** Renderer Map **********/
 
 // Add components to the renderer map
 scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.SvgShape", new scada.scheme.SvgShapeRenderer);
 scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.CustomSVG", new scada.scheme.CustomSVGRenderer);
 scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.Polygon", new scada.scheme.PolygonRenderer);
+scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.BarGraph", new scada.scheme.BarGraphRenderer);

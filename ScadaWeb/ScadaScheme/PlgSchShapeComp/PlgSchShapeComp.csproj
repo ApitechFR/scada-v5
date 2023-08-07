@@ -82,10 +82,12 @@
     <Content Include="plugins\SchShapeComp\js\shapecomprender.js" />
     <None Include="Resources\svg.png" />
     <None Include="Resources\polygon.png" />
+    <None Include="Resources\barre.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppCode\PlgSchShapeCompSpec.cs" />
+    <Compile Include="AppCode\SchShapeComp\BarGraph.cs" />
     <Compile Include="AppCode\SchShapeComp\BoundProperties.cs" />
     <Compile Include="AppCode\SchShapeComp\CustomSVG.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\AdvancedCondition.cs" />
