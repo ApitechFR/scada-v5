@@ -99,6 +99,11 @@ scada.scheme.SvgShapeRenderer.prototype.createDom = function (
 	divComp.css({ "overflow": "hidden" });
 		
 	divComp.append(divSvgComp);
+	if (props.Rotation && props.Rotation > 0) {
+		divComp.css({
+			"transform": "rotate(" + props.Rotation + "deg)",
+		})
+	}
 	component.dom = divComp;
 };
 scada.scheme.SvgShapeRenderer.prototype.updateData = function (
@@ -135,7 +140,11 @@ scada.scheme.SvgShapeRenderer.prototype.updateData = function (
 			"width": props.Width +"px",
 			"height": props.Height + "px",
 		})
-
+		if (props.Rotation && props.Rotation > 0) {
+			divComp.css({
+				"transform": "rotate(" + props.Rotation + "deg)",
+			})
+		}
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
 
@@ -231,6 +240,11 @@ scada.scheme.PolygonRenderer.prototype.createDom = function (
 		"border-color": props.BorderColor,
 		"border-radius": props.RoundedCorners ? props.CornerRadius + "%" : "0%",
 	});
+	if (props.Rotation && props.Rotation > 0) {
+		divComp.css({
+			"transform": "rotate(" + props.Rotation + "deg)",
+		})
+	}
 
 	component.dom = divComp;
 };
@@ -259,6 +273,13 @@ scada.scheme.PolygonRenderer.prototype.updateData = function (
 			props.BorderColor,
 			props.BorderColorOnHover,
 		);
+
+		if (props.Rotation && props.Rotation > 0) {
+			console.log(props.Rotation)
+			divComp.css({
+				"transform": "rotate(" + props.Rotation + "deg)",
+			})
+		}
 
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
@@ -384,6 +405,11 @@ scada.scheme.CustomSVGRenderer.prototype.createDom = function (
 		props.Height);
 
 	divComp.append(svg);
+	if (props.Rotation && props.Rotation > 0) {
+		divComp.css({
+			"transform": "rotate(" + props.Rotation + "deg)",
+		})
+	}
 	component.dom = divComp;
 };
 
@@ -411,7 +437,11 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 			props.BorderColor,
 			props.BorderColorOnHover,
 		);
-
+		if (props.Rotation && props.Rotation > 0) {
+			divComp.css({
+				"transform": "rotate(" + props.Rotation +"deg)",
+			})
+		}
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
 

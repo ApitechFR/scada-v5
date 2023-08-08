@@ -47,6 +47,11 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.DefaultValue(100)]
 		public int Width { get; set; }
 
+		[DisplayName("Rotation"), Category(Categories.Appearance)]
+		[Description("The rotation angle of the SVG shape in degrees.")]
+		[CM.DefaultValue(0)]
+		public int Rotation { get; set; }
+
 		[DisplayName("Height"), Category(Categories.Appearance)]
 		[Description("The Height of SVG shape.")]
 		[CM.DefaultValue(130)]
@@ -101,6 +106,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		{
 			base.LoadFromXml(xmlNode);
 			Action = xmlNode.GetChildAsEnum<Actions>("Action");
+			Rotation = xmlNode.GetChildAsInt("Rotation");
 			InCnlNum = xmlNode.GetChildAsInt("InCnlNum");
 			CtrlCnlNum = xmlNode.GetChildAsInt("CtrlCnlNum");
 			Width = xmlNode.GetChildAsInt("Width");
@@ -132,6 +138,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 				XmlElement conditionElem = conditionsElem.AppendElem("Condition");
 				condition.SaveToXml(conditionElem);
 			}
+			xmlElem.AppendElem("Rotation", Rotation);
 			xmlElem.AppendElem("ShapeType", ShapeType);
 			xmlElem.AppendElem("InCnlNum", InCnlNum);
 			xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
