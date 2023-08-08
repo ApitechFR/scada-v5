@@ -11,7 +11,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 	/// additional properties specific to polygons.
 	/// </summary>
 	[Serializable]
-	public class PolygonCondition : Condition
+	public class PolygonCondition : AdvancedCondition
 	{
 		/// <summary>
 		/// Property to get or set the number of sides in the polygon. 
