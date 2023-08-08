@@ -311,6 +311,10 @@ namespace Scada.Scheme.Editor
 
             if (!loadOK)
                 ScadaUiUtils.ShowError(errMsg);
+
+
+            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = true;
+            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = false;
         }
 
         /// <summary>
@@ -1651,8 +1655,8 @@ namespace Scada.Scheme.Editor
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
-        {
-            new FrmAlias().ShowDialog();
+        {  
+            new FrmAlias(editor.SchemeView.MainSymbol).ShowDialog();
         }
     }
 }

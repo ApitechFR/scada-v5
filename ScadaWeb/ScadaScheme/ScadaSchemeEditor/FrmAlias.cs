@@ -12,16 +12,18 @@ namespace Scada.Scheme.Editor
 {
     public partial class FrmAlias : Form
     {
-        //todo: à supprimer
-        Symbol s = new Symbol();
+
+        Symbol s;
 
         private Alias _selectedAlias;
 
-        public FrmAlias()
+        public FrmAlias(Symbol symbol)
         {
             InitializeComponent();
 
-            AddAliasAndSymbole();
+            s = symbol;
+
+            //AddAliasAndSymbole();
 
             FillListBox();
         }
@@ -35,7 +37,6 @@ namespace Scada.Scheme.Editor
             al.Value = "value test";
             al.isCnlLinked = false;
 
-            s.Name = "name symbole test";
             s.AliasList.Add(al);
         }
 
