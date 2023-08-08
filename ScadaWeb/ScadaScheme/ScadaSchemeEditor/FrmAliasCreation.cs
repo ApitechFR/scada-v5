@@ -34,7 +34,7 @@ namespace Scada.Scheme.Editor
             else if(frmType == 'M')
             {
                 textBox1.Text = currentAlias.Name;
-                textBox2.Text = currentAlias.Value.ToString();
+                textBox2.Text = currentAlias.Value == null ? "" : currentAlias.Value.ToString();
                 checkBox1.Checked = currentAlias.isCnlLinked;
 
                 int index = GetComboBoxIndexForType(currentAlias.AliasType);
@@ -52,7 +52,7 @@ namespace Scada.Scheme.Editor
                     return i;
                 }
             }
-
+            
             return -1;
         }
 

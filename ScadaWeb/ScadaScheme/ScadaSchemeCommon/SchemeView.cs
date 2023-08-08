@@ -204,7 +204,7 @@ namespace Scada.Scheme
 
             if (isSymbol)
             {
-                if(rootElem.SelectSingleNode("MainSymbol") is XmlNode mainSymbolNode)
+                if (rootElem.SelectSingleNode("MainSymbol") is XmlNode mainSymbolNode)
                 {
                     CompManager compManager = CompManager.GetInstance();
                     MainSymbol = compManager.CreateComponent(mainSymbolNode, out string errMsg) as Symbol;

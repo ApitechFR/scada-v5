@@ -1656,7 +1656,7 @@ namespace Scada.Scheme.Editor
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {  
-            new FrmAlias(editor.SchemeView.MainSymbol).ShowDialog();
+            new FrmAlias(editor.SchemeView.MainSymbol).ShowDialog(); 
         }
     }
 }
