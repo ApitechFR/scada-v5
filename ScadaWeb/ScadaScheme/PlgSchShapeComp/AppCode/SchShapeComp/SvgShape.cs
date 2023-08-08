@@ -7,6 +7,7 @@ using CM = System.ComponentModel;
 using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 using System.Collections.Generic;
 using Scada.Scheme.Model.DataTypes;
+using Scada.Data.Entities;
 
 namespace Scada.Web.Plugins.SchShapeComp
 {
@@ -24,6 +25,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "NA (0)";
 			CtrlCnlNumCustom = "NA (0)";
+			Width = 100;
+			Height = 130;
 		}
 
 		[DisplayName("Conditions"), Category(Categories.Behavior)]
@@ -36,8 +39,18 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[DisplayName("Shape Type"), Category(Categories.Appearance)]
 		[Description("The type of SVG shape.")]
 		[CM.Editor(typeof(SvgShapeSelectEditor), typeof(UITypeEditor))]
-		[CM.DefaultValue("circle")]
+		[CM.DefaultValue("Circle")]
 		public string ShapeType { get; set; }
+
+		[DisplayName("Width"), Category(Categories.Appearance)]
+		[Description("The Width of SVG shape.")]
+		[CM.DefaultValue(100)]
+		public int Width { get; set; }
+
+		[DisplayName("Height"), Category(Categories.Appearance)]
+		[Description("The Height of SVG shape.")]
+		[CM.DefaultValue(130)]
+		public int Height { get; set; }
 
 		/// <summary>
 		/// Get or set the input channel number
@@ -90,6 +103,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 			Action = xmlNode.GetChildAsEnum<Actions>("Action");
 			InCnlNum = xmlNode.GetChildAsInt("InCnlNum");
 			CtrlCnlNum = xmlNode.GetChildAsInt("CtrlCnlNum");
+			Width = xmlNode.GetChildAsInt("Width");
+			Height = xmlNode.GetChildAsInt("Height");
 			InCnlNumCustom = xmlNode.GetChildAsString("InCnlNumCustom");
 			CtrlCnlNumCustom = xmlNode.GetChildAsString("CtrlCnlNumCustom");
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
@@ -120,6 +135,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 			xmlElem.AppendElem("ShapeType", ShapeType);
 			xmlElem.AppendElem("InCnlNum", InCnlNum);
 			xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
+			xmlElem.AppendElem("Width", Width);
+			xmlElem.AppendElem("Height", Height);
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
 			xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
 			xmlElem.AppendElem("Action", Action.ToString());

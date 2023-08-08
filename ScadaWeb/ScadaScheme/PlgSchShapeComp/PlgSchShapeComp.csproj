@@ -91,6 +91,7 @@
     <Compile Include="AppCode\SchShapeComp\BoundProperties.cs" />
     <Compile Include="AppCode\SchShapeComp\CustomSVG.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\AdvancedCondition.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\BarGraphCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\ColorCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\Polygon.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\PolygonCondition.cs" />

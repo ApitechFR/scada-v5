@@ -25,7 +25,7 @@ namespace Scada.Web.Plugins
 		{
             if (SchemeContext.GetInstance().EditorMode)
             {
-                if (!Localization.LoadDictionaries(Path.Combine(AppDirs.PluginsDir, "SchShapeComp","lang"),"PlgSvgComponent", out string errMsg))
+                if (!Localization.LoadDictionaries(Path.Combine(AppDirs.PluginsDir, "SchShapeComp","lang"),"PlgShapeComponent", out string errMsg))
                 {
 					Log.WriteError(errMsg);
                     
@@ -34,6 +34,7 @@ namespace Scada.Web.Plugins
 				attrTranslator.TranslateAttrs(typeof(ColorCondition));
 				attrTranslator.TranslateAttrs(typeof(PolygonCondition));
 				attrTranslator.TranslateAttrs(typeof(AdvancedCondition));
+				attrTranslator.TranslateAttrs(typeof(BarGraphCondition));
 				attrTranslator.TranslateAttrs(typeof(PopupSize));
 
 
