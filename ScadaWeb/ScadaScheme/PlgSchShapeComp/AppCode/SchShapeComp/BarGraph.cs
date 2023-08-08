@@ -7,55 +7,51 @@ using CM = System.ComponentModel;
 using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 using System.Collections.Generic;
 using Scada.Scheme.Model.DataTypes;
-using Scada.Data.Entities;
 
 namespace Scada.Web.Plugins.SchShapeComp
 {
 	[Serializable]
-	public class SvgShape : BaseComponent, IDynamicComponent
+	public class BarGraph : BaseComponent, IDynamicComponent
 	{
-		public SvgShape()
+		public BarGraph()
 		{
 			serBinder = PlgUtils.SerializationBinder;
-			ShapeType = "Circle";
-			BackColor = "black";
-			Action = Actions.None;
-			Conditions = new List<AdvancedCondition>();
+			BarColor = "blue";
+			Value = 10;
+			Conditions = new List<BarGraphCondition>();
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "NA (0)";
 			CtrlCnlNumCustom = "NA (0)";
-			Width = 100;
-			Height = 130;
+			BorderWidth = 1;
+			BorderColor = "black";
 		}
 
 		[DisplayName("Conditions"), Category(Categories.Behavior)]
-		[Description("The conditions for SVG Shape output depending on the value of the input channel.")]
+		[Description("The conditions for Bar Graph output depending on the value of the input channel.")]
 		[CM.DefaultValue(null), CM.TypeConverter(typeof(CollectionConverter))]
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
-		public List<AdvancedCondition> Conditions { get; protected set; }
+		public List<BarGraphCondition> Conditions { get; protected set; }
+
+		[DisplayName("Bar Color"), Category(Categories.Appearance)]
+		[Description("The color of the Bar Graph.")]
+		[CM.Editor(typeof(ColorEditor), typeof(UITypeEditor))]
+		[CM.DefaultValue("blue")]
+		public string BarColor { get; set; }
+
+		[DisplayName("Bar Value"), Category(Categories.Appearance)]
+		[Description("The minimum value represented by the Bar Graph.")]
+		[CM.DefaultValue(10)]
+		public double Value { get; set; }
 
 
-		[DisplayName("Shape Type"), Category(Categories.Appearance)]
-		[Description("The type of SVG shape.")]
-		[CM.Editor(typeof(SvgShapeSelectEditor), typeof(UITypeEditor))]
-		[CM.DefaultValue("Circle")]
-		public string ShapeType { get; set; }
-
-		[DisplayName("Width"), Category(Categories.Appearance)]
-		[Description("The Width of SVG shape.")]
-		[CM.DefaultValue(100)]
-		public int Width { get; set; }
-
-		[DisplayName("Rotation"), Category(Categories.Appearance)]
-		[Description("The rotation angle of the SVG shape in degrees.")]
-		[CM.DefaultValue(0)]
-		public int Rotation { get; set; }
-
-		[DisplayName("Height"), Category(Categories.Appearance)]
-		[Description("The Height of SVG shape.")]
-		[CM.DefaultValue(130)]
-		public int Height { get; set; }
+		/// <summary>
+		/// Get or set the action
+		/// </summary>
+		[DisplayName("Action"), Category(Categories.Behavior)]
+		[Description("The action executed by clicking the left mouse button on the component.")]
+		[CM.DefaultValue(Actions.None)]
+		public Actions Action { get; set; }
 
 		/// <summary>
 		/// Get or set the input channel number
@@ -93,57 +89,45 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.Editor(typeof(IDcustomEditor), typeof(UITypeEditor))]
 		public string CtrlCnlNumCustom { get; set; }
 
-
-		/// <summary>
-		/// Get or set the action
-		/// </summary>
-		[DisplayName("Action"), Category(Categories.Behavior)]
-		[Description("The action executed by clicking the left mouse button on the component.")]
-		[CM.DefaultValue(Actions.None)]
-		public Actions Action { get; set; }
-
 		public override void LoadFromXml(XmlNode xmlNode)
 		{
 			base.LoadFromXml(xmlNode);
+			Value = xmlNode.GetChildAsDouble("Value");
+			BarColor = xmlNode.GetChildAsString("BarColor");
 			Action = xmlNode.GetChildAsEnum<Actions>("Action");
-			Rotation = xmlNode.GetChildAsInt("Rotation");
 			InCnlNum = xmlNode.GetChildAsInt("InCnlNum");
 			CtrlCnlNum = xmlNode.GetChildAsInt("CtrlCnlNum");
-			Width = xmlNode.GetChildAsInt("Width");
-			Height = xmlNode.GetChildAsInt("Height");
 			InCnlNumCustom = xmlNode.GetChildAsString("InCnlNumCustom");
 			CtrlCnlNumCustom = xmlNode.GetChildAsString("CtrlCnlNumCustom");
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
 
 			if (conditionsNode != null)
 			{
-				Conditions = new List<AdvancedCondition>();
+				Conditions = new List<BarGraphCondition>();
 				XmlNodeList conditionNodes = conditionsNode.SelectNodes("Condition");
 				foreach (XmlNode conditionNode in conditionNodes)
 				{
-					AdvancedCondition condition = new AdvancedCondition { SchemeView = SchemeView };
+					BarGraphCondition condition = new BarGraphCondition { SchemeView = SchemeView };
 					condition.LoadFromXml(conditionNode);
 					Conditions.Add(condition);
 				}
 			}
-			ShapeType = xmlNode.GetChildAsString("ShapeType");
 		}
 
 		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
+			
+			xmlElem.AppendElem("Value", Value);
 			XmlElement conditionsElem = xmlElem.AppendElem("Conditions");
-			foreach (AdvancedCondition condition in Conditions)
+			foreach (BarGraphCondition condition in Conditions)
 			{
 				XmlElement conditionElem = conditionsElem.AppendElem("Condition");
 				condition.SaveToXml(conditionElem);
 			}
-			xmlElem.AppendElem("Rotation", Rotation);
-			xmlElem.AppendElem("ShapeType", ShapeType);
+			xmlElem.AppendElem("BarColor", BarColor);
 			xmlElem.AppendElem("InCnlNum", InCnlNum);
 			xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
-			xmlElem.AppendElem("Width", Width);
-			xmlElem.AppendElem("Height", Height);
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
 			xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
 			xmlElem.AppendElem("Action", Action.ToString());
@@ -151,9 +135,9 @@ namespace Scada.Web.Plugins.SchShapeComp
 
 		public override BaseComponent Clone()
 		{
-			SvgShape cloneComponent = (SvgShape)base.Clone();
+			BarGraph cloneComponent = (BarGraph)base.Clone();
 
-			foreach (AdvancedCondition condition in cloneComponent.Conditions)
+			foreach (BarGraphCondition condition in cloneComponent.Conditions)
 			{
 				condition.SchemeView = schemeView;
 			}

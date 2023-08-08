@@ -65,10 +65,11 @@ scada.scheme.SvgShapeRenderer.prototype.createSvgElement = function (shapeType, 
 			return null;
 	}
 
-	// Set SVG attributes for color and stroke width
-	svgElement.setAttribute('fill', props.BackColor);
-	svgElement.setAttribute('stroke', props.BorderColor); props.BorderColor
-	svgElement.setAttribute('stroke-width', props.BorderWidth);
+	if (["Polygon", "Triangle", "Rectangle", "Circle", "Polyline"].includes(shapeType)) {
+		svgElement.setAttribute('fill', props.BackColor || 'none');
+	}
+	svgElement.setAttribute('stroke', props.BorderColor || 'black');
+	svgElement.setAttribute('stroke-width', props.BorderWidth || '1');
 
 	return svgElement;
 };
@@ -79,6 +80,7 @@ scada.scheme.SvgShapeRenderer.prototype.createDom = function (
 ) {
 	var props = component.props;
 	var shapeType = props.ShapeType;
+	console.log(props)
 	
 	var divComp = $("<div id='comp" + component.id + "'></div>");
 	this.prepareComponent(divComp, component, false, true);
@@ -88,10 +90,20 @@ scada.scheme.SvgShapeRenderer.prototype.createDom = function (
 	var svgNamespace = "http://www.w3.org/2000/svg";
 	var svgContainer = document.createElementNS(svgNamespace, "svg");
 	svgContainer.appendChild(svgElement);
+	svgContainer.setAttribute('viewBox', '0 0 ' + props.Width + ' ' + props.Height);
 	svgContainer.style.width = "100%";
 	svgContainer.style.height = "100%";
 
-	divComp.append(svgContainer);
+	var divSvgComp = $("<div class='svgcomp'> </div>")
+	divSvgComp.append(svgContainer);
+	divComp.css({ "overflow": "hidden" });
+		
+	divComp.append(divSvgComp);
+	if (props.Rotation && props.Rotation > 0) {
+		divComp.css({
+			"transform": "rotate(" + props.Rotation + "deg)",
+		})
+	}
 	component.dom = divComp;
 };
 scada.scheme.SvgShapeRenderer.prototype.updateData = function (
@@ -124,6 +136,15 @@ scada.scheme.SvgShapeRenderer.prototype.updateData = function (
 		svgElement.attr("fill", backColor);
 		svgElement.attr("stroke", borderColor);
 
+		divComp.find(".svgcomp").css({
+			"width": props.Width +"px",
+			"height": props.Height + "px",
+		})
+		if (props.Rotation && props.Rotation > 0) {
+			divComp.css({
+				"transform": "rotate(" + props.Rotation + "deg)",
+			})
+		}
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
 
@@ -219,6 +240,11 @@ scada.scheme.PolygonRenderer.prototype.createDom = function (
 		"border-color": props.BorderColor,
 		"border-radius": props.RoundedCorners ? props.CornerRadius + "%" : "0%",
 	});
+	if (props.Rotation && props.Rotation > 0) {
+		divComp.css({
+			"transform": "rotate(" + props.Rotation + "deg)",
+		})
+	}
 
 	component.dom = divComp;
 };
@@ -247,6 +273,13 @@ scada.scheme.PolygonRenderer.prototype.updateData = function (
 			props.BorderColor,
 			props.BorderColorOnHover,
 		);
+
+		if (props.Rotation && props.Rotation > 0) {
+			console.log(props.Rotation)
+			divComp.css({
+				"transform": "rotate(" + props.Rotation + "deg)",
+			})
+		}
 
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
@@ -372,6 +405,11 @@ scada.scheme.CustomSVGRenderer.prototype.createDom = function (
 		props.Height);
 
 	divComp.append(svg);
+	if (props.Rotation && props.Rotation > 0) {
+		divComp.css({
+			"transform": "rotate(" + props.Rotation + "deg)",
+		})
+	}
 	component.dom = divComp;
 };
 
@@ -399,7 +437,11 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 			props.BorderColor,
 			props.BorderColorOnHover,
 		);
-
+		if (props.Rotation && props.Rotation > 0) {
+			divComp.css({
+				"transform": "rotate(" + props.Rotation +"deg)",
+			})
+		}
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
 
@@ -427,9 +469,94 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 	}
 };
 
+/** BarGraph */
+
+
+scada.scheme.BarGraphRenderer = function () {
+	scada.scheme.ComponentRenderer.call(this);
+};
+
+scada.scheme.BarGraphRenderer.prototype = Object.create(
+	scada.scheme.ComponentRenderer.prototype
+);
+scada.scheme.BarGraphRenderer.constructor = scada.scheme.BarGraphRenderer;
+
+scada.scheme.BarGraphRenderer.prototype.createDom = function (component, renderContext) {
+	var props = component.props;
+	console.log(props);
+
+	var divComp = $("<div id='comp" + component.id + "'></div>");
+
+	var bar = $("<div class='bar' style='height:" + props.Value + "%" + ";background-color:" + props.BarColor + "' data-value='" + parseInt(props.Value) + "'></div>");
+	
+	divComp.append(bar);
+
+	this.prepareComponent(divComp, component);
+
+	divComp.css({
+		"border": props.BorderWidth + "px solid " + props.BorderColor,
+		"display": "flex",
+		"align-items": "flex-end", 
+		"justify-content": "center" 
+	});
+
+	component.dom = divComp;
+};
+
+
+scada.scheme.BarGraphRenderer.prototype.updateData = function (component, renderContext) {
+	var props = component.props;
+
+	if (props.InCnlNum > 0) {
+		var divComp = component.dom;
+		var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
+		
+		divComp.css({
+			"border": props.BorderWidth + "px solid " + props.BorderColor,
+			"background-color": props.BackColor,
+		})
+		divComp.find('.bar').css({
+			"background-color": props.BarColor,
+			"height": props.Value + "%",
+		});
+		divComp.find('.bar').attr('data-value', parseInt(props.Value));
+
+	}
+	
+	if (cnlDataExt.Stat > 0 && props.Conditions) {
+		var cnlVal = cnlDataExt.Val;
+		for (var condition of props.Conditions) {
+			if (scada.scheme.calc.conditionSatisfied(condition, cnlVal)) {
+				if (condition.Level === "Min") {
+					divComp.find('.bar').css('height', "10%");
+					divComp.find('.bar').css('background-color', condition.FillColor);
+				}
+				else if (condition.Level === "Low") {
+					divComp.find('.bar').css('height', "30%");
+					divComp.find('.bar').css('background-color', condition.FillColor);
+				}
+				else if (condition.Level === "Medium") {
+					divComp.find('.bar').css('height', "50%");
+					divComp.find('.bar').css('background-color', condition.FillColor);
+				}
+				else if (condition.Level === "High") {
+					divComp.find('.bar').css('height', "70%");
+					divComp.find('.bar').css('background-color', condition.FillColor);
+				}
+				else if (condition.Level === "Max" ) {
+					divComp.find('.bar').css('background-color', condition.FillColor);
+					divComp.find('.bar').css('height', "100%");
+				}
+			}
+		}
+	}
+};
+
+
 /********** Renderer Map **********/
 
 // Add components to the renderer map
 scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.SvgShape", new scada.scheme.SvgShapeRenderer);
 scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.CustomSVG", new scada.scheme.CustomSVGRenderer);
 scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.Polygon", new scada.scheme.PolygonRenderer);
+scada.scheme.rendererMap.set("Scada.Web.Plugins.SchShapeComp.BarGraph", new scada.scheme.BarGraphRenderer);

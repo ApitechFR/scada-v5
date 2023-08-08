@@ -42,7 +42,10 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.DefaultValue(4)]
 		public int NumberOfSides { get; set; }
 
-
+		[DisplayName("Rotation"), Category(Categories.Appearance)]
+		[Description("The rotation angle of the polygon shape in degrees.")]
+		[CM.DefaultValue(0)]
+		public int Rotation { get; set; }
 
 		/// <summary>
 		/// Get or set the radius of the rounded corners of the polygon
@@ -139,7 +142,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 			BackColorOnHover = xmlNode.GetChildAsString("BackColorOnHover");
 			BorderColorOnHover = xmlNode.GetChildAsString("BorderColorOnHover");
 			Action = xmlNode.GetChildAsEnum<Actions>("Action");
-
+			Rotation = xmlNode.GetChildAsInt("Rotation");
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
 			//  PolyName = xmlNode.GetChildAsString("PolyName");
 			NumberOfSides = xmlNode.GetChildAsInt("NumberOfSides");
@@ -181,6 +184,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 				XmlElement conditionElem = conditionsElem.AppendElem("Condition");
 				condition.SaveToXml(conditionElem);
 			}
+			xmlElem.AppendElem("Rotation", Rotation);
 
 			xmlElem.AppendElem("InCnlNum", InCnlNum);
 			xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);

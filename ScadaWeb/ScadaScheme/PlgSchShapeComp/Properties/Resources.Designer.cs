@@ -63,6 +63,16 @@ namespace Scada.Web.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap barre {
+            get {
+                object obj = ResourceManager.GetObject("barre", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap polygon {
             get {
                 object obj = ResourceManager.GetObject("polygon", resourceCulture);
