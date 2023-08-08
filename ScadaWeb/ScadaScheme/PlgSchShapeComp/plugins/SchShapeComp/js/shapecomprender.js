@@ -238,7 +238,6 @@ scada.scheme.PolygonRenderer.prototype.createDom = function (
 		"clip-path": this.generatePolygonPath(props.NumberOfSides),
 		"border-width": props.BorderWidth + "px",
 		"border-color": props.BorderColor,
-		"border-radius": props.RoundedCorners ? props.CornerRadius + "%" : "0%",
 	});
 	if (props.Rotation && props.Rotation > 0) {
 		divComp.css({
