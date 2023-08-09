@@ -283,8 +283,7 @@ scada.scheme.PolygonRenderer.prototype.createDom = function (
 			"transform": "rotate(" + props.Rotation + "deg)",
 		})
 	}
-	scada.scheme.addInfoTooltipToDiv(divComp[0], 'Votre texte d\'information ici');
-
+	
 	component.dom = divComp;
 };
 
