@@ -12,6 +12,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 	{
 		public enum BarLevel
 		{
+			None,
 			Low,
 			Min,
 			High,
@@ -22,7 +23,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		public BarGraphCondition() : base()
 		{
 			FillColor = "";
-			Level = BarLevel.Min;
+			Level = BarLevel.None;
 		}
 
 		[DisplayName("Fill Color"), Category(Categories.Appearance)]

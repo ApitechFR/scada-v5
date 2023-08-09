@@ -162,7 +162,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 				condition.SaveToXml(conditionElem);
 			}
 			xmlElem.AppendElem("Rotation", Rotation);
-
 			xmlElem.AppendElem("InCnlNum", InCnlNum);
 			xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);

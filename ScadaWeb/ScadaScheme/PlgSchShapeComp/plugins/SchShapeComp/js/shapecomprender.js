@@ -13,6 +13,37 @@
 
 /********** Static SVG Shape Renderer **********/
 
+
+scada.scheme.addInfoTooltipToDiv = function (targetDiv, text) {
+
+	if (targetDiv instanceof jQuery) {
+		targetDiv = targetDiv[0];
+	}
+
+	if (!targetDiv) return;
+	if (!targetDiv) return;
+
+	// Create tooltip
+	const tooltip = document.createElement('div');
+	tooltip.style.position = 'absolute';
+	tooltip.style.bottom = '45%';
+	tooltip.style.left = '50%';
+	tooltip.style.transform = 'translateX(-50%)';
+	tooltip.style.padding = '10px';
+	tooltip.style.backgroundColor = 'black';
+	tooltip.style.color = 'white';
+	tooltip.style.borderRadius = '5px';
+	tooltip.style.zIndex = '10';
+	tooltip.style.whiteSpace = 'nowrap';
+	tooltip.style.marginBottom = '5px';
+
+	tooltip.textContent = text;
+
+	targetDiv.style.position = 'relative';
+	targetDiv.appendChild(tooltip);
+}
+
+
 scada.scheme.SvgShapeRenderer = function () {
 	scada.scheme.ComponentRenderer.call(this);
 };
@@ -80,10 +111,10 @@ scada.scheme.SvgShapeRenderer.prototype.createDom = function (
 ) {
 	var props = component.props;
 	var shapeType = props.ShapeType;
-	console.log(props)
 	
 	var divComp = $("<div id='comp" + component.id + "'></div>");
 	this.prepareComponent(divComp, component, false, true);
+	
 
 	var svgElement = this.createSvgElement(shapeType, props);
 
@@ -104,6 +135,7 @@ scada.scheme.SvgShapeRenderer.prototype.createDom = function (
 			"transform": "rotate(" + props.Rotation + "deg)",
 		})
 	}
+
 	component.dom = divComp;
 };
 scada.scheme.SvgShapeRenderer.prototype.updateData = function (
@@ -161,8 +193,15 @@ scada.scheme.SvgShapeRenderer.prototype.updateData = function (
 						divComp.css("background-color", cond.BackgroundColor);
 					}
 					if (cond.TextContent) {
-						divComp.text(cond.TextContent);
+						
+						scada.scheme.addInfoTooltipToDiv(divComp[0], cond.TextContent);
 					}
+					if (cond.Rotation) {
+						divComp.css(
+							"transform", "rotate(" + props.Rotation + "deg)",
+						)
+					}
+
 					divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
 					divComp.css("width", cond.Width);
 					divComp.css("height", cond.Height);
@@ -244,6 +283,7 @@ scada.scheme.PolygonRenderer.prototype.createDom = function (
 			"transform": "rotate(" + props.Rotation + "deg)",
 		})
 	}
+	scada.scheme.addInfoTooltipToDiv(divComp[0], 'Votre texte d\'information ici');
 
 	component.dom = divComp;
 };
@@ -274,7 +314,6 @@ scada.scheme.PolygonRenderer.prototype.updateData = function (
 		);
 
 		if (props.Rotation && props.Rotation > 0) {
-			console.log(props.Rotation)
 			divComp.css({
 				"transform": "rotate(" + props.Rotation + "deg)",
 			})
@@ -283,7 +322,7 @@ scada.scheme.PolygonRenderer.prototype.updateData = function (
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
 
-		// Advanced Conditions
+		// Conditions
 		if (props.Conditions && cnlDataExt.Stat > 0) {
 			var cnlVal = cnlDataExt.Val;
 
@@ -297,7 +336,12 @@ scada.scheme.PolygonRenderer.prototype.updateData = function (
 						divComp.css("background-color", cond.BackgroundColor);
 					}
 					if (cond.TextContent) {
-						divComp.text(cond.TextContent);
+						scada.scheme.addInfoTooltipToDiv(divComp[0], cond.TextContent);
+					}
+					if (cond.Rotation) {
+						divComp.css(
+							"transform", "rotate(" + props.Rotation + "deg)",
+						)
 					}
 					divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
 					divComp.css("width", cond.Width);
@@ -445,14 +489,36 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 		this.setBorderColor(divComp, borderColor, true, statusColor);
 
 		divComp.removeClass("no-blink slow-blink fast-blink");
-		if ( props.Conditions && cnlDataExt.Stat > 0) {
+		if (props.Conditions && cnlDataExt.Stat > 0) {
 			var cnlVal = cnlDataExt.Val;
+
 			for (var cond of props.Conditions) {
 				if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
-					divComp.css("background-color", cond.Color);
+					// Set CSS properties based on Condition
+					if (cond.Color) {
+						divComp.css("color", cond.Color);
+					}
+					if (cond.BackgroundColor) {
+						divComp.css("background-color", cond.BackgroundColor);
+					}
+					if (cond.TextContent) {
+						scada.scheme.addInfoTooltipToDiv(divComp[0], cond.TextContent);
+					}
+					if (cond.Rotation) {
+						divComp.css("transform", "rotate(" + cond.Rotation + "deg)");
+					}
+					divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
+					if (cond.Width) {
+						divComp.css("width", cond.Width);
+					}
+					if (cond.Height) {
+						divComp.css("height", cond.Height);
+					}
+
+					// Handle Blinking
 					switch (cond.Blinking) {
 						case 0:
-							divComp.addClass("no-blink");
+							divComp.removeClass("slow-blink fast-blink");
 							break;
 						case 1:
 							divComp.addClass("slow-blink");
@@ -461,10 +527,12 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 							divComp.addClass("fast-blink");
 							break;
 					}
+
 					break;
 				}
 			}
 		}
+
 	}
 };
 
@@ -482,8 +550,7 @@ scada.scheme.BarGraphRenderer.constructor = scada.scheme.BarGraphRenderer;
 
 scada.scheme.BarGraphRenderer.prototype.createDom = function (component, renderContext) {
 	var props = component.props;
-	console.log(props);
-
+	
 	var divComp = $("<div id='comp" + component.id + "'></div>");
 
 	var bar = $("<div class='bar' style='height:" + props.Value + "%" + ";background-color:" + props.BarColor + "' data-value='" + parseInt(props.Value) + "'></div>");
@@ -505,7 +572,6 @@ scada.scheme.BarGraphRenderer.prototype.createDom = function (component, renderC
 
 scada.scheme.BarGraphRenderer.prototype.updateData = function (component, renderContext) {
 	var props = component.props;
-
 	if (props.InCnlNum > 0) {
 		var divComp = component.dom;
 		var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
@@ -524,32 +590,65 @@ scada.scheme.BarGraphRenderer.prototype.updateData = function (component, render
 	
 	if (cnlDataExt.Stat > 0 && props.Conditions) {
 		var cnlVal = cnlDataExt.Val;
+
 		for (var condition of props.Conditions) {
 			if (scada.scheme.calc.conditionSatisfied(condition, cnlVal)) {
-				if (condition.Level === "Min") {
-					divComp.find('.bar').css('height', "10%");
-					divComp.find('.bar').css('background-color', condition.FillColor);
-				}
-				else if (condition.Level === "Low") {
-					divComp.find('.bar').css('height', "30%");
-					divComp.find('.bar').css('background-color', condition.FillColor);
-				}
-				else if (condition.Level === "Medium") {
-					divComp.find('.bar').css('height', "50%");
-					divComp.find('.bar').css('background-color', condition.FillColor);
-				}
-				else if (condition.Level === "High") {
-					divComp.find('.bar').css('height', "70%");
-					divComp.find('.bar').css('background-color', condition.FillColor);
-				}
-				else if (condition.Level === "Max" ) {
-					divComp.find('.bar').css('background-color', condition.FillColor);
-					divComp.find('.bar').css('height', "100%");
+				if (scada.scheme.calc.conditionSatisfied(condition, cnlVal)) {
+					var barStyles = {}; 
+
+					if (condition.Level === "Min") {
+						barStyles.height = "10%";
+					} else if (condition.Level === "Low") {
+						barStyles.height = "30%";
+					} else if (condition.Level === "Medium") {
+						barStyles.height = "50%";
+					} else if (condition.Level === "High") {
+						barStyles.height = "70%";
+					} else if (condition.Level === "Max") {
+						barStyles.height = "100%";
+					}
+					if (condition.FillColor) {
+						barStyles['background-color'] = condition.FillColor;
+					}
+
+					divComp.find('.bar').css(barStyles);
+
+					if (condition.TextContent) {
+						scada.scheme.addInfoTooltipToDiv(divComp[0], condition.TextContent);
+					}
+					// Set other CSS properties based on Condition
+					if (condition.Color) {
+						divComp.css("color", condition.Color);
+					}
+					if (condition.BackgroundColor) {
+						divComp.css("background-color", condition.BackgroundColor);
+					}
+					if (condition.TextContent) {
+						divComp.text(condition.TextContent);
+					}
+					divComp.css("visibility", condition.IsVisible ? "visible" : "hidden");
+					if (condition.Width) {
+						divComp.css("width", condition.Width);
+					}
+					if (condition.Height) {
+						divComp.css("height", condition.Height);
+					}
+
+					// Handle Blinking
+					if (condition.Blinking == 1) {
+						divComp.addClass("slow-blink");
+					} else if (condition.Blinking == 2) {
+						divComp.addClass("fast-blink");
+					} else {
+						divComp.removeClass("slow-blink fast-blink");
+					}
 				}
 			}
 		}
 	}
+
 };
+
 
 
 /********** Renderer Map **********/

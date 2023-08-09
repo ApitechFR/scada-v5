@@ -13,21 +13,23 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 	[Serializable]
 	public class PolygonCondition : AdvancedCondition
 	{
+
+		public PolygonCondition():base() {
+			
+			Color = "";
+		}
 		/// <summary>
 		/// Property to get or set the number of sides in the polygon. 
 		/// This value is user-defined.
 		/// </summary>
 		[DisplayName("Sides"), Category(Categories.Appearance)]
-		[Description("The number of sides in the polygon.")]
 		[CM.Editor(typeof(NumberSelectEditor), typeof(UITypeEditor))]
-		[CM.DefaultValue(3)]
 		public int Sides { get; set; }
 
 		/// <summary>
 		/// Property to get or set the color of the polygon. 
 		/// </summary>
 		[DisplayName("Color"), Category(Categories.Appearance)]
-		[Description("The color of the polygon.")]
 		[CM.Editor(typeof(ColorEditor), typeof(UITypeEditor))]
 		public string Color { get; set; }
 
