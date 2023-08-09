@@ -27,9 +27,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 			InCnlNumCustom = "NA (0)";
 			CtrlCnlNumCustom = "NA (0)";
 			BackColor = "black";
-			RoundedCorners = false;
 			NumberOfSides = 4;
-			CornerRadius = 0;
 		}
 
 
@@ -47,24 +45,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.DefaultValue(0)]
 		public int Rotation { get; set; }
 
-		/// <summary>
-		/// Get or set the radius of the rounded corners of the polygon
-		/// </summary>
-		[DisplayName("Corner radius"), Category(Categories.Appearance)]
-		[Description("The radius of the rounded corners of the polygon.")]
-		[CM.DefaultValue(0)]
-		public int CornerRadius { get; set; }
-
-
-		/// <summary>
-		/// Get or set the corners of the polygon
-		/// </summary>
-		[DisplayName("Rounded corners"), Category(Categories.Appearance)]
-		[Description("If true, the corners of the polygon will be rounded.")]
-		[CM.DefaultValue(false)]
-		public bool RoundedCorners { get; set; }
-
-
+	
 		/// <summary>
 		/// Get or set the background color when the mouse pointer hovers over
 		/// <summary>
@@ -144,11 +125,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 			Action = xmlNode.GetChildAsEnum<Actions>("Action");
 			Rotation = xmlNode.GetChildAsInt("Rotation");
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
-			//  PolyName = xmlNode.GetChildAsString("PolyName");
 			NumberOfSides = xmlNode.GetChildAsInt("NumberOfSides");
-			//BackgroundColor = xmlNode.GetChildAsString("BackgroundColor");
-			RoundedCorners = xmlNode.GetChildAsBool("RoundedCorners");
-			CornerRadius = xmlNode.GetChildAsInt("CornerRadius");
 			if (conditionsNode != null)
 			{
 				Conditions = new List<PolygonCondition>();
@@ -191,8 +168,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
 			xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
 			xmlElem.AppendElem("NumberOfSides", NumberOfSides);
-			xmlElem.AppendElem("RoundedCorners", RoundedCorners);
-			xmlElem.AppendElem("CornerRadius", CornerRadius);
+			
+			
 		}
 		/// <summary>
 		/// Clone  object
