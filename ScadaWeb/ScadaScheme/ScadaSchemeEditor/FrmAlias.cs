@@ -55,6 +55,8 @@ namespace Scada.Scheme.Editor
 
             new FrmAliasCreation('C', alias).ShowDialog();
             s.AliasList.Add(alias);
+            if (alias.isCnlLinked)
+                s.AliasCnlDictionary.Add(alias.Name, int.Parse(alias.Value.ToString()));
             FillListBox();
         }
 
@@ -63,7 +65,11 @@ namespace Scada.Scheme.Editor
             if (_selectedAlias == null)
                 MessageBox.Show("Please, select an alias.");
             else
-                new FrmAliasCreation('M',_selectedAlias).ShowDialog();
+            {
+                new FrmAliasCreation('M', _selectedAlias).ShowDialog();
+                if (_selectedAlias.isCnlLinked)
+                    s.AliasCnlDictionary.Add(_selectedAlias.Name, int.Parse(_selectedAlias.Value.ToString()));
+            }
 
             FillListBox();
         }

@@ -58,27 +58,68 @@ namespace Scada.Scheme.Editor
 
         private void button1_Click(object sender, EventArgs e)
         {
-            currentAlias.Name = textBox1.Text;
+            bool isOKtoClose = true;
 
-            string selectedValue = comboBox1.SelectedItem == null ? "" : comboBox1.SelectedItem.ToString();
-            switch (selectedValue)
+            if (textBox1.Text == "" || textBox2.Text == "" || comboBox1.SelectedItem == null)
+                MessageBox.Show("Please, enter a name, a type and a value.");
+            else
             {
-                case "String":
-                    currentAlias.AliasType = typeof(string);
-                    break;
-                case "Int32":
-                    currentAlias.AliasType = typeof(int);
-                    break;
-                case "Double":
-                    currentAlias.AliasType = typeof(double);
-                    break;
-                case "Boolean":
-                    currentAlias.AliasType = typeof(bool);
-                    break;
-            }
+                currentAlias.Name = textBox1.Text;
 
-            currentAlias.isCnlLinked = checkBox1.Checked;
-            currentAlias.Value = textBox2.Text;
+                string selectedValue = comboBox1.SelectedItem == null ? "" : comboBox1.SelectedItem.ToString();
+                switch (selectedValue)
+                {
+                    case "String":
+                        currentAlias.AliasType = typeof(string);
+                        currentAlias.Value = textBox2.Text.ToString();
+                        break;
+                    case "Int32":
+                        currentAlias.AliasType = typeof(int);
+                        if (int.TryParse(textBox2.Text, out int result))
+                            currentAlias.Value = result;
+                        else
+                        {
+                            MessageBox.Show("Please, enter an int32 value.");
+                            isOKtoClose = false;
+                        }
+                        break;
+                    case "Double":
+                        currentAlias.AliasType = typeof(double);
+                        if (double.TryParse(textBox2.Text, out double resultDouble))
+                            currentAlias.Value = resultDouble;
+                        else
+                        {
+                            MessageBox.Show("Please, enter a double value.");
+                            isOKtoClose = false;
+                        }
+                        break;
+                    case "Boolean":
+                        currentAlias.AliasType = typeof(bool);
+                        if (bool.TryParse(textBox2.Text, out bool resultBool))
+                            currentAlias.Value = resultBool;
+                        else
+                        {
+                            MessageBox.Show("Please, enter a bool value.");
+                            isOKtoClose = false;
+                        }
+                        break;
+                }
+
+                currentAlias.isCnlLinked = checkBox1.Checked;
+
+                if (currentAlias.isCnlLinked)
+                {
+                    if (int.TryParse(textBox2.Text, out int result))
+                        currentAlias.Value = result;
+                    else
+                    {
+                        MessageBox.Show("Please, enter an int32 value.");
+                        isOKtoClose = false;
+                    }
+                }
+
+                if(isOKtoClose) this.Close();
+            }
         }
     }
 }
