@@ -1,6 +1,7 @@
 ﻿using Scada.Data.Tables;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -50,12 +51,26 @@ namespace Scada.Scheme.Model
 
             SymbolId = xmlNode.GetChildAsString("SymbolId");
             LastModificationDate = xmlNode.GetChildAsDateTime("LastModificationDate");
-            foreach(XmlNode aliasNode in xmlNode.SelectNodes("AliasList")) 
+
+            //if (xmlNode.SelectSingleNode("AliasList") is XmlNode aliasListNode)
+            //{
+            //    foreach (XmlNode aliasNode in aliasListNode.ChildNodes)
+            //    {
+            //        if (aliasNode != null)
+            //        {
+            //            Alias alias = new Alias();
+            //            alias.loadFromXml(aliasNode);
+            //            AliasCnlDictionary.Add(alias.Name, aliasNode.GetChildAsInt("CnlNum"));
+            //            AliasList.Add(alias);
+            //        }
+            //    }
+            //}
+            foreach (XmlNode aliasNode in xmlNode.SelectNodes("AliasList"))
             {
                 if (aliasNode == null) continue;
                 Alias alias = new Alias();
                 alias.loadFromXml(aliasNode);
-                AliasCnlDictionary.Add(alias.Name,aliasNode.GetChildAsInt("CnlNum"));
+                AliasCnlDictionary.Add(alias.Name, aliasNode.GetChildAsInt("CnlNum"));
                 AliasList.Add(alias);
             }
         }
