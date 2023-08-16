@@ -77,7 +77,7 @@ namespace Scada.Scheme.Editor
                         currentAlias.AliasTypeName = "Int32";
                         if (int.TryParse(textBox2.Text, out int result))
                             currentAlias.Value = result;
-                        else
+                        else if (!currentAlias.isCnlLinked)
                         {
                             MessageBox.Show("Please, enter an int32 value.");
                             isOKtoClose = false;
@@ -87,7 +87,7 @@ namespace Scada.Scheme.Editor
                         currentAlias.AliasTypeName = "Double";
                         if (double.TryParse(textBox2.Text, out double resultDouble))
                             currentAlias.Value = resultDouble;
-                        else
+                        else if (!currentAlias.isCnlLinked)
                         {
                             MessageBox.Show("Please, enter a double value.");
                             isOKtoClose = false;
@@ -97,7 +97,7 @@ namespace Scada.Scheme.Editor
                         currentAlias.AliasTypeName = "Boolean";
                         if (bool.TryParse(textBox2.Text, out bool resultBool))
                             currentAlias.Value = resultBool;
-                        else
+                        else if (!currentAlias.isCnlLinked)
                         {
                             MessageBox.Show("Please, enter a bool value.");
                             isOKtoClose = false;
@@ -109,11 +109,11 @@ namespace Scada.Scheme.Editor
 
                 if (currentAlias.isCnlLinked)
                 {
-                    if (int.TryParse(textBox2.Text, out int result))
+                    if (int.TryParse(textBox2.Text, out int result) && selectedValue == "Int32")
                         currentAlias.Value = result;
                     else
                     {
-                        MessageBox.Show("Please, enter an int32 value.");
+                        MessageBox.Show("Please, enter an int32 value and choose int32 type.");
                         isOKtoClose = false;
                     }
                 }

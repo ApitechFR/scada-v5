@@ -23,21 +23,7 @@ namespace Scada.Scheme.Editor
 
             s = symbol;
 
-            //AddAliasAndSymbole();
-
             FillListBox();
-        }
-
-        //todo: à supprimer
-        private void AddAliasAndSymbole()
-        {
-            Alias al = new Alias();
-            al.Name = "alias test";
-            al.AliasTypeName = "String";
-            al.Value = "value test";
-            al.isCnlLinked = false;
-
-            s.AliasList.Add(al);
         }
 
         private void FillListBox()
@@ -62,13 +48,15 @@ namespace Scada.Scheme.Editor
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (_selectedAlias == null)
+            if (listBox1.SelectedIndex == -1)
                 MessageBox.Show("Please, select an alias.");
             else
             {
                 new FrmAliasCreation('M', _selectedAlias).ShowDialog();
-                if (_selectedAlias.isCnlLinked)
+                if (_selectedAlias.isCnlLinked && !s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name))
                     s.AliasCnlDictionary.Add(_selectedAlias.Name, int.Parse(_selectedAlias.Value.ToString()));
+                else if (_selectedAlias.isCnlLinked && s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name))
+                    s.AliasCnlDictionary[_selectedAlias.Name] = int.Parse(_selectedAlias.Value.ToString());
             }
 
             FillListBox();

@@ -8,7 +8,6 @@ namespace Scada.Scheme.Model
     public class Alias
     {
         public string Name { get; set; }
-        //public Type AliasType { get; set; }
         public string AliasTypeName { get; set; }
         public Type AliasType => Type.GetType(AliasTypeName);
         public bool isCnlLinked { get; set; }
@@ -36,7 +35,6 @@ namespace Scada.Scheme.Model
                 throw new ArgumentNullException("xmlElem");
 
             xmlElem.AppendElem("Name", Name);
-            //xmlElem.AppendElem("AliasType", AliasType);
             xmlElem.AppendElem("AliasType", AliasTypeName);
             xmlElem.AppendElem("Value", Value);
             xmlElem.AppendElem("isCnlLinked", isCnlLinked);
@@ -47,7 +45,6 @@ namespace Scada.Scheme.Model
                 throw new ArgumentNullException("xmlNode");
 
             Name = xmlNode.GetChildAsString("Name");
-            //AliasType = Type.GetType(xmlNode.GetChildAsString("AliasType"));
             AliasTypeName = xmlNode.GetChildAsString("AliasType");
             Value = xmlNode.GetChildAsString("Value");
             isCnlLinked = xmlNode.GetChildAsBool("isCnlLinked");
