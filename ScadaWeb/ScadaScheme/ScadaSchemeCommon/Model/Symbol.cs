@@ -69,14 +69,6 @@ namespace Scada.Scheme.Model
                 AliasList.AddRange(listTemp);
             }
 
-            //foreach (XmlNode aliasNode in xmlNode.SelectNodes("AliasList"))
-            //{
-            //    if (aliasNode == null) continue;
-            //    Alias alias = new Alias();
-            //    alias.loadFromXml(aliasNode);
-            //    AliasCnlDictionary.Add(alias.Name, aliasNode.GetChildAsInt("CnlNum"));
-            //    AliasList.Add(alias);
-            //}
         }
     }
 }
