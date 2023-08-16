@@ -33,7 +33,7 @@ namespace Scada.Scheme.Editor
         {
             Alias al = new Alias();
             al.Name = "alias test";
-            al.AliasType = typeof(string);
+            al.AliasTypeName = "String";
             al.Value = "value test";
             al.isCnlLinked = false;
 

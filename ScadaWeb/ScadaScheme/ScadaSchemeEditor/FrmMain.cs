@@ -1569,7 +1569,7 @@ namespace Scada.Scheme.Editor
             //todo: remove tis part from here
             Alias al = new Alias();
             al.Name = "alias Test";
-            al.AliasType = typeof(string);
+            al.AliasTypeName = "string";
             al.Value = "Louis";
             al.isCnlLinked = false;
 

@@ -37,17 +37,17 @@ namespace Scada.Scheme.Editor
                 textBox2.Text = currentAlias.Value == null ? "" : currentAlias.Value.ToString();
                 checkBox1.Checked = currentAlias.isCnlLinked;
 
-                int index = GetComboBoxIndexForType(currentAlias.AliasType);
+                int index = GetComboBoxIndexForType(currentAlias.AliasTypeName);
 
                 if (index >= 0) comboBox1.SelectedIndex = index;
             }
         }
 
-        private int GetComboBoxIndexForType(Type type)
+        private int GetComboBoxIndexForType(string type)
         {
             for (int i = 0; i < comboBox1.Items.Count; i++)
             {
-                if (type.Name == comboBox1.Items[i].ToString())
+                if (type == comboBox1.Items[i].ToString())
                 {
                     return i;
                 }
@@ -70,11 +70,11 @@ namespace Scada.Scheme.Editor
                 switch (selectedValue)
                 {
                     case "String":
-                        currentAlias.AliasType = typeof(string);
+                        currentAlias.AliasTypeName = "String";
                         currentAlias.Value = textBox2.Text.ToString();
                         break;
                     case "Int32":
-                        currentAlias.AliasType = typeof(int);
+                        currentAlias.AliasTypeName = "Int32";
                         if (int.TryParse(textBox2.Text, out int result))
                             currentAlias.Value = result;
                         else
@@ -84,7 +84,7 @@ namespace Scada.Scheme.Editor
                         }
                         break;
                     case "Double":
-                        currentAlias.AliasType = typeof(double);
+                        currentAlias.AliasTypeName = "Double";
                         if (double.TryParse(textBox2.Text, out double resultDouble))
                             currentAlias.Value = resultDouble;
                         else
@@ -94,7 +94,7 @@ namespace Scada.Scheme.Editor
                         }
                         break;
                     case "Boolean":
-                        currentAlias.AliasType = typeof(bool);
+                        currentAlias.AliasTypeName = "Boolean";
                         if (bool.TryParse(textBox2.Text, out bool resultBool))
                             currentAlias.Value = resultBool;
                         else
