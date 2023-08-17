@@ -282,13 +282,13 @@ namespace Scada.Scheme
             }
 
             // load groups
-            if(rootElem.SelectSingleNode("Groups") is XmlNode groupsNode)
+            if (rootElem.SelectSingleNode("Groups") is XmlNode groupsNode)
             {
-                HashSet<string> errNodeNames = new HashSet<string>(); 
+                HashSet<string> errNodeNames = new HashSet<string>();
                 CompManager compManager = CompManager.GetInstance();
                 LoadErrors.AddRange(compManager.LoadErrors);
 
-                foreach( XmlNode grpNode in groupsNode.ChildNodes)
+                foreach (XmlNode grpNode in groupsNode.ChildNodes)
                 {
                     BaseComponent group = compManager.CreateComponent(grpNode, out string errMsg);
                     if (group == null)
@@ -304,7 +304,7 @@ namespace Scada.Scheme
                     AddInCnlNums(group.GetInCnlNums(), inCnlOffset);
                     AddCtrlCnlNums(group.GetCtrlCnlNums(), ctrlCnlOffset);
 
-                    if(group.ID > maxComponentID) maxComponentID = group.ID;
+                    if (group.ID > maxComponentID) maxComponentID = group.ID;
                 }
             }
 

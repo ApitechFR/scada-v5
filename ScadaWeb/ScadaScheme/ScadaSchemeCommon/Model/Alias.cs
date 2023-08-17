@@ -8,12 +8,13 @@ namespace Scada.Scheme.Model
     public class Alias
     {
         public string Name { get; set; }
-        public Type AliasType { get; set; }
+        public string AliasTypeName { get; set; }
+        public Type AliasType => Type.GetType(AliasTypeName);
         public bool isCnlLinked { get; set; }
 
         private object _value;
         public object Value { get { return _value; } set { 
-                if (value.GetType() == AliasType)
+                if (value.GetType().Name == AliasTypeName)
                 {
                     _value = value;
                 }
@@ -21,7 +22,7 @@ namespace Scada.Scheme.Model
         public Alias()
         {
             Name = "";
-            AliasType = typeof(string);
+            AliasTypeName = "string";
             isCnlLinked = false;
         }
         public override string ToString()
@@ -34,7 +35,7 @@ namespace Scada.Scheme.Model
                 throw new ArgumentNullException("xmlElem");
 
             xmlElem.AppendElem("Name", Name);
-            xmlElem.AppendElem("AliasType", AliasType);
+            xmlElem.AppendElem("AliasType", AliasTypeName);
             xmlElem.AppendElem("Value", Value);
             xmlElem.AppendElem("isCnlLinked", isCnlLinked);
         }
@@ -44,10 +45,9 @@ namespace Scada.Scheme.Model
                 throw new ArgumentNullException("xmlNode");
 
             Name = xmlNode.GetChildAsString("Name");
-            AliasType = Type.GetType(xmlNode.GetChildAsString("AliasType"));
+            AliasTypeName = xmlNode.GetChildAsString("AliasType");
             Value = xmlNode.GetChildAsString("Value");
             isCnlLinked = xmlNode.GetChildAsBool("isCnlLinked");
-
         }
     }
 }

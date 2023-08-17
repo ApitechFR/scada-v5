@@ -52,27 +52,23 @@ namespace Scada.Scheme.Model
             SymbolId = xmlNode.GetChildAsString("SymbolId");
             LastModificationDate = xmlNode.GetChildAsDateTime("LastModificationDate");
 
-            //if (xmlNode.SelectSingleNode("AliasList") is XmlNode aliasListNode)
-            //{
-            //    foreach (XmlNode aliasNode in aliasListNode.ChildNodes)
-            //    {
-            //        if (aliasNode != null)
-            //        {
-            //            Alias alias = new Alias();
-            //            alias.loadFromXml(aliasNode);
-            //            AliasCnlDictionary.Add(alias.Name, aliasNode.GetChildAsInt("CnlNum"));
-            //            AliasList.Add(alias);
-            //        }
-            //    }
-            //}
-            foreach (XmlNode aliasNode in xmlNode.SelectNodes("AliasList"))
+            if (xmlNode.SelectSingleNode("AliasList") is XmlNode aliasListNode)
             {
-                if (aliasNode == null) continue;
-                Alias alias = new Alias();
-                alias.loadFromXml(aliasNode);
-                AliasCnlDictionary.Add(alias.Name, aliasNode.GetChildAsInt("CnlNum"));
-                AliasList.Add(alias);
+                List<Alias> listTemp = new List<Alias>();
+
+                foreach (XmlNode aliasNode in aliasListNode.ChildNodes)
+                {
+                    if (aliasNode != null)
+                    {
+                        Alias alias = new Alias();
+                        alias.loadFromXml(aliasNode);
+                        listTemp.Add(alias);
+                        AliasCnlDictionary.Add(alias.Name, aliasNode.GetChildAsInt("CnlNum"));
+                    }
+                }
+                AliasList.AddRange(listTemp);
             }
+
         }
     }
 }
