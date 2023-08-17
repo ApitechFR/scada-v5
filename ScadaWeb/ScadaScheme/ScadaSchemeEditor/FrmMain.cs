@@ -411,12 +411,12 @@ namespace Scada.Scheme.Editor
                 else
                 {
                     XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
-                    XmlElement root = xmlDoc.CreateElement("entries");
+                    XmlElement root = xmlDoc.CreateElement("symbols");
                     xmlDoc.InsertBefore(xmlDeclaration, xmlDoc.DocumentElement);
                     xmlDoc.AppendChild(root);
                 }
 
-                XmlNode entryToUpdate = xmlDoc.SelectSingleNode($"//entry[@symbolId='{currentSymbol.SymbolId}']");
+                XmlNode entryToUpdate = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{currentSymbol.SymbolId}' or @path='{symbolFileName}']");
 
                 if (entryToUpdate != null)
                 {
@@ -424,8 +424,9 @@ namespace Scada.Scheme.Editor
                 }
                 else
                 {
-                    XmlElement newEntry = xmlDoc.CreateElement("entry");
-                    newEntry.SetAttribute("name", currentSymbol.Name);
+                    XmlElement newEntry = xmlDoc.CreateElement("symbol");
+                    newEntry.SetAttribute("name", currentSymbol.Name != "" ? currentSymbol.Name : Path.GetFileNameWithoutExtension(symbolFileName));
+
                     newEntry.SetAttribute("path", symbolFileName);
                     newEntry.SetAttribute("symbolId", currentSymbol.SymbolId);
                     newEntry.SetAttribute("lastModificationDate", DateTime.Now.ToString());
