@@ -38,6 +38,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml;
 using Utils;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
@@ -349,6 +350,7 @@ namespace Scada.Scheme.Editor
                 // сохранение схемы
                 if (editor.SaveSchemeToFile(fileName, out string errMsg,asSymbol))
                 {
+                    updateSymbolIndex(Path.GetFullPath(appData.AppDirs.SymbolDir)+"\\index.xml",fileName);
                     result = true;
                 }
                 else
@@ -365,6 +367,48 @@ namespace Scada.Scheme.Editor
             return result;
         }
 
+        private void updateSymbolIndex(string xmlPath, string symbolFileName)
+        {
+            try
+            {
+                Symbol currentSymbol = editor.SchemeView.MainSymbol;
+                XmlDocument xmlDoc = new XmlDocument();
+
+                if (File.Exists(xmlPath))
+                {
+                    xmlDoc.Load(xmlPath);
+                }
+                else
+                {
+                    XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
+                    XmlElement root = xmlDoc.CreateElement("entries");
+                    xmlDoc.InsertBefore(xmlDeclaration, xmlDoc.DocumentElement);
+                    xmlDoc.AppendChild(root);
+                }
+
+                XmlNode entryToUpdate = xmlDoc.SelectSingleNode($"//entry[@symbolId='{currentSymbol.SymbolId}']");
+
+                if (entryToUpdate != null)
+                {
+                    entryToUpdate.Attributes["lastModificationDate"].Value = DateTime.Now.ToString();
+                }
+                else
+                {
+                    XmlElement newEntry = xmlDoc.CreateElement("entry");
+                    newEntry.SetAttribute("name", currentSymbol.Name);
+                    newEntry.SetAttribute("path", symbolFileName);
+                    newEntry.SetAttribute("symbolId", currentSymbol.SymbolId);
+                    newEntry.SetAttribute("lastModificationDate", DateTime.Now.ToString());
+                    xmlDoc.DocumentElement.AppendChild(newEntry);
+                }
+
+                xmlDoc.Save(xmlPath);
+            }
+            catch (Exception ex)
+            {
+                log.WriteException(ex,"Error: " + ex.Message);
+            }
+        }
 
 
         /// <summary>
