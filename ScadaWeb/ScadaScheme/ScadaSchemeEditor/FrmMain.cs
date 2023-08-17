@@ -66,6 +66,7 @@ namespace Scada.Scheme.Editor
         private bool schCompChanging;       // пользователь изменяет выбранный элемент cbSchComp
         private FormStateDTO formStateDTO;  // состояние формы для передачи
         private bool noTreeviewSelectionEffect;
+        private Dictionary<string, string> availableSymbols;
 
 
         /// <summary>
@@ -96,6 +97,35 @@ namespace Scada.Scheme.Editor
             SchemeContext.GetInstance().SchemePath = editor.FileName;
         }
 
+        private void LoadAvailableSymbols()
+        {
+            string xmlPath = Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml";
+            Dictionary<string, string> symbolsDictionary = new Dictionary<string, string>();
+
+            try
+            {
+                if (File.Exists(xmlPath))
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    xmlDoc.Load(xmlPath);
+
+                    XmlNodeList entries = xmlDoc.SelectNodes("//entry");
+
+                    foreach (XmlNode entry in entries)
+                    {
+                        string name = entry.Attributes["name"].Value;
+                        string path = entry.Attributes["path"].Value;
+
+                        symbolsDictionary[name] = path;
+                    }
+                }
+                availableSymbols = symbolsDictionary;
+            }
+            catch (Exception ex)
+            {
+                log.WriteException(ex, "Error: " + ex.Message);
+            }
+        }
 
         /// <summary>
         /// Локализовать форму.
@@ -1023,6 +1053,8 @@ namespace Scada.Scheme.Editor
                 Close();
             }
             SchemeContext.GetInstance().SchemePath = editor.FileName;
+
+            LoadAvailableSymbols();
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
