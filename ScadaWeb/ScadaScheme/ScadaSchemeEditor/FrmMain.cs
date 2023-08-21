@@ -109,7 +109,7 @@ namespace Scada.Scheme.Editor
                     XmlDocument xmlDoc = new XmlDocument();
                     xmlDoc.Load(xmlPath);
 
-                    XmlNodeList entries = xmlDoc.SelectNodes("//entry");
+                    XmlNodeList entries = xmlDoc.SelectNodes("//symbol");
 
                     foreach (XmlNode entry in entries)
                     {
@@ -119,7 +119,14 @@ namespace Scada.Scheme.Editor
                         symbolsDictionary[name] = path;
                     }
                 }
+                //Display available symbols list
                 availableSymbols = symbolsDictionary;
+                ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
+                foreach (var s in availableSymbols)
+                {
+                    lvCompTypes.Items.Add(new ListViewItem(s.Key, "component.png", symbolsViewGroup){ IndentCount = 1 });
+                }
+                lvCompTypes.Groups.Add(symbolsViewGroup);
             }
             catch (Exception ex)
             {
