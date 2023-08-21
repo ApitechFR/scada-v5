@@ -313,8 +313,8 @@ namespace Scada.Scheme.Editor
                 ScadaUiUtils.ShowError(errMsg);
 
 
-            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStripButton1.Enabled =  true;
-            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStripButton1.Enabled  = false;
+            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStrip1.Visible =  true;
+            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStrip1.Visible = false;
         }
 
         /// <summary>
