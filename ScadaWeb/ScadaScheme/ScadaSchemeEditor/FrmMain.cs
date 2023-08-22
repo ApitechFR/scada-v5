@@ -37,11 +37,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using System.Xml;
 using Utils;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-
+using Button = System.Windows.Forms.Button;
+using ListViewItem = System.Windows.Forms.ListViewItem;
 
 namespace Scada.Scheme.Editor
 {
@@ -106,11 +108,10 @@ namespace Scada.Scheme.Editor
             {
                 if (File.Exists(xmlPath))
                 {
+                    //Populate available symbols from index.xml
                     XmlDocument xmlDoc = new XmlDocument();
                     xmlDoc.Load(xmlPath);
-
                     XmlNodeList entries = xmlDoc.SelectNodes("//symbol");
-
                     foreach (XmlNode entry in entries)
                     {
                         string name = entry.Attributes["name"].Value;
@@ -118,25 +119,86 @@ namespace Scada.Scheme.Editor
 
                         symbolsDictionary[name] = path;
                     }
+
+                    ////
+                    ////lvCompTypes.View = View.Details;
+                    //lvCompTypes.Columns.Add("Action", 50);
+                    ////lvCompTypes.Columns.Add("Action", 50);
+
+                    //ListViewItem item1 = new ListViewItem("Élément 1"); 
+                    //item1.SubItems.Add("Bouton 1");
+                    //lvCompTypes.Items.Add(item1);
+
+                    //ListViewItem item2 = new ListViewItem("Élément 2");
+                    //item2.SubItems.Add(""); // Laissez la cellule vide pour le bouton
+                    //lvCompTypes.Items.Add(item2);
+
+                    lvCompTypes.DrawSubItem += ListView1_DrawSubItem;
+
+                    availableSymbols = symbolsDictionary;
+                    ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
+                    foreach (var s in availableSymbols)
+                    {
+                        lvCompTypes.Items.Add(new ListViewItem(s.Key, "component.png", symbolsViewGroup){ IndentCount = 1 });
+                    }
+                    lvCompTypes.Groups.Add(symbolsViewGroup);
+
+                    lvCompTypes.MouseClick += ListView1_MouseClick;
                 }
-                //Display available symbols list
-                availableSymbols = symbolsDictionary;
-                ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
-                foreach (var s in availableSymbols)
-                {
-                    lvCompTypes.Items.Add(new ListViewItem(s.Key, "component.png", symbolsViewGroup){ IndentCount = 1 });
-                }
-                lvCompTypes.Groups.Add(symbolsViewGroup);
             }
             catch (Exception ex)
             {
                 log.WriteException(ex, "Error: " + ex.Message);
             }
         }
+        private void ListView1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
+                if (clickedItem != null)
+                {
+                    // Créez un menu contextuel et ajoutez une option
+                    ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
+                    ToolStripMenuItem optionMenuItem = new ToolStripMenuItem("Mon option");
+                    contextMenuStrip.Items.Add(optionMenuItem);
+                    optionMenuItem.Image = Properties.Resources.MyImage; // Remplacez MyImage par le nom de votre image
 
-        /// <summary>
-        /// Локализовать форму.
-        /// </summary>
+                    // Associez un gestionnaire d'événements à l'option du menu
+                    optionMenuItem.Click += (s, args) =>
+                    {
+                        MessageBox.Show("Option cliquée pour : " + clickedItem.Text);
+                    };
+
+                    // Affichez le menu contextuel à l'emplacement du clic
+                    contextMenuStrip.Show(lvCompTypes, e.Location);
+                }
+            }
+        }
+        private void ListView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
+        {
+            e.DrawDefault = true;
+
+            // Dessiner un bouton dans la deuxième colonne de l'élément 2
+            if (e.ItemIndex == 1 && e.ColumnIndex == 1)
+            {
+                Button button = new Button();
+                button.Text = "Cliquez";
+                button.Size = e.SubItem.Bounds.Size;
+                button.Location = new System.Drawing.Point(e.SubItem.Bounds.Left, e.SubItem.Bounds.Top);
+
+                button.Click += (s, evt) =>
+                {
+                    MessageBox.Show("Bouton cliqué pour l'élément 2");
+                };
+
+                e.Item.ListView.Controls.Add(button);
+            }
+        }
+
+/// <summary>
+/// Локализовать форму.
+/// </summary>
         private void LocalizeForm()
         {
             if (!Localization.LoadDictionaries(appData.AppDirs.LangDir, "ScadaData", out string errMsg))
