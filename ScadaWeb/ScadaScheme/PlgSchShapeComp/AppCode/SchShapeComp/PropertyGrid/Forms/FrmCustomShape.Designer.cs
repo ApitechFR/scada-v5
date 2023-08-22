@@ -34,7 +34,8 @@
 			this.btnSave = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
-			this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+			this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+			this.btnEditExternally = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// txtFilePath
@@ -104,28 +105,35 @@
 			this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.label2.Location = new System.Drawing.Point(30, 105);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(93, 20);
+			this.label2.Size = new System.Drawing.Size(140, 25);
 			this.label2.TabIndex = 7;
-			this.label2.Text = "SVG Code:";
+			this.label2.Text = "Aperçu SVG :";
 			// 
-			// richTextBox1
+			// webBrowser1
 			// 
-			this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.richTextBox1.Location = new System.Drawing.Point(34, 128);
-			this.richTextBox1.Name = "richTextBox1";
-			this.richTextBox1.Size = new System.Drawing.Size(402, 224);
-			this.richTextBox1.TabIndex = 8;
-			this.richTextBox1.Text = "";
-			this.richTextBox1.TextChanged += RichTextBox1_TextChanged;
-
+			this.webBrowser1.Location = new System.Drawing.Point(34, 133);
+			this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+			this.webBrowser1.Name = "webBrowser1";
+			this.webBrowser1.Size = new System.Drawing.Size(423, 209);
+			this.webBrowser1.TabIndex = 8;
+			// 
+			// btnEditExternally
+			// 
+			this.btnEditExternally.Location = new System.Drawing.Point(144, 367);
+			this.btnEditExternally.Name = "btnEditExternally";
+			this.btnEditExternally.Size = new System.Drawing.Size(88, 38);
+			this.btnEditExternally.TabIndex = 9;
+			this.btnEditExternally.Text = "Edit";
+			this.btnEditExternally.UseVisualStyleBackColor = true;
+			this.btnEditExternally.Click += new System.EventHandler(this.BtnEditExternally_Click);
 			// 
 			// FrmCustomShape
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(483, 413);
-			this.Controls.Add(this.richTextBox1);
+			this.Controls.Add(this.btnEditExternally);
+			this.Controls.Add(this.webBrowser1);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.btnCancel);
@@ -151,6 +159,7 @@
 		private System.Windows.Forms.Button btnSave;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.RichTextBox richTextBox1;
+		private System.Windows.Forms.WebBrowser webBrowser1;
+		private System.Windows.Forms.Button btnEditExternally;
 	}
 }

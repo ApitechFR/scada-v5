@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Drawing;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Schema;
 
 namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
-
 	public partial class FrmCustomShape : Form
 	{
 		public string ShapeType { get; set; }
 		public bool Saved { get; private set; }
+		private readonly string tempFilePath = Path.Combine(Path.GetTempPath(), "tempSVG.svg");
 
 		public FrmCustomShape()
 		{
@@ -21,24 +19,16 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		public FrmCustomShape(string existingShapeType) : this()
 		{
 			ShapeType = existingShapeType;
-			richTextBox1.Text = ShapeType;
+			webBrowser1.DocumentText = ShapeType;
 			Saved = false;
 		}
 
 		private void BtnSave_Click(object sender, EventArgs e)
 		{
-			string svg = richTextBox1.Text;
-			if (ValidateAndHighlightErrors(svg))
-			{
-				MessageBox.Show("The SVG code contains errors. Please correct them before saving.");
-			}
-			else
-			{
-				ShapeType = svg;
-				Saved = true;
-				this.DialogResult = DialogResult.OK;
-				this.Close();
-			}
+			ShapeType = webBrowser1.DocumentText;
+			Saved = true;
+			this.DialogResult = DialogResult.OK;
+			this.Close();
 		}
 
 		private void BtnImport_Click(object sender, EventArgs e)
@@ -52,75 +42,80 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 					try
 					{
 						string svgCode = File.ReadAllText(openFileDialog.FileName);
-						richTextBox1.Text = svgCode;
+						webBrowser1.DocumentText = svgCode;
 					}
-					catch
+					catch (Exception ex)
 					{
-						MessageBox.Show("An error occurred while reading the file.");
+						MessageBox.Show($"An error occurred while reading the file: {ex.Message}");
 					}
 				}
 			}
 		}
 
-		private bool ValidateAndHighlightErrors(string svgCode)
+		private void BtnEditExternally_Click(object sender, EventArgs e)
 		{
-			bool hasErrors = false;
-			XmlReaderSettings settings = new XmlReaderSettings
+			try
 			{
-				ConformanceLevel = ConformanceLevel.Document,
-				ValidationType = ValidationType.Schema
-			};
+				File.WriteAllText(tempFilePath, webBrowser1.DocumentText);
 
-			settings.ValidationEventHandler += (object sender, ValidationEventArgs args) =>
-			{
-				if (args.Severity == XmlSeverityType.Error)
+				string editorPath = Properties.Settings.Default.EditorPath;
+
+				if (string.IsNullOrEmpty(editorPath))
 				{
-					int errorIndex = svgCode.IndexOf(args.Message, StringComparison.InvariantCulture);
-					if (errorIndex >= 0)
+					DialogResult result = MessageBox.Show("Voulez-vous sélectionner un éditeur personnalisé ou utiliser l'éditeur par défaut?",
+														  "Choix de l'éditeur",
+														  MessageBoxButtons.YesNoCancel,
+														  MessageBoxIcon.Question);
+
+					if (result == DialogResult.Yes)
 					{
-						HighlightError(richTextBox1, errorIndex, args.Message.Length);
-						richTextBox1.Refresh();
-						hasErrors = true;
+						using (OpenFileDialog openFileDialog = new OpenFileDialog())
+						{
+							openFileDialog.Filter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*";
+							if (openFileDialog.ShowDialog() == DialogResult.OK)
+							{
+								editorPath = openFileDialog.FileName;
+
+								Properties.Settings.Default.EditorPath = editorPath;
+								Properties.Settings.Default.Save();
+							}
+							else
+							{
+								return;
+							}
+						}
+					}
+					else if (result == DialogResult.No)
+					{
+						Process.Start(tempFilePath);
+						return;
+					}
+					else
+					{
+						
+						return;
 					}
 				}
-			};
 
-			using (StringReader stringReader = new StringReader(svgCode))
-			{
-				using (XmlReader reader = XmlReader.Create(stringReader, settings))
-				{
-					try
-					{
-						while (reader.Read()) { /* Just read */ }
-					}
-					catch (XmlException)
-					{
-						hasErrors = true;
-					}
-				}
+				Process.Start(editorPath, tempFilePath);
 			}
-
-			return hasErrors;
+			catch (Exception ex)
+			{
+				MessageBox.Show($"Failed to open the SVG in the external editor: {ex.Message}");
+			}
 		}
 
-		private void HighlightError(RichTextBox richTextBox, int startIndex, int length)
+		private void BtnDoneEditing_Click(object sender, EventArgs e)
 		{
-			int selectionStartOriginal = richTextBox.SelectionStart;
-			int selectionLengthOriginal = richTextBox.SelectionLength;
-			Color selectionColorOriginal = richTextBox.SelectionBackColor;
-
-			richTextBox.SelectionStart = startIndex;
-			richTextBox.SelectionLength = length;
-			richTextBox.SelectionBackColor = Color.Red;
-
-			richTextBox.SelectionStart = selectionStartOriginal;
-			richTextBox.SelectionLength = selectionLengthOriginal;
-			richTextBox.SelectionBackColor = selectionColorOriginal;
-		}
-
-		private void RichTextBox1_TextChanged(object sender, EventArgs e)
-		{
-			ValidateAndHighlightErrors(richTextBox1.Text);
+			try
+			{
+				string svgCode = File.ReadAllText(tempFilePath);
+				webBrowser1.DocumentText = svgCode;
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"An error occurred while reading the temporary file: {ex.Message}");
+			}
 		}
 
 	}
