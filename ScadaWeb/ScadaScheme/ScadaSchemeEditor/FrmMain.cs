@@ -99,7 +99,7 @@ namespace Scada.Scheme.Editor
             SchemeContext.GetInstance().SchemePath = editor.FileName;
         }
 
-        private void LoadAvailableSymbols()
+        private void RefreshAvailableSymbols()
         {
             string xmlPath = Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml";
             Dictionary<string, string> symbolsDictionary = new Dictionary<string, string>();
@@ -119,23 +119,21 @@ namespace Scada.Scheme.Editor
 
                         symbolsDictionary[name] = path;
                     }
-
-                    ////
-                    ////lvCompTypes.View = View.Details;
-                    //lvCompTypes.Columns.Add("Action", 50);
-                    ////lvCompTypes.Columns.Add("Action", 50);
-
-                    //ListViewItem item1 = new ListViewItem("Élément 1"); 
-                    //item1.SubItems.Add("Bouton 1");
-                    //lvCompTypes.Items.Add(item1);
-
-                    //ListViewItem item2 = new ListViewItem("Élément 2");
-                    //item2.SubItems.Add(""); // Laissez la cellule vide pour le bouton
-                    //lvCompTypes.Items.Add(item2);
-
-                    lvCompTypes.DrawSubItem += ListView1_DrawSubItem;
-
                     availableSymbols = symbolsDictionary;
+
+                    //Delete current symbols from list
+                    List<ListViewItem> itemsToRemove = lvCompTypes.Items.Cast<ListViewItem>().Where(item => item.Group.Header=="Symbols").ToList();
+                    foreach (ListViewItem itemToRemove in itemsToRemove)
+                    {
+                        lvCompTypes.Items.Remove(itemToRemove);
+                    }
+                    var groupToRemove = lvCompTypes.Groups.Cast<ListViewGroup>().Where(group => group.Header == "Symbols").FirstOrDefault();
+                    if(groupToRemove != null)
+                    {
+                        lvCompTypes.Groups.Remove(groupToRemove);
+                    }
+
+                    //Add symbols to list
                     ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
                     foreach (var s in availableSymbols)
                     {
@@ -143,7 +141,6 @@ namespace Scada.Scheme.Editor
                     }
                     lvCompTypes.Groups.Add(symbolsViewGroup);
 
-                    lvCompTypes.MouseClick += ListView1_MouseClick;
                 }
             }
             catch (Exception ex)
@@ -151,29 +148,48 @@ namespace Scada.Scheme.Editor
                 log.WriteException(ex, "Error: " + ex.Message);
             }
         }
-        private void ListView1_MouseClick(object sender, MouseEventArgs e)
+        private void lvCompTypes_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
                 ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
+                string symbolPath = availableSymbols[clickedItem.Text];
                 if (clickedItem != null)
                 {
-                    // Créez un menu contextuel et ajoutez une option
                     ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
-                    ToolStripMenuItem optionMenuItem = new ToolStripMenuItem("Mon option");
+                    ToolStripMenuItem optionMenuItem = new ToolStripMenuItem("Delete symbol");
                     contextMenuStrip.Items.Add(optionMenuItem);
-                    optionMenuItem.Image = Properties.Resources.MyImage; // Remplacez MyImage par le nom de votre image
-
-                    // Associez un gestionnaire d'événements à l'option du menu
                     optionMenuItem.Click += (s, args) =>
                     {
-                        MessageBox.Show("Option cliquée pour : " + clickedItem.Text);
-                    };
+                        if (MessageBox.Show(string.Format("Delete {0} ?", clickedItem.Text), "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            DeleteSymbol(symbolPath);
+                        }
 
-                    // Affichez le menu contextuel à l'emplacement du clic
+                    };
                     contextMenuStrip.Show(lvCompTypes, e.Location);
                 }
             }
+        }
+        private void DeleteSymbol(string symbolPath)
+        {
+            if (System.IO.File.Exists(symbolPath))
+            {
+                System.IO.File.Delete(symbolPath);
+            }
+
+            string indexFile = Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml"; // Remplacez par le chemin du fichier XML
+            XmlDocument indexXmlDocument = new XmlDocument();
+            indexXmlDocument.Load(indexFile);
+
+            XmlNodeList elements = indexXmlDocument.SelectNodes("//symbol[@path='" + symbolPath + "']");
+            if (elements.Count > 0)
+            {
+                XmlNode elementToDelete = elements[0];
+                elementToDelete.ParentNode.RemoveChild(elementToDelete);
+                indexXmlDocument.Save(indexFile);
+            }
+            RefreshAvailableSymbols();
         }
         private void ListView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
@@ -451,6 +467,7 @@ namespace Scada.Scheme.Editor
                 {
                     updateSymbolIndex(Path.GetFullPath(appData.AppDirs.SymbolDir)+"\\index.xml",fileName);
                     result = true;
+                    RefreshAvailableSymbols();
                 }
                 else
                 {
@@ -485,7 +502,7 @@ namespace Scada.Scheme.Editor
                     xmlDoc.AppendChild(root);
                 }
 
-                XmlNode entryToUpdate = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{currentSymbol.SymbolId}' or @path='{symbolFileName}']");
+                XmlNode entryToUpdate = xmlDoc.SelectSingleNode($"//symbol[@path='{symbolFileName}']");
 
                 if (entryToUpdate != null)
                 {
@@ -493,9 +510,12 @@ namespace Scada.Scheme.Editor
                 }
                 else
                 {
+                    if (xmlDoc.SelectSingleNode($"//symbol[@symbolId='{currentSymbol.SymbolId}']") != null)
+                    {
+                        currentSymbol.ResetSymbolId();
+                    }
                     XmlElement newEntry = xmlDoc.CreateElement("symbol");
                     newEntry.SetAttribute("name", currentSymbol.Name != "" ? currentSymbol.Name : Path.GetFileNameWithoutExtension(symbolFileName));
-
                     newEntry.SetAttribute("path", symbolFileName);
                     newEntry.SetAttribute("symbolId", currentSymbol.SymbolId);
                     newEntry.SetAttribute("lastModificationDate", DateTime.Now.ToString());
@@ -1124,7 +1144,7 @@ namespace Scada.Scheme.Editor
             }
             SchemeContext.GetInstance().SchemePath = editor.FileName;
 
-            LoadAvailableSymbols();
+            RefreshAvailableSymbols();
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -1790,7 +1810,6 @@ namespace Scada.Scheme.Editor
         private void miSaveSymbolAs_Click(object sender, EventArgs e)
         {
             SaveScheme(saveAs: true, asSymbol: true);
-
         }
 
         private void newSymbolToolStripMenuItem_Click(object sender, EventArgs e)

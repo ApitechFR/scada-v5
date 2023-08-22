@@ -68,7 +68,10 @@ namespace Scada.Scheme.Model
                 }
                 AliasList.AddRange(listTemp);
             }
-
+        }
+        public void ResetSymbolId()
+        {
+            SymbolId = Guid.NewGuid().ToString();
         }
     }
 }
