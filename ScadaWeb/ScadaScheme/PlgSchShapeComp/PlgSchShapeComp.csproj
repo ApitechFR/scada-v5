@@ -54,6 +54,10 @@
     <Reference Include="ScadaWebCommon">
       <HintPath>..\..\ScadaWeb\ScadaWebCommon\bin\Release\ScadaWebCommon.dll</HintPath>
     </Reference>
+    <Reference Include="Svg, Version=2.2.1.39233, Culture=neutral, PublicKeyToken=12a0bac221edeae2, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ScadaSchemeEditor\bin\Debug\Svg.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -80,6 +84,10 @@
     <Content Include="plugins\SchShapeComp\css\shapecomp.css" />
     <Content Include="plugins\SchShapeComp\css\shapecomp.min.css" />
     <Content Include="plugins\SchShapeComp\js\shapecomprender.js" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Resources\svg.png" />
     <None Include="Resources\polygon.png" />
     <None Include="Resources\barre.png" />
@@ -117,6 +125,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="compilerconfig.json" />
@@ -138,6 +152,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="AppCode\SchShapeComp\PropertyGrid\Forms\FrmCustomShape.resx">
+      <DependentUpon>FrmCustomShape.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
