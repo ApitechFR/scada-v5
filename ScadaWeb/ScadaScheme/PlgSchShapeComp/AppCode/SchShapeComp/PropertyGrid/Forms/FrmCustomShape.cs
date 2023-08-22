@@ -11,6 +11,9 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		public bool Saved { get; private set; }
 		private readonly string tempFilePath = Path.Combine(Path.GetTempPath(), "tempSVG.svg");
 
+		private Process externalEditorProcess;
+		private FileSystemWatcher fileWatcher;
+
 		public FrmCustomShape()
 		{
 			InitializeComponent();
@@ -75,7 +78,6 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 							if (openFileDialog.ShowDialog() == DialogResult.OK)
 							{
 								editorPath = openFileDialog.FileName;
-
 								Properties.Settings.Default.EditorPath = editorPath;
 								Properties.Settings.Default.Save();
 							}
@@ -87,23 +89,76 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 					}
 					else if (result == DialogResult.No)
 					{
-						Process.Start(tempFilePath);
+						externalEditorProcess = Process.Start(tempFilePath);
+						WatchFileChanges();
 						return;
 					}
 					else
 					{
-						
 						return;
 					}
 				}
 
-				Process.Start(editorPath, tempFilePath);
+				externalEditorProcess = Process.Start(editorPath, tempFilePath);
+				WatchFileChanges();
 			}
 			catch (Exception ex)
 			{
 				MessageBox.Show($"Failed to open the SVG in the external editor: {ex.Message}");
 			}
 		}
+
+		private void WatchFileChanges()
+		{
+			if (fileWatcher == null)
+			{
+				fileWatcher = new FileSystemWatcher
+				{
+					Path = Path.GetDirectoryName(tempFilePath),
+					Filter = Path.GetFileName(tempFilePath),
+					NotifyFilter = NotifyFilters.LastWrite
+				};
+
+				fileWatcher.Changed += OnFileChanged;
+				fileWatcher.EnableRaisingEvents = true;
+			}
+		}
+
+		private void OnFileChanged(object sender, FileSystemEventArgs e)
+		{
+			if (e.ChangeType == WatcherChangeTypes.Changed)
+			{
+				Invoke(new Action(() =>
+				{
+					try
+					{
+						string svgCode = File.ReadAllText(tempFilePath);
+						webBrowser1.DocumentText = svgCode;
+
+						if (externalEditorProcess != null && !externalEditorProcess.HasExited)
+						{
+							externalEditorProcess.Kill();
+							externalEditorProcess = null;
+						}
+					}
+					catch (Exception ex)
+					{
+						MessageBox.Show($"Failed to reload the SVG: {ex.Message}");
+					}
+				}));
+			}
+		}
+
+		protected override void OnClosed(EventArgs e)
+		{
+			base.OnClosed(e);
+			if (fileWatcher != null)
+			{
+				fileWatcher.Dispose();
+				fileWatcher = null;
+			}
+		}
+
 
 		private void BtnDoneEditing_Click(object sender, EventArgs e)
 		{
