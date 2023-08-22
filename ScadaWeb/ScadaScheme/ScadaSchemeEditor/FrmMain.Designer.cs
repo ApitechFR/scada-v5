@@ -141,9 +141,9 @@ namespace Scada.Scheme.Editor
             this.btnEditDelete,
             this.btnGroup,
             this.toolStripButton2});
-            this.toolStrip.Location = new System.Drawing.Point(0, 30);
+            this.toolStrip.Location = new System.Drawing.Point(0, 28);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(410, 31);
+            this.toolStrip.Size = new System.Drawing.Size(410, 27);
             this.toolStrip.TabIndex = 0;
             this.toolStrip.MouseEnter += new System.EventHandler(this.FrmMain_MouseEnter);
             // 
@@ -155,7 +155,7 @@ namespace Scada.Scheme.Editor
             this.btnFileNew.Image = ((System.Drawing.Image)(resources.GetObject("btnFileNew.Image")));
             this.btnFileNew.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnFileNew.Name = "btnFileNew";
-            this.btnFileNew.Size = new System.Drawing.Size(34, 28);
+            this.btnFileNew.Size = new System.Drawing.Size(34, 24);
             this.btnFileNew.ToolTipText = "New scheme (Ctrl+N)";
             this.btnFileNew.Click += new System.EventHandler(this.miFileNew_Click);
             // 
@@ -173,7 +173,7 @@ namespace Scada.Scheme.Editor
             this.btnFileOpen.Image = ((System.Drawing.Image)(resources.GetObject("btnFileOpen.Image")));
             this.btnFileOpen.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnFileOpen.Name = "btnFileOpen";
-            this.btnFileOpen.Size = new System.Drawing.Size(29, 28);
+            this.btnFileOpen.Size = new System.Drawing.Size(29, 24);
             this.btnFileOpen.ToolTipText = "Open scheme (Ctrl+O)";
             this.btnFileOpen.Click += new System.EventHandler(this.miFileOpen_Click);
             // 
@@ -185,7 +185,7 @@ namespace Scada.Scheme.Editor
             this.btnFileSave.Image = ((System.Drawing.Image)(resources.GetObject("btnFileSave.Image")));
             this.btnFileSave.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnFileSave.Name = "btnFileSave";
-            this.btnFileSave.Size = new System.Drawing.Size(39, 28);
+            this.btnFileSave.Size = new System.Drawing.Size(39, 24);
             this.btnFileSave.ToolTipText = "Save scheme (Ctrl+S)";
             this.btnFileSave.ButtonClick += new System.EventHandler(this.miFileSave_Click);
             // 
@@ -205,7 +205,7 @@ namespace Scada.Scheme.Editor
             this.miSaveSymbol.Image = global::Scada.Scheme.Editor.Properties.Resources.component;
             this.miSaveSymbol.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.miSaveSymbol.Name = "miSaveSymbol";
-            this.miSaveSymbol.Size = new System.Drawing.Size(39, 28);
+            this.miSaveSymbol.Size = new System.Drawing.Size(39, 24);
             this.miSaveSymbol.Text = "Save Symbol";
             this.miSaveSymbol.ButtonClick += new System.EventHandler(this.miSaveSymbol_ButtonClick);
             // 
@@ -223,14 +223,14 @@ namespace Scada.Scheme.Editor
             this.btnFileOpenBrowser.Image = ((System.Drawing.Image)(resources.GetObject("btnFileOpenBrowser.Image")));
             this.btnFileOpenBrowser.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnFileOpenBrowser.Name = "btnFileOpenBrowser";
-            this.btnFileOpenBrowser.Size = new System.Drawing.Size(29, 28);
+            this.btnFileOpenBrowser.Size = new System.Drawing.Size(29, 24);
             this.btnFileOpenBrowser.ToolTipText = "Open new browser tab";
             this.btnFileOpenBrowser.Click += new System.EventHandler(this.miFileOpenBrowser_Click);
             // 
             // sep1
             // 
             this.sep1.Name = "sep1";
-            this.sep1.Size = new System.Drawing.Size(6, 31);
+            this.sep1.Size = new System.Drawing.Size(6, 27);
             // 
             // btnEditCut
             // 
@@ -238,7 +238,7 @@ namespace Scada.Scheme.Editor
             this.btnEditCut.Image = ((System.Drawing.Image)(resources.GetObject("btnEditCut.Image")));
             this.btnEditCut.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnEditCut.Name = "btnEditCut";
-            this.btnEditCut.Size = new System.Drawing.Size(29, 28);
+            this.btnEditCut.Size = new System.Drawing.Size(29, 24);
             this.btnEditCut.ToolTipText = "Cut scheme components (Ctrl+X)";
             this.btnEditCut.Click += new System.EventHandler(this.miEditCut_Click);
             // 
@@ -248,7 +248,7 @@ namespace Scada.Scheme.Editor
             this.btnEditCopy.Image = ((System.Drawing.Image)(resources.GetObject("btnEditCopy.Image")));
             this.btnEditCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnEditCopy.Name = "btnEditCopy";
-            this.btnEditCopy.Size = new System.Drawing.Size(29, 28);
+            this.btnEditCopy.Size = new System.Drawing.Size(29, 24);
             this.btnEditCopy.ToolTipText = "Copy scheme components (Ctrl+C)";
             this.btnEditCopy.Click += new System.EventHandler(this.miEditCopy_Click);
             // 
@@ -258,14 +258,14 @@ namespace Scada.Scheme.Editor
             this.btnEditPaste.Image = ((System.Drawing.Image)(resources.GetObject("btnEditPaste.Image")));
             this.btnEditPaste.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnEditPaste.Name = "btnEditPaste";
-            this.btnEditPaste.Size = new System.Drawing.Size(29, 28);
+            this.btnEditPaste.Size = new System.Drawing.Size(29, 24);
             this.btnEditPaste.ToolTipText = "Paste scheme components (Ctrl+V)";
             this.btnEditPaste.Click += new System.EventHandler(this.miEditPaste_Click);
             // 
             // sep2
             // 
             this.sep2.Name = "sep2";
-            this.sep2.Size = new System.Drawing.Size(6, 31);
+            this.sep2.Size = new System.Drawing.Size(6, 27);
             // 
             // btnEditUndo
             // 
@@ -273,7 +273,7 @@ namespace Scada.Scheme.Editor
             this.btnEditUndo.Image = ((System.Drawing.Image)(resources.GetObject("btnEditUndo.Image")));
             this.btnEditUndo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnEditUndo.Name = "btnEditUndo";
-            this.btnEditUndo.Size = new System.Drawing.Size(29, 28);
+            this.btnEditUndo.Size = new System.Drawing.Size(29, 24);
             this.btnEditUndo.ToolTipText = "Undo (Ctrl+Z)";
             this.btnEditUndo.Click += new System.EventHandler(this.miEditUndo_Click);
             // 
@@ -283,14 +283,14 @@ namespace Scada.Scheme.Editor
             this.btnEditRedo.Image = ((System.Drawing.Image)(resources.GetObject("btnEditRedo.Image")));
             this.btnEditRedo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnEditRedo.Name = "btnEditRedo";
-            this.btnEditRedo.Size = new System.Drawing.Size(29, 28);
+            this.btnEditRedo.Size = new System.Drawing.Size(29, 24);
             this.btnEditRedo.ToolTipText = "Redo (Ctrl+Y)";
             this.btnEditRedo.Click += new System.EventHandler(this.miEditRedo_Click);
             // 
             // sep3
             // 
             this.sep3.Name = "sep3";
-            this.sep3.Size = new System.Drawing.Size(6, 31);
+            this.sep3.Size = new System.Drawing.Size(6, 27);
             // 
             // btnEditPointer
             // 
@@ -298,7 +298,7 @@ namespace Scada.Scheme.Editor
             this.btnEditPointer.Image = ((System.Drawing.Image)(resources.GetObject("btnEditPointer.Image")));
             this.btnEditPointer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnEditPointer.Name = "btnEditPointer";
-            this.btnEditPointer.Size = new System.Drawing.Size(29, 28);
+            this.btnEditPointer.Size = new System.Drawing.Size(29, 24);
             this.btnEditPointer.ToolTipText = "Cancel adding component (Esc)";
             this.btnEditPointer.Click += new System.EventHandler(this.miEditPointer_Click);
             // 
@@ -356,12 +356,12 @@ namespace Scada.Scheme.Editor
             this.tabControl.Controls.Add(this.pageProperties);
             this.tabControl.Controls.Add(this.ComponentsTree);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl.Location = new System.Drawing.Point(0, 61);
+            this.tabControl.Location = new System.Drawing.Point(0, 55);
             this.tabControl.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl.Multiline = true;
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(410, 493);
+            this.tabControl.Size = new System.Drawing.Size(410, 499);
             this.tabControl.TabIndex = 1;
             this.tabControl.MouseEnter += new System.EventHandler(this.FrmMain_MouseEnter);
             // 
@@ -372,7 +372,7 @@ namespace Scada.Scheme.Editor
             this.pageComponents.Margin = new System.Windows.Forms.Padding(4);
             this.pageComponents.Name = "pageComponents";
             this.pageComponents.Padding = new System.Windows.Forms.Padding(3);
-            this.pageComponents.Size = new System.Drawing.Size(402, 464);
+            this.pageComponents.Size = new System.Drawing.Size(402, 470);
             this.pageComponents.TabIndex = 2;
             this.pageComponents.Text = "Components";
             this.pageComponents.UseVisualStyleBackColor = true;
@@ -414,7 +414,7 @@ namespace Scada.Scheme.Editor
             this.lvCompTypes.Margin = new System.Windows.Forms.Padding(4);
             this.lvCompTypes.MultiSelect = false;
             this.lvCompTypes.Name = "lvCompTypes";
-            this.lvCompTypes.Size = new System.Drawing.Size(396, 458);
+            this.lvCompTypes.Size = new System.Drawing.Size(396, 464);
             this.lvCompTypes.SmallImageList = this.ilCompTypes;
             this.lvCompTypes.TabIndex = 0;
             this.lvCompTypes.UseCompatibleStateImageBehavior = false;
@@ -572,7 +572,7 @@ namespace Scada.Scheme.Editor
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip.Size = new System.Drawing.Size(410, 30);
+            this.menuStrip.Size = new System.Drawing.Size(410, 28);
             this.menuStrip.TabIndex = 3;
             // 
             // miFile
@@ -586,7 +586,7 @@ namespace Scada.Scheme.Editor
             this.miFileSep,
             this.miFileExit});
             this.miFile.Name = "miFile";
-            this.miFile.Size = new System.Drawing.Size(46, 26);
+            this.miFile.Size = new System.Drawing.Size(46, 24);
             this.miFile.Text = "&File";
             // 
             // miFileNew
@@ -659,7 +659,7 @@ namespace Scada.Scheme.Editor
             this.miEditPointer,
             this.miEditDelete});
             this.miEdit.Name = "miEdit";
-            this.miEdit.Size = new System.Drawing.Size(49, 26);
+            this.miEdit.Size = new System.Drawing.Size(49, 24);
             this.miEdit.Text = "&Edit";
             // 
             // miEditCut
@@ -745,7 +745,7 @@ namespace Scada.Scheme.Editor
             this.miTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miToolsOptions});
             this.miTools.Name = "miTools";
-            this.miTools.Size = new System.Drawing.Size(58, 26);
+            this.miTools.Size = new System.Drawing.Size(58, 24);
             this.miTools.Text = "&Tools";
             // 
             // miToolsOptions
@@ -761,7 +761,7 @@ namespace Scada.Scheme.Editor
             this.miHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miHelpAbout});
             this.miHelp.Name = "miHelp";
-            this.miHelp.Size = new System.Drawing.Size(55, 26);
+            this.miHelp.Size = new System.Drawing.Size(55, 24);
             this.miHelp.Text = "&Help";
             // 
             // miHelpAbout
