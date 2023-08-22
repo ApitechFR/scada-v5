@@ -937,9 +937,12 @@ namespace Scada.Scheme.Editor
         public BaseComponent getHihghestGroup(BaseComponent comp)
         {
             int groupID = comp.GroupId;
-            if (groupID == -1 || groupID == SchemeView.MainSymbol.ID)
+            if (SchemeView.MainSymbol != null)
             {
-                return comp;
+                if (groupID == -1 || groupID == SchemeView.MainSymbol.ID)
+                {
+                    return comp;
+                }
             }
 
             BaseComponent group = SchemeView.Components.Values.Where(x => x.ID == groupID).FirstOrDefault();

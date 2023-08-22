@@ -313,8 +313,8 @@ namespace Scada.Scheme.Editor
                 ScadaUiUtils.ShowError(errMsg);
 
 
-            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = true;
-            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = false;
+            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStrip1.Visible =  true;
+            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStrip1.Visible = false;
         }
 
         /// <summary>
@@ -753,6 +753,8 @@ namespace Scada.Scheme.Editor
 
         public void treeView1_onNodeSelection(object sender, TreeViewEventArgs e)
         {
+            bool isDisabled = false;
+
             List<BaseComponent> compToSelect = new List<BaseComponent>();
             lock (((TreeViewMultipleSelection)treeView1).SelectedNodes)
             {
@@ -763,6 +765,7 @@ namespace Scada.Scheme.Editor
                         this.noTreeviewSelectionEffect = true;
                         BaseComponent component = tn.Tag as BaseComponent;
                         compToSelect.Add(component);
+                        if (tn.Level == 0 && editor.SchemeView.isSymbol) isDisabled = true;
                     }
                 }
                 editor.DeselectAll();
@@ -770,20 +773,18 @@ namespace Scada.Scheme.Editor
                 {
                     if (comp is ComponentGroup)
                     {
-                        if (comp.ID != editor.SchemeView.MainSymbol.ID)
-                        {
-                            foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
-                            {
-                                this.noTreeviewSelectionEffect = true;
+                                foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
+                                {
+                                    this.noTreeviewSelectionEffect = true;
 
-                                editor.SelectComponent(child.ID, true);
-                            }
-                        }
+                                    editor.SelectComponent(child.ID, true);
+                                }
                     }
                     this.noTreeviewSelectionEffect = true;
 
                     editor.SelectComponent(comp.ID, true);
 
+                    if (isDisabled) btnEditDelete.Enabled = false;
                 }
             }
         }
