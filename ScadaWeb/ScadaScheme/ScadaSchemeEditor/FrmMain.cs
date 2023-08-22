@@ -162,7 +162,7 @@ namespace Scada.Scheme.Editor
                     ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
                     ToolStripMenuItem optionMenuItem = new ToolStripMenuItem("Mon option");
                     contextMenuStrip.Items.Add(optionMenuItem);
-                    optionMenuItem.Image = Properties.Resources.MyImage; // Remplacez MyImage par le nom de votre image
+                   // optionMenuItem.Image = Properties.Resources.MyImage; // Remplacez MyImage par le nom de votre image
 
                     // Associez un gestionnaire d'événements à l'option du menu
                     optionMenuItem.Click += (s, args) =>
@@ -1520,8 +1520,25 @@ namespace Scada.Scheme.Editor
         {
             // выбор компонента для добавления на схему
             compTypesChanging = true;
-            string typeName = lvCompTypes.SelectedItems.Count > 0 ?
-                lvCompTypes.SelectedItems[0].Tag as string : "";
+
+            string typeName = "";
+
+            //Symboles
+            if (lvCompTypes.SelectedItems.Count > 0 && lvCompTypes.SelectedItems[0].Group.Header == "Symbols")
+            {
+                string path = findSymboleInAvailableList(lvCompTypes.SelectedItems[0].Text);
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(path);
+
+                XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
+                XmlNode nameNode = mainSymbolNode.SelectSingleNode("Name");
+                typeName = nameNode.InnerText;
+            }
+            else
+            {
+                typeName = lvCompTypes.SelectedItems.Count > 0 ?
+                    lvCompTypes.SelectedItems[0].Tag as string : "";
+            }
 
             if (string.IsNullOrEmpty(typeName))
             {
@@ -1803,6 +1820,15 @@ namespace Scada.Scheme.Editor
         private void toolStripButton2_Click(object sender, EventArgs e)
         {  
             new FrmAlias(editor.SchemeView.MainSymbol).ShowDialog(); 
+        }
+
+        private string findSymboleInAvailableList(string name)
+        {
+            foreach(KeyValuePair<string, string> kvp in availableSymbols)
+            {
+                if (name == kvp.Key) return kvp.Value;
+            }
+            return "";
         }
     }
 }
