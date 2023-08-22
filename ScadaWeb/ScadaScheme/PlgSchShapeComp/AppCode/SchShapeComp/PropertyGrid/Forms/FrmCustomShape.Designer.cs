@@ -11,14 +11,14 @@
 		/// Clean up any resources being used.
 		/// </summary>
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing && (components != null))
-			{
-				components.Dispose();
-			}
-			base.Dispose(disposing);
-		}
+		//protected override void Dispose(bool disposing)
+		//{
+		//	if (disposing && (components != null))
+		//	{
+		//		components.Dispose();
+		//	}
+		//	base.Dispose(disposing);
+		//}
 
 		#region Windows Form Designer generated code
 
@@ -77,7 +77,7 @@
 			// btnSave
 			// 
 			this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnSave.Location = new System.Drawing.Point(252, 372);
+			this.btnSave.Location = new System.Drawing.Point(256, 372);
 			this.btnSave.Margin = new System.Windows.Forms.Padding(4);
 			this.btnSave.Name = "btnSave";
 			this.btnSave.Size = new System.Drawing.Size(100, 28);
@@ -105,12 +105,15 @@
 			this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.label2.Location = new System.Drawing.Point(30, 105);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(140, 25);
+			this.label2.Size = new System.Drawing.Size(112, 20);
 			this.label2.TabIndex = 7;
 			this.label2.Text = "Aperçu SVG :";
 			// 
 			// webBrowser1
 			// 
+			this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.webBrowser1.Location = new System.Drawing.Point(34, 133);
 			this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
 			this.webBrowser1.Name = "webBrowser1";
@@ -119,9 +122,11 @@
 			// 
 			// btnEditExternally
 			// 
-			this.btnEditExternally.Location = new System.Drawing.Point(144, 367);
+			this.btnEditExternally.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.btnEditExternally.Location = new System.Drawing.Point(143, 373);
+			this.btnEditExternally.Margin = new System.Windows.Forms.Padding(4);
 			this.btnEditExternally.Name = "btnEditExternally";
-			this.btnEditExternally.Size = new System.Drawing.Size(88, 38);
+			this.btnEditExternally.Size = new System.Drawing.Size(100, 28);
 			this.btnEditExternally.TabIndex = 9;
 			this.btnEditExternally.Text = "Edit";
 			this.btnEditExternally.UseVisualStyleBackColor = true;
