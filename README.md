@@ -56,3 +56,4 @@ To keep the code and repository as clean as possible, we follow these rules:
 * Merge a pull request only when it was reviewed by another developer (Github allows to add a reviewer to pull requests)
 * Don't commit change directly to ```master``` or ```develop```
 * Respect naming conventions
+  
