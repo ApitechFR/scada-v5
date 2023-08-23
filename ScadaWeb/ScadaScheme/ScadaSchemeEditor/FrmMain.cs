@@ -1553,6 +1553,9 @@ namespace Scada.Scheme.Editor
                 XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
                 XmlNode nameNode = mainSymbolNode.SelectSingleNode("Name");
                 typeName = nameNode.InnerText;
+
+                Symbol newSymbol = new Symbol();
+                newSymbol.LoadFromXml(mainSymbolNode);
             }
             else
             {
