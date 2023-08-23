@@ -14,7 +14,7 @@ In the repository, we use the gitflow workflow, in addition to a separated branc
 
 ```master``` is linked to the community project, ```production``` is used to deploy solution to client, and ```develop``` to do the development.
 
-* The process is to create one new branch from ```develop``` for every feature or bugfix, and then make a pull request to apply changes into ```develop```. 
+* The process is to create one new branch from ```develop``` for every feature or bugfix, and then make a pull request to apply changes into ```master``` (or ```production```). 
 * ```master```, as well as ```production``` should only be modified via pull request from ```develop``` or a hotfix branch.
 * To perform a hotfix, create a new branch from ```master``` (or ```production```), and then make a pull request from this branch to ```master``` (or ```production```). After the hotfix, make sure to align ```develop``` with ```master``` (or ```production```) to avoid any conflict during next pull request from ```develop``` to ```master``` (or ```production```).
 
