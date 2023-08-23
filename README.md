@@ -10,11 +10,13 @@ This documentation is intended for developers. It contains insctructions to corr
 
 ## Git repository
 ### Gitflow
-In the repository, we use the gitflow workflow : ```master``` and ```develop``` are the only branches that are permanent, and no one should commit changes to these two branches.
+In the repository, we use the gitflow workflow, in addition to a separated branch for production : ```master```, ```production``` and ```develop``` are the only branches that are permanent, and no one should commit changes to these three branches.
 
-* The process is to create one new branch from ```develop``` for every feature or bugfix, and then make a pull request to apply changes into ```develop```. 
-* ```master``` should only be modified via pull request from ```develop``` or a hotfix branch.
-* To perform a hotfix, create a new branch from ```master```, and then make a pull request from this branch to ```master```. After the hotfix, make sure to align ```develop``` with ```master``` to avoid any conflict during next pull request from ```develop``` to ```master```
+```master``` is linked to the community project, ```production``` is used to deploy solution to client, and ```develop``` to do the development.
+
+* The process is to create one new branch from ```develop``` for every feature or bugfix, and then make a pull request to apply changes into ```master``` (or ```production```). 
+* ```master```, as well as ```production``` should only be modified via pull request from ```develop``` or a hotfix branch.
+* To perform a hotfix, create a new branch from ```master``` (or ```production```), and then make a pull request from this branch to ```master``` (or ```production```). After the hotfix, make sure to align ```develop``` with ```master``` (or ```production```) to avoid any conflict during next pull request from ```develop``` to ```master``` (or ```production```).
 
 ### Naming conventions
 #### Branches
