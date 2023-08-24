@@ -348,6 +348,46 @@ namespace Scada.Scheme.Editor
             if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = false;
         }
 
+        private void CheckUpdatedSymbols()
+        {
+            string xmlPath = Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml";
+            try
+            {
+                if (File.Exists(xmlPath))
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    xmlDoc.Load(xmlPath);
+
+                    XmlNodeList entries = xmlDoc.SelectNodes("//entry");
+
+
+
+                    foreach (BaseComponent comp in editor.SchemeView.Components.Values.Where(x => x is Symbol))
+                    {
+                        Symbol symbol = comp as Symbol;
+                        if (symbol.SymbolId == editor.SchemeView.MainSymbol.SymbolId) continue;
+                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}'");
+
+                        if (indexEntry == null) { 
+                            // no idexed symbol
+                            continue; 
+                        }
+                        if (indexEntry.GetChildAsDateTime("lastModificationDate") >= symbol.LastModificationDate)
+                        {
+                            // symbol not up to date
+                            continue;
+                        }
+
+
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                log.WriteException(ex, "Error: " + ex.Message);
+            }
+        }
+
         /// <summary>
         /// Сохранить схему.
         /// </summary>
