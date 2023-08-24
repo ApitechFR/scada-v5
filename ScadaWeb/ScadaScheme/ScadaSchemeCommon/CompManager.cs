@@ -346,7 +346,7 @@ namespace Scada.Scheme
 
                         return comp;
                     }
-                    else if(compTypeName == "Symbol")
+                    else if(compTypeName.Contains("Symbol"))
                     {
                         BaseComponent comp = new Symbol();
 

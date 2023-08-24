@@ -33,6 +33,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Xml;
 using Utils;
 
 namespace Scada.Scheme.Editor
@@ -63,6 +64,10 @@ namespace Scada.Scheme.Editor
         /// Default file name of symbols
         /// </summary>
         public const string DefSymbolFileName = "NewSymbol.sch";
+        /// <summary>
+        /// path of symbol
+        /// </summary>
+        public string SymbolPath;
 
         private readonly CompManager compManager;  // менеджер компонентов
         private readonly Log log;                  // журнал приложения
@@ -720,7 +725,6 @@ namespace Scada.Scheme.Editor
                         "Не определён тип создаваемого компонента." :
                         "Type of the creating component is not defined.");
                 }
-
                 // создание компонента
                 BaseComponent component = compManager.CreateComponent(NewComponentTypeName);
 
@@ -730,6 +734,19 @@ namespace Scada.Scheme.Editor
                 }
                 else
                 {
+
+                    if (NewComponentTypeName.Contains("Symbol"))
+                    {
+                        XmlDocument xmlDoc = new XmlDocument();
+                        xmlDoc.Load(SymbolPath);
+                        XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
+
+                        if (mainSymbolNode != null)
+                        {
+                            component.LoadFromXml(mainSymbolNode);
+                        }
+                    }
+
                     component.ID = SchemeView.GetNextComponentID();
                     component.Location = new Point(x, y);
                     component.SchemeView = SchemeView;

@@ -1546,16 +1546,13 @@ namespace Scada.Scheme.Editor
             //Symboles
             if (lvCompTypes.SelectedItems.Count > 0 && lvCompTypes.SelectedItems[0].Group.Header == "Symbols")
             {
-                string path = findSymboleInAvailableList(lvCompTypes.SelectedItems[0].Text);
+                editor.SymbolPath = findSymboleInAvailableList(lvCompTypes.SelectedItems[0].Text);
                 XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(path);
+                xmlDoc.Load(editor.SymbolPath);
 
                 XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
                 XmlNode nameNode = mainSymbolNode.SelectSingleNode("Name");
-                typeName = nameNode.InnerText;
-
-                Symbol newSymbol = new Symbol();
-                newSymbol.LoadFromXml(mainSymbolNode);
+                typeName = nameNode.InnerText + " - Symbol";
             }
             else
             {
