@@ -211,7 +211,7 @@ namespace Scada.Scheme.Editor
             // 
             this.miSaveSymbolAs.Image = global::Scada.Scheme.Editor.Properties.Resources.component;
             this.miSaveSymbolAs.Name = "miSaveSymbolAs";
-            this.miSaveSymbolAs.Size = new System.Drawing.Size(206, 26);
+            this.miSaveSymbolAs.Size = new System.Drawing.Size(224, 26);
             this.miSaveSymbolAs.Text = "Save Symbol As...";
             this.miSaveSymbolAs.Click += new System.EventHandler(this.miSaveSymbolAs_Click);
             // 
@@ -461,7 +461,7 @@ namespace Scada.Scheme.Editor
             // 
             this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
             this.splitContainer1.Size = new System.Drawing.Size(397, 442);
-            this.splitContainer1.SplitterDistance = 405;
+            this.splitContainer1.SplitterDistance = 404;
             this.splitContainer1.TabIndex = 3;
             // 
             // splitContainer2
@@ -471,8 +471,8 @@ namespace Scada.Scheme.Editor
             this.splitContainer2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            this.splitContainer2.Size = new System.Drawing.Size(397, 405);
-            this.splitContainer2.SplitterDistance = 30;
+            this.splitContainer2.Size = new System.Drawing.Size(397, 404);
+            this.splitContainer2.SplitterDistance = 29;
             this.splitContainer2.TabIndex = 0;
             // 
             // toolStrip1
@@ -483,7 +483,7 @@ namespace Scada.Scheme.Editor
             this.toolStripButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(397, 33);
+            this.toolStrip1.Size = new System.Drawing.Size(397, 34);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -494,7 +494,7 @@ namespace Scada.Scheme.Editor
             this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(29, 30);
+            this.toolStripButton1.Size = new System.Drawing.Size(29, 31);
             this.toolStripButton1.Text = "toolStripButton1";
             this.toolStripButton1.ToolTipText = "Link to a symbol property";
             this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);

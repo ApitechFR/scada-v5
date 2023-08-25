@@ -780,7 +780,7 @@ namespace Scada.Scheme.Editor
                             foreach(XmlNode nodeSymbolComponent in SymbolComponents)
                             {
                                 BaseComponent symbolComponent = CreateComponentOfSymbol(x, y, nodeSymbolComponent);
-                                if(symbolComponent!= null) selComponents.Add(component);
+                                //if(symbolComponent!= null) selComponents.Add(component);
                             }
                         }  
                     }
