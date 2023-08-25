@@ -922,7 +922,7 @@ namespace Scada.Scheme.Editor
             {
                 foreach (TreeNode tn in ((TreeViewMultipleSelection)treeView1).SelectedNodes)
                 {
-                    if (tn.Tag != null && tn.Tag.ToString() != "")
+                    if (tn.Tag != null && tn.Tag.ToString() != "" && !tn.Parent.Text.Contains("Symbol"))
                     {
                         this.noTreeviewSelectionEffect = true;
                         BaseComponent component = tn.Tag as BaseComponent;
