@@ -934,7 +934,17 @@ namespace Scada.Scheme.Editor
                 {
                     if (comp is ComponentGroup)
                     {
-                        if (comp.ID != editor.SchemeView.MainSymbol.ID)
+                        //case symbol in schema
+                        if(editor.SchemeView.MainSymbol == null)
+                        {
+                            foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
+                            {
+                                this.noTreeviewSelectionEffect = true;
+
+                                editor.SelectComponent(child.ID, true);
+                            }
+                        }
+                        else if (comp.ID != editor.SchemeView.MainSymbol.ID)
                         {
                             foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
                             {

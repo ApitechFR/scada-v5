@@ -825,6 +825,7 @@ namespace Scada.Scheme.Editor
                 default:
                     break;
             }
+
             BaseComponent component = compManager.CreateComponent(componentTypeName);
             if (component == null)
             {
@@ -1017,7 +1018,7 @@ namespace Scada.Scheme.Editor
         public BaseComponent getHihghestGroup(BaseComponent comp)
         {
             int groupID = comp.GroupId;
-            if (groupID == -1 || groupID == SchemeView.MainSymbol.ID)
+            if (SchemeView.MainSymbol!= null && (groupID == -1 || groupID == SchemeView.MainSymbol.ID))
             {
                 return comp;
             }
