@@ -382,8 +382,17 @@ namespace Scada.Scheme
 
                 List<string> symbolsList = new List<string>();
 
+                foreach(BaseComponent comp in Components.Values.Where(x=>x is Symbol && (!isSymbol || x.ID != MainSymbol.ID)))
+                {
+                    Symbol symbol = comp as Symbol; 
+                    if(!symbolsList.Contains(symbol.SymbolId))
+                        symbolsList.Add(symbol.SymbolId);
+                }
+
+
                 foreach (BaseComponent component in Components.Values)
                 {
+                    
                     if (component is UnknownComponent)
                     {
                         componentsElem.AppendChild(((UnknownComponent)component).XmlNode);
@@ -426,7 +435,7 @@ namespace Scada.Scheme
                                     {
                                         symbolsList.Add(symbol.SymbolId);
                                         symbols.AppendChild(componentElem);
-                                        saveSymbolTemplateToXml(symbols, symbol);
+                                        saveSymbolTemplateToXml(componentElem, symbol,compManager);
                                     }
                                 }
                             }
@@ -462,19 +471,67 @@ namespace Scada.Scheme
 
         public void saveSymbolTemplateToXml(XmlElement node,Symbol symbol, CompManager compManager)
         {
+            XmlElement componentsElem = node.OwnerDocument.CreateElement("Components");
+            XmlElement groupsElem = node.OwnerDocument.CreateElement("Groups");
 
-            foreach(BaseComponent comp in )
-            Type compType = symbol.GetType();
-            CompLibSpec compLibSpec = compManager.GetSpecByType(compType);
+            node.AppendChild(componentsElem);
+            node.AppendChild(groupsElem);
+
+            foreach (BaseComponent component in getGroupedComponents(symbol.ID))
+            {
+                if (component is UnknownComponent)
+                {
+                    componentsElem.AppendChild(((UnknownComponent)component).XmlNode);
+                }
+                else
+                {
+                    Type compType = component.GetType();
+                    CompLibSpec compLibSpec = compManager.GetSpecByType(compType);
 
 
 
-            XmlElement componentElem = compLibSpec == null ?
-                node.OwnerDocument.CreateElement(compType.Name) /*стандартный компонент*/ :
-                node.OwnerDocument.CreateElement(compLibSpec.XmlPrefix, compType.Name, compLibSpec.XmlNs);
+                    XmlElement componentElem = compLibSpec == null ?
+                        node.OwnerDocument.CreateElement(compType.Name) /*стандартный компонент*/ :
+                        node.OwnerDocument.CreateElement(compLibSpec.XmlPrefix, compType.Name, compLibSpec.XmlNs);
 
+                    if (component is ComponentGroup)
+                    {
+                        if (component is Symbol)
+                        {
+                            componentsElem.AppendChild(componentElem);
+                        }
+                        else groupsElem.AppendChild(componentElem);
+                    }
+                    else componentsElem.AppendChild(componentElem);
 
+                    component.SaveToXml(componentElem);
+                }
+            }
         }
+
+
+        /// <summary>
+        /// Returns every BaseComponents in the group
+        /// </summary>
+
+
+        public BaseComponent getHihghestGroup(BaseComponent comp)
+        {
+            int groupID = comp.GroupId;
+            if (groupID == -1 || groupID == MainSymbol.ID)
+            {
+                return comp;
+            }
+
+            BaseComponent group = Components.Values.Where(x => x.ID == groupID).FirstOrDefault();
+            if (group == null) return comp;
+            while (group.GroupId != -1)
+            {
+                group = getHihghestGroup(group);
+            }
+            return group;
+        }
+
 
         public List<BaseComponent> getGroupedComponents(int groupID)
         {
