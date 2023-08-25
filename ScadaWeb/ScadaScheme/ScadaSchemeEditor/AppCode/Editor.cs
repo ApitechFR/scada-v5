@@ -787,6 +787,7 @@ namespace Scada.Scheme.Editor
 
                     OnSelectionChanged();
                     PointerMode = PointerMode.Select;
+                    SymbolPath = null;
                     return true;
                 }
             }
@@ -819,10 +820,8 @@ namespace Scada.Scheme.Editor
                 case "shape":
                     componentTypeName = "Scada.Web.Plugins.SchShapeComp." + name[1];
                     break;
-                case "":
-                    componentTypeName = "Scada.Scheme.Model." + name[1];
-                    break;
                 default:
+                    componentTypeName = "Scada.Scheme.Model." + name[0];
                     break;
             }
 

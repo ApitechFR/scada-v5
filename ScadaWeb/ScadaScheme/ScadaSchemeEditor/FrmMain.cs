@@ -454,7 +454,7 @@ namespace Scada.Scheme.Editor
             {
                 fileName = editor.FileName;
                 sfdScheme.InitialDirectory = Path.GetDirectoryName(fileName);
-                sfdScheme.FileName = Path.GetFileName(fileName);
+                sfdScheme.FileName = Path.GetFileName(fileName); 
             }
 
             if (saveAs && sfdScheme.ShowDialog() == DialogResult.OK)
@@ -463,12 +463,13 @@ namespace Scada.Scheme.Editor
             if (!string.IsNullOrEmpty(fileName))
             {
                 // сохранение схемы
-                if (editor.SaveSchemeToFile(fileName, out string errMsg,asSymbol))
+                if (asSymbol && editor.SaveSchemeToFile(fileName, out string errMsg2, asSymbol))
                 {
-                    updateSymbolIndex(Path.GetFullPath(appData.AppDirs.SymbolDir)+"\\index.xml",fileName);
+                    updateSymbolIndex(Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml", fileName);
                     result = true;
                     RefreshAvailableSymbols();
                 }
+                else if (editor.SaveSchemeToFile(fileName, out string errMsg, asSymbol)) result = true;
                 else
                 {
                     log.WriteError(errMsg);
