@@ -725,8 +725,14 @@ namespace Scada.Scheme.Editor
                         "Не определён тип создаваемого компонента." :
                         "Type of the creating component is not defined.");
                 }
-                // создание компонента
+
+
                 BaseComponent component = compManager.CreateComponent(NewComponentTypeName);
+
+                XmlDocument xmlDoc = new XmlDocument();
+                
+                if (SymbolPath != null)
+                    xmlDoc.Load(SymbolPath);
 
                 if (component == null)
                 {
@@ -734,11 +740,9 @@ namespace Scada.Scheme.Editor
                 }
                 else
                 {
-
                     if (NewComponentTypeName.Contains("Symbol"))
                     {
-                        XmlDocument xmlDoc = new XmlDocument();
-                        xmlDoc.Load(SymbolPath);
+                        
                         XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
 
                         if (mainSymbolNode != null)
@@ -763,12 +767,22 @@ namespace Scada.Scheme.Editor
                     }
 
                     SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
-
                     // выбор добавленного компонента
                     lock (selComponents)
                     {
                         selComponents.Clear();
                         selComponents.Add(component);
+                    
+                        //si nous ajoutons un symbol, on crée aussi ses composants
+                        XmlNode SymbolComponents = xmlDoc.SelectSingleNode(".//Components");
+                        if (SymbolComponents != null)
+                        {
+                            foreach(XmlNode nodeSymbolComponent in SymbolComponents)
+                            {
+                                BaseComponent symbolComponent = CreateComponentOfSymbol(x, y, nodeSymbolComponent);
+                                if(symbolComponent!= null) selComponents.Add(component);
+                            }
+                        }  
                     }
 
                     OnSelectionChanged();
@@ -790,6 +804,55 @@ namespace Scada.Scheme.Editor
                     "Error creating scheme component");
                 return false;
             }
+        }
+
+        public BaseComponent CreateComponentOfSymbol(int x, int y, XmlNode node)
+        {
+            // creation of component type name
+            string[] name = node.Name.Split(':');
+            string componentTypeName = "";
+            switch (name[0])
+            {
+                case "basic":
+                    componentTypeName = "Scada.Web.Plugins.SchBasicComp." + name[1];
+                    break;
+                case "shape":
+                    componentTypeName = "Scada.Web.Plugins.SchShapeComp." + name[1];
+                    break;
+                case "":
+                    componentTypeName = "Scada.Scheme.Model." + name[1];
+                    break;
+                default:
+                    break;
+            }
+            BaseComponent component = compManager.CreateComponent(componentTypeName);
+            if (component == null)
+            {
+                return null;
+            }
+            else
+            {
+                component.LoadFromXml(node);
+                component.ID = SchemeView.GetNextComponentID();
+                component.Location = new Point(x + component.Location.X, y + component.Location.Y);
+                component.SchemeView = SchemeView;
+                component.ItemChanged += Scheme_ItemChanged;
+
+                lock (SchemeView.SyncRoot)
+                {
+                    SchemeView.Components[component.ID] = component;
+                }
+                if (SchemeView.isSymbol)
+                {
+                    component.GroupId = SchemeView.MainSymbol.ID;
+                }
+
+                SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
+
+                return component;
+            }
+
+            return null;
         }
 
         /// <summary>
