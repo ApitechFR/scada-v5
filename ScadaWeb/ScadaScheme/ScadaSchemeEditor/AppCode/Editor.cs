@@ -915,24 +915,7 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Returns every BaseComponents in the group
         /// </summary>
-        public List<BaseComponent> getGroupedComponents(int groupID)
-        {
-            List<BaseComponent> groupedComponents = new List<BaseComponent>();
-            if (groupID == -1) return groupedComponents;
-            foreach (BaseComponent component in SchemeView.Components.Values)
-            {
-                if (component.GroupId == groupID) { groupedComponents.Add(component); }
-            }
 
-            foreach (BaseComponent componentGroup in SchemeView.Components.Values.Where(x => x.GroupId == groupID).DefaultIfEmpty().ToList())
-            {
-                if (componentGroup == null) break;
-                groupedComponents.AddRange(getGroupedComponents(componentGroup.ID));
-            }
-
-            return groupedComponents;
-
-        }
 
         public BaseComponent getHihghestGroup(BaseComponent comp)
         {

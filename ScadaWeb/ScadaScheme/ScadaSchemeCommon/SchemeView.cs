@@ -375,8 +375,12 @@ namespace Scada.Scheme
                 HashSet<string> prefixes = new HashSet<string>();
                 XmlElement componentsElem = xmlDoc.CreateElement("Components");
                 XmlElement groupsElem = xmlDoc.CreateElement("Groups");
+                XmlElement symbols = xmlDoc.CreateElement("Symbols");
                 rootElem.AppendChild(componentsElem);
                 rootElem.AppendChild(groupsElem);
+                rootElem.AppendChild(symbols);
+
+                List<string> symbolsList = new List<string>();
 
                 foreach (BaseComponent component in Components.Values)
                 {
@@ -416,6 +420,15 @@ namespace Scada.Scheme
                                     groupsElem.AppendChild(componentElem);
                                     rootElem.AppendChild(componentElem);
                                 }
+                                else
+                                {
+                                    if (!symbolsList.Contains(symbol.SymbolId))
+                                    {
+                                        symbolsList.Add(symbol.SymbolId);
+                                        symbols.AppendChild(componentElem);
+                                        saveSymbolTemplateToXml(symbols, symbol);
+                                    }
+                                }
                             }
                             else groupsElem.AppendChild(componentElem); 
                         }
@@ -447,6 +460,40 @@ namespace Scada.Scheme
             }
         }
 
+        public void saveSymbolTemplateToXml(XmlElement node,Symbol symbol, CompManager compManager)
+        {
+
+            foreach(BaseComponent comp in )
+            Type compType = symbol.GetType();
+            CompLibSpec compLibSpec = compManager.GetSpecByType(compType);
+
+
+
+            XmlElement componentElem = compLibSpec == null ?
+                node.OwnerDocument.CreateElement(compType.Name) /*стандартный компонент*/ :
+                node.OwnerDocument.CreateElement(compLibSpec.XmlPrefix, compType.Name, compLibSpec.XmlNs);
+
+
+        }
+
+        public List<BaseComponent> getGroupedComponents(int groupID)
+        {
+            List<BaseComponent> groupedComponents = new List<BaseComponent>();
+            if (groupID == -1) return groupedComponents;
+            foreach (BaseComponent component in Components.Values)
+            {
+                if (component.GroupId == groupID) { groupedComponents.Add(component); }
+            }
+
+            foreach (BaseComponent componentGroup in Components.Values.Where(x => x.GroupId == groupID).DefaultIfEmpty().ToList())
+            {
+                if (componentGroup == null) break;
+                groupedComponents.AddRange(getGroupedComponents(componentGroup.ID));
+            }
+
+            return groupedComponents;
+
+        }
         /// <summary>
         /// Очистить представление.
         /// </summary>

@@ -342,10 +342,12 @@ namespace Scada.Scheme.Editor
 
             if (!loadOK)
                 ScadaUiUtils.ShowError(errMsg);
-
-
+            else
+                CheckUpdatedSymbols();
+            
             if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = true;
             if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = false;
+
         }
 
         private void CheckUpdatedSymbols()
@@ -365,6 +367,8 @@ namespace Scada.Scheme.Editor
                     foreach (BaseComponent comp in editor.SchemeView.Components.Values.Where(x => x is Symbol))
                     {
                         Symbol symbol = comp as Symbol;
+                        if (symbol == null) break;
+
                         if (symbol.SymbolId == editor.SchemeView.MainSymbol.SymbolId) continue;
                         XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}'");
 
@@ -377,7 +381,6 @@ namespace Scada.Scheme.Editor
                             // symbol not up to date
                             continue;
                         }
-
 
                     }
                 }
