@@ -251,6 +251,15 @@ namespace Scada.Scheme
                     component.LoadFromXml(compNode);
                     Components[component.ID] = component;
 
+                    //SI COMPOSANT EST UN SYMBOL:
+                    //tout dépend ce que fait lancelot:
+                    //s'il met à jour le fichier xml en fonction du choix de l'utilisateur => lire le xml actuel
+                    //recréer le foreach actuel (ligne 237 à 287) mais pour les composants du/ des symbols présents dans la balise ???? créée pour lancelot
+                    // le faire dans une fonction à part ça sera surement plus propre (j'ai fait ça dans Editor.cs "CreateComponentOfSymbol")
+                    // normalement les données des composants du/des symbols sont correctes mais au cas où bien vérifier :
+                    // que le groupID des composants du symbole doit être égale à l'ID du symbole (pour que les groupes fonctionnent dans la treeview)
+
+
                     // добавление входных каналов представления
                     if (component is IDynamicComponent dynamicComponent)
                     {
