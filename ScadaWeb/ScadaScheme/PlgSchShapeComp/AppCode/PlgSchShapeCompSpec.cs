@@ -34,8 +34,6 @@ namespace Scada.Web.Plugins
 				attrTranslator.TranslateAttrs(typeof(ColorCondition));
 				attrTranslator.TranslateAttrs(typeof(PolygonCondition));
 				attrTranslator.TranslateAttrs(typeof(PopupSize));
-
-
             }
         }
 	}

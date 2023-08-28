@@ -429,8 +429,8 @@ namespace Scada.Scheme.Editor
                 ScadaUiUtils.ShowError(errMsg);
 
 
-            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = true;
-            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = false;
+            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStrip1.Visible =  true;
+            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStrip1.Visible = false;
         }
 
         /// <summary>
@@ -918,6 +918,8 @@ namespace Scada.Scheme.Editor
 
         public void treeView1_onNodeSelection(object sender, TreeViewEventArgs e)
         {
+            bool isDisabled = false;
+
             List<BaseComponent> compToSelect = new List<BaseComponent>();
             lock (((TreeViewMultipleSelection)treeView1).SelectedNodes)
             {
@@ -970,6 +972,7 @@ namespace Scada.Scheme.Editor
 
                     editor.SelectComponent(comp.ID, true);
 
+                    if (isDisabled) btnEditDelete.Enabled = false;
                 }
             }
         }
@@ -1764,47 +1767,19 @@ namespace Scada.Scheme.Editor
             }
             else
             {
-                // todo : set to false
                 toolStripButton1.Enabled = true;
                 toolStripButton1.ToolTipText = "Link to a symbol property";
             }
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
-            //todo: remove tis part from here
-            Alias al = new Alias();
-            al.Name = "alias Test";
-            al.AliasTypeName = "string";
-            al.Value = "Louis";
-            al.isCnlLinked = false;
-
-            Symbol s = new Symbol();
-            s.Name = "okok";
-            s.AliasList.Add(al);
-            s.AliasCnlDictionary.Add(s.Name, -1);
-            //to here
-
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
-            TreeNode SymbolNode = findNode(treeView1.Nodes, n =>
-                {
-                    BaseComponent bc = (BaseComponent)n.Tag;
-                    return (bc.ID == selectedComponent.GroupId && bc.GetType() == typeof(Symbol));
-                }
-            );
-            /*todo: uncomment from here
-            if(SymbolNode == null)
-            {
-                return;
-            }
-            to here*/
-            
-            //todo: uncomment first line and delete second one
-            //Symbol parentSymbol = SymbolNode.Tag as Symbol;
-            Symbol parentSymbol = s;
+            if (editor.SchemeView.MainSymbol == null) { return; }
+            Symbol parentSymbol = editor.SchemeView.MainSymbol;
 
             GridItem selectedProperty = propertyGrid.SelectedGridItem;
             List<Alias> availableAliases = new List<Alias>();
-            availableAliases = parentSymbol.AliasList.Where(a => a.AliasType == selectedProperty.PropertyDescriptor.PropertyType).ToList();
+            availableAliases = parentSymbol.AliasList.Where(a => a.AliasTypeName == selectedProperty.PropertyDescriptor.PropertyType.Name).ToList();
             string selectedPropertyName = selectedProperty.PropertyDescriptor.Name;
             int defaultSelectionIndex = -1;
             if (selectedComponent.AliasesDictionnary.ContainsKey(selectedPropertyName))
@@ -1836,7 +1811,6 @@ namespace Scada.Scheme.Editor
 
                 propertyGrid.SelectedObject = selectedComponent;
                 propertyGrid_PropertyValueChanged(propertyGrid, new PropertyValueChangedEventArgs(selectedProperty, oldProperty));
-
                 return;
             }
         }
