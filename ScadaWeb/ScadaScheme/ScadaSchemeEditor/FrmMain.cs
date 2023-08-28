@@ -427,15 +427,13 @@ namespace Scada.Scheme.Editor
 
             if (!loadOK)
                 ScadaUiUtils.ShowError(errMsg);
-            else
-                CheckUpdatedSymbols();
-            
+                        
             if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = true;
             if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = false;
 
         }
 
-        private void CheckUpdatedSymbols()
+        public bool IsSymbolUpToDate(Symbol symbol)
         {
             string xmlPath = Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml";
             try
@@ -447,27 +445,21 @@ namespace Scada.Scheme.Editor
 
                     XmlNodeList entries = xmlDoc.SelectNodes("//entry");
 
+                    XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}'");
 
-
-                    foreach (BaseComponent comp in editor.SchemeView.Components.Values.Where(x => x is Symbol))
+                    if (indexEntry == null)
                     {
-                        Symbol symbol = comp as Symbol;
-                        if (symbol == null) break;
-
-                        if (symbol.SymbolId == editor.SchemeView.MainSymbol.SymbolId) continue;
-                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}'");
-
-                        if (indexEntry == null) { 
-                            // no idexed symbol
-                            continue; 
-                        }
-                        if (indexEntry.GetChildAsDateTime("lastModificationDate") >= symbol.LastModificationDate)
-                        {
-                            // symbol not up to date
-                            continue;
-                        }
-
+                        // no idexed symbol
+                        return false;
                     }
+                    if (indexEntry.GetChildAsDateTime("lastModificationDate") >= symbol.LastModificationDate)
+                    {
+                        // symbol not up to date
+                        return false;
+                    }
+                    return true;
+
+                    
                 }
             }
             catch(Exception ex)
@@ -992,7 +984,7 @@ namespace Scada.Scheme.Editor
                         //case symbol in schema
                         if(editor.SchemeView.MainSymbol == null)
                         {
-                            foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
+                            foreach (BaseComponent child in editor.SchemeView.getGroupedComponents(comp.ID))
                             {
                                 this.noTreeviewSelectionEffect = true;
 

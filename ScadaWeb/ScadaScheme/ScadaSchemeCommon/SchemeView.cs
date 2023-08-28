@@ -25,6 +25,7 @@
 
 using Scada.Client;
 using Scada.Scheme.Model;
+using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Template;
 using System;
 using System.Collections.Generic;
@@ -391,17 +392,9 @@ namespace Scada.Scheme
 
                 List<string> symbolsList = new List<string>();
 
-                foreach(BaseComponent comp in Components.Values.Where(x=>x is Symbol && (!isSymbol || x.ID != MainSymbol.ID)))
-                {
-                    Symbol symbol = comp as Symbol; 
-                    if(!symbolsList.Contains(symbol.SymbolId))
-                        symbolsList.Add(symbol.SymbolId);
-                }
-
-
                 foreach (BaseComponent component in Components.Values)
                 {
-                    
+                    if (getHihghestGroup(component) is Symbol) continue;
                     if (component is UnknownComponent)
                     {
                         componentsElem.AppendChild(((UnknownComponent)component).XmlNode);
@@ -486,8 +479,13 @@ namespace Scada.Scheme
             node.AppendChild(componentsElem);
             node.AppendChild(groupsElem);
 
-            foreach (BaseComponent component in getGroupedComponents(symbol.ID))
+            foreach (BaseComponent comp in getGroupedComponents(symbol.ID))
             {
+                BaseComponent component = comp.Clone();
+                Point location = new Point(component.Location.X - symbol.Location.X, 
+                                           component.Location.Y - symbol.Location.Y);
+                component.Location = location;
+
                 if (component is UnknownComponent)
                 {
                     componentsElem.AppendChild(((UnknownComponent)component).XmlNode);
