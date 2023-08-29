@@ -1832,9 +1832,52 @@ namespace Scada.Scheme.Editor
                 InitScheme(isSymbol:true);
         }
 
+        private void handleUpdateAlias(object sender, OnUpdateAliasEventArgs e)
+        {
+            //update values in components that use aliases
+            foreach (BaseComponent c in editor.SchemeView.Components.Values)
+            {
+                //handle deletion
+                if (e.NewAlias == null)
+                {
+                    c.AliasesDictionnary = c.AliasesDictionnary.Where(entry => entry.Value.Name!= e.OldAlias.Name).ToDictionary(pair => pair.Key, pair => pair.Value);
+                    continue;
+                }
+
+                //find component property to update
+                var dictionnaryEntriesToModify = c.AliasesDictionnary.Where(entry => entry.Value.Name == e.OldAlias.Name).ToList();
+
+                foreach (var entry in dictionnaryEntriesToModify)
+                {
+                    //todo: take in consideration alias name changes
+                    if (e.OldAlias.Name != e.NewAlias.Name)
+                    {
+                        c.AliasesDictionnary[entry.Key] = e.NewAlias;
+                    }
+
+                    var componentProperty = c.GetType().GetProperty(entry.Key);
+                    if (componentProperty == null)
+                    {
+                        continue;
+                    }
+
+                    //Copy alias value in component parameter
+                    componentProperty.SetValue(c, e.NewAlias.Value, null);
+
+                    //c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+
+                    return;
+                }
+            }
+            updateAliasParametersDisplay();
+        }
+
         private void toolStripButton2_Click(object sender, EventArgs e)
-        {  
-            new FrmAlias(editor.SchemeView.MainSymbol).ShowDialog(); 
+        {
+            var aliasCRUD = new FrmAliasesList(editor.SchemeView.MainSymbol);
+            aliasCRUD.OnUpdateAlias += handleUpdateAlias;
+            aliasCRUD.ShowDialog();
+           
         }
 
         private string findSymboleInAvailableList(string name)

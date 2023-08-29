@@ -1,6 +1,6 @@
 ﻿namespace Scada.Scheme.Editor
 {
-    partial class FrmAliasCreation
+    partial class FrmAliasEdition
     {
         /// <summary>
         /// Required designer variable.
