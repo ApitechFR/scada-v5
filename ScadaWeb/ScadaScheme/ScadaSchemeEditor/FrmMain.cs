@@ -433,40 +433,7 @@ namespace Scada.Scheme.Editor
 
         }
 
-        public bool IsSymbolUpToDate(Symbol symbol)
-        {
-            string xmlPath = Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml";
-            try
-            {
-                if (File.Exists(xmlPath))
-                {
-                    XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(xmlPath);
 
-                    XmlNodeList entries = xmlDoc.SelectNodes("//entry");
-
-                    XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}'");
-
-                    if (indexEntry == null)
-                    {
-                        // no idexed symbol
-                        return false;
-                    }
-                    if (indexEntry.GetChildAsDateTime("lastModificationDate") >= symbol.LastModificationDate)
-                    {
-                        // symbol not up to date
-                        return false;
-                    }
-                    return true;
-
-                    
-                }
-            }
-            catch(Exception ex)
-            {
-                log.WriteException(ex, "Error: " + ex.Message);
-            }
-        }
 
         /// <summary>
         /// Сохранить схему.

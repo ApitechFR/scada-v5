@@ -281,7 +281,7 @@ namespace Scada.Scheme.Editor
             {
                 lock (SchemeView.SyncRoot)
                 {
-                    loadOK = SchemeView.LoadFromFile(fileName, out errMsg);
+                    loadOK = SchemeView.LoadFromFile(fileName,SymbolPath, out errMsg);
                 }
 
                 if (!loadOK)
