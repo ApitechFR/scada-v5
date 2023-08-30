@@ -257,7 +257,7 @@ namespace Scada.Scheme
 
                     if (component is Symbol symbol)
                     {
-                        updateSymbol(Symbolpath, stream, symbol);
+                        updateSymbol(Symbolpath, rootElem, symbol);
                     }
 
                     // добавление входных каналов представления
@@ -366,7 +366,7 @@ namespace Scada.Scheme
             }
         }
 
-        private void updateSymbol(string symbolPath, Stream rootElem, Symbol symbol)
+        private void updateSymbol(string symbolPath, XmlElement rootElem, Symbol symbol)
         {
             string symbolIndexPath = symbolPath + "\\index.xml";
 
@@ -528,19 +528,123 @@ namespace Scada.Scheme
 
                     comp.GroupId = group.ID;
                 }
-                group.OnItemChanged(SchemeChangeTypes.ComponentChanged, group);
+                Components[group.ID] = group;
+                group.OnItemChanged(SchemeChangeTypes.ComponentAdded, group);
             }
             foreach(BaseComponent component in components)
             {
                 if (component is ComponentGroup) continue;
                 component.ID = GetNextComponentID();
-                component.OnItemChanged(SchemeChangeTypes.ComponentChanged, component);
+                Components[component.ID] = component;
+                component.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
             }
         }
 
         private void loadFromCurrentFile(XmlElement rootelem,Symbol symbol)
         {
+            List<BaseComponent> components = new List<BaseComponent>();
+            if (rootelem.SelectSingleNode("Symbols") is XmlNode symbolNodes)
+            {
+                XmlNode symbolNode = null;
+                foreach (XmlNode node in symbolNodes.ChildNodes)
+                {
+                    if (node.GetChildAsString("SymbolId") == symbol.SymbolId)
+                    {
+                        symbolNode = node;
+                        break;
+                    }
+                }
+                if (symbolNode != null)
+                {
+                    // get channel offsets in template mode
+                    int inCnlOffset = templateArgs.InCnlOffset;
+                    int ctrlCnlOffset = templateArgs.CtrlCnlOffset;
 
+                    if (symbolNode.SelectSingleNode("Components") is XmlNode componentsNode)
+                    {
+                        HashSet<string> errNodeNames = new HashSet<string>(); // имена узлов незагруженных компонентов
+                        CompManager compManager = CompManager.GetInstance();
+                        LoadErrors.AddRange(compManager.LoadErrors);
+                        SortedDictionary<int, ComponentBinding> componentBindings = templateBindings?.ComponentBindings;
+
+                        foreach (XmlNode compNode in componentsNode.ChildNodes)
+                        {
+                            // создание компонента
+                            BaseComponent component = compManager.CreateComponent(compNode, out string errMsg);
+
+                            if (component == null)
+                            {
+                                component = new UnknownComponent { XmlNode = compNode };
+                                if (errNodeNames.Add(compNode.Name))
+                                    LoadErrors.Add(errMsg);
+                            }
+
+                            // загрузка компонента и добавление его в представление
+                            component.SchemeView = this;
+                            component.LoadFromXml(compNode);
+                            components.Add(component);
+                            if (component is Symbol sym)
+                            {
+                                updateSymbol(Symbolpath, symbolNode as XmlElement, sym);
+                            }
+
+                            // добавление входных каналов представления
+                            if (component is IDynamicComponent dynamicComponent)
+                            {
+                                if (componentBindings != null &&
+                                    componentBindings.TryGetValue(component.ID, out ComponentBinding binding))
+                                {
+                                    dynamicComponent.InCnlNum = binding.InCnlNum;
+                                    dynamicComponent.CtrlCnlNum = binding.CtrlCnlNum;
+                                }
+                                else
+                                {
+                                    if (inCnlOffset > 0 && dynamicComponent.InCnlNum > 0)
+                                        dynamicComponent.InCnlNum += inCnlOffset;
+                                    if (ctrlCnlOffset > 0 && dynamicComponent.CtrlCnlNum > 0)
+                                        dynamicComponent.CtrlCnlNum += ctrlCnlOffset;
+                                }
+
+                                AddCnlNum(dynamicComponent.InCnlNum);
+                                AddCtrlCnlNum(dynamicComponent.CtrlCnlNum);
+                            }
+
+                            AddInCnlNums(component.GetInCnlNums(), inCnlOffset);
+                            AddCtrlCnlNums(component.GetCtrlCnlNums(), ctrlCnlOffset);
+
+                        }
+                    }
+
+
+                    // load groups
+                    if (symbolNode.SelectSingleNode("Groups") is XmlNode groupsNode)
+                    {
+                        HashSet<string> errNodeNames = new HashSet<string>();
+                        CompManager compManager = CompManager.GetInstance();
+                        LoadErrors.AddRange(compManager.LoadErrors);
+
+                        foreach (XmlNode grpNode in groupsNode.ChildNodes)
+                        {
+                            BaseComponent group = compManager.CreateComponent(grpNode, out string errMsg);
+                            if (group == null)
+                            {
+                                group = new UnknownComponent { XmlNode = grpNode };
+                                if (errNodeNames.Add(grpNode.Name))
+                                    LoadErrors.Add(errMsg);
+                            }
+
+                            group.SchemeView = this;
+                            group.LoadFromXml(grpNode);
+                            components.Add(group);
+
+                            AddInCnlNums(group.GetInCnlNums(), inCnlOffset);
+                            AddCtrlCnlNums(group.GetCtrlCnlNums(), ctrlCnlOffset);
+
+                        }
+                    }
+                }
+                setNewSymbolCompsIDs(components);
+            }
         }
 
         /// <summary>
