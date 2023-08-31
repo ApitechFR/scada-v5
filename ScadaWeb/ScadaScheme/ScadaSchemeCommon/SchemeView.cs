@@ -287,6 +287,7 @@ namespace Scada.Scheme
                     // определение макс. идентификатора компонентов
                     if (component.ID > maxComponentID)
                         maxComponentID = component.ID;
+                    Components[component.ID] = component;
                 }
             }
 
@@ -422,7 +423,8 @@ namespace Scada.Scheme
 
                     if(component is Symbol sym)
                     {
-                        LoadSymbol(symbolPath,rootElem, sym);
+                        //------------- TO DO : ---------------
+                        //LoadSymbol(symbolPath,rootElem, sym);
                     }
 
                     // добавление входных каналов представления
@@ -725,6 +727,9 @@ namespace Scada.Scheme
                             componentElem = xmlDoc.CreateElement("MainSymbol");
                         }
 
+                        component.SaveToXml(componentElem);
+
+
                         if (component is ComponentGroup) 
                         { 
                             if(component is Symbol symbol)
@@ -740,9 +745,11 @@ namespace Scada.Scheme
                                 {
                                     if (!symbolsList.Contains(symbol.SymbolId))
                                     {
+                                        XmlElement symbolTemplate = componentElem.Clone() as XmlElement;
+
+                                        symbols.AppendChild(symbolTemplate);
+                                        saveSymbolTemplateToXml(symbolTemplate, symbol,compManager);
                                         symbolsList.Add(symbol.SymbolId);
-                                        symbols.AppendChild(componentElem);
-                                        saveSymbolTemplateToXml(componentElem, symbol,compManager);
                                     }
                                 }
                             }
@@ -750,7 +757,6 @@ namespace Scada.Scheme
                         }
                         else componentsElem.AppendChild(componentElem);
 
-                        component.SaveToXml(componentElem);
                     }
                 }
 

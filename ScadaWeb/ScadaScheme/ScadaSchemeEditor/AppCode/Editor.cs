@@ -851,8 +851,6 @@ namespace Scada.Scheme.Editor
 
                 return component;
             }
-
-            return null;
         }
 
         /// <summary>
