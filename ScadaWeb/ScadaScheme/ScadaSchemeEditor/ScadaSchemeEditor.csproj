@@ -103,17 +103,17 @@
     <Compile Include="FrmAbout.designer.cs">
       <DependentUpon>FrmAbout.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmAlias.cs">
+    <Compile Include="FrmAliasesList.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmAlias.Designer.cs">
-      <DependentUpon>FrmAlias.cs</DependentUpon>
+    <Compile Include="FrmAliasesList.Designer.cs">
+      <DependentUpon>FrmAliasesList.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmAliasCreation.cs">
+    <Compile Include="FrmAliasEdition.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmAliasCreation.Designer.cs">
-      <DependentUpon>FrmAliasCreation.cs</DependentUpon>
+    <Compile Include="FrmAliasEdition.Designer.cs">
+      <DependentUpon>FrmAliasEdition.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmAliasSelection.cs">
       <SubType>Form</SubType>
@@ -148,11 +148,11 @@
     <EmbeddedResource Include="FrmAbout.resx">
       <DependentUpon>FrmAbout.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FrmAlias.resx">
-      <DependentUpon>FrmAlias.cs</DependentUpon>
+    <EmbeddedResource Include="FrmAliasesList.resx">
+      <DependentUpon>FrmAliasesList.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FrmAliasCreation.resx">
-      <DependentUpon>FrmAliasCreation.cs</DependentUpon>
+    <EmbeddedResource Include="FrmAliasEdition.resx">
+      <DependentUpon>FrmAliasEdition.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmAliasSelection.resx">
       <DependentUpon>FrmAliasSelection.cs</DependentUpon>

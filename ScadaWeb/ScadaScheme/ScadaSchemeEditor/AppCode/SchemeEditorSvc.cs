@@ -244,7 +244,7 @@ namespace Scada.Scheme.Editor
                     dto.FormState = AppData.MainForm.GetFormState();
                     Editor.Status = status;
                 }
-                return JsSerializer.Serialize(dto);
+                return JsSerializer.Serialize(dto); // ajout
                 //var settings = new JsonSerializerSettings
                 //{
                 //    ReferenceLoopHandling = ReferenceLoopHandling.Ignore, 

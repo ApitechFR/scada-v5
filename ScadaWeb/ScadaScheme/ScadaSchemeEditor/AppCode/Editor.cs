@@ -775,7 +775,6 @@ namespace Scada.Scheme.Editor
                         selComponents.Clear();
                         selComponents.Add(component);
                     
-                        //si nous ajoutons un symbol, on crée aussi ses composants
                         XmlNode SymbolComponents = xmlDoc.SelectSingleNode(".//Components");
                         if (SymbolComponents != null)
                         {
@@ -811,7 +810,6 @@ namespace Scada.Scheme.Editor
 
         public BaseComponent CreateComponentOfSymbol(int x, int y, XmlNode node)
         {
-            // creation of component type name
             string[] name = node.Name.Split(':');
             string componentTypeName = "";
             switch (name[0])
