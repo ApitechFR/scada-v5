@@ -69,6 +69,8 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public string SymbolPath;
 
+        public string SymbolDir;
+
         private readonly CompManager compManager;  // менеджер компонентов
         private readonly Log log;                  // журнал приложения
         private List<Change> changes;              // изменения схемы
@@ -281,7 +283,7 @@ namespace Scada.Scheme.Editor
             {
                 lock (SchemeView.SyncRoot)
                 {
-                    loadOK = SchemeView.LoadFromFile(fileName,SymbolPath, out errMsg);
+                    loadOK = SchemeView.LoadFromFile(fileName,SymbolDir, out errMsg);
                 }
 
                 if (!loadOK)

@@ -257,7 +257,7 @@ namespace Scada.Scheme
 
                     if (component is Symbol symbol)
                     {
-                        updateSymbol(Symbolpath, rootElem, symbol);
+                        LoadSymbol(Symbolpath, rootElem, symbol);
                     }
 
                     // добавление входных каналов представления
@@ -332,45 +332,12 @@ namespace Scada.Scheme
                 }
             }
         }
-        public bool IsSymbolUpToDate(Symbol symbol, string indexPath)
-        {
-            try
-            {
-                if (File.Exists(indexPath))
-                {
-                    XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(indexPath);
-
-                    XmlNodeList entries = xmlDoc.SelectNodes("//entry");
-
-                    XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}'");
-
-                    if (indexEntry == null)
-                    {
-                        return true;
-                    }
-                    if (indexEntry.GetChildAsDateTime("lastModificationDate") >= symbol.LastModificationDate)
-                    {
-                        // symbol not up to date
-                        return false;
-                    }
-                    return true;
-
-
-                }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
-
-        private void updateSymbol(string symbolPath, XmlElement rootElem, Symbol symbol)
+        
+        private void LoadSymbol(string symbolPath, XmlElement rootElem, Symbol symbol)
         {
             string symbolIndexPath = symbolPath + "\\index.xml";
 
-            if (IsSymbolUpToDate(symbol, symbolIndexPath))
+            if (!IsSymbolUpToDate(symbol, symbolIndexPath))
             {
                 DialogResult popup = MessageBox.Show
                     (
@@ -384,24 +351,37 @@ namespace Scada.Scheme
                 {
                     XmlDocument xmlDoc = new XmlDocument();
                     xmlDoc.Load(symbolIndexPath);
-
-                    XmlNodeList entries = xmlDoc.SelectNodes("//entry");
-
                     XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}'");
 
-                    loadFromSymbolFile(indexEntry.GetChildAsString("path"), symbol);
+                    LoadFromSymbolFile(indexEntry.GetChildAsString("path"), symbol);
                     
                 }
                 else
                 {
-                    loadFromCurrentFile(rootElem, symbol);
+                    LoadFromCurrentFile(rootElem, symbol);
                 }
+            }
+            else
+            {
+                LoadFromCurrentFile(rootElem, symbol);
             }
 
         }
 
+        private bool IsSymbolUpToDate(Symbol symbol,string symbolIndexPath)
+        {
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(symbolIndexPath);
 
-        private void loadFromSymbolFile(string symbolPath, Symbol symbol)
+            XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
+
+            if (indexEntry == null) return true;
+
+
+            return indexEntry.GetChildAsDateTime("lastModificationDate") <= symbol.LastModificationDate;
+        }
+
+        private void LoadFromSymbolFile(string symbolPath, Symbol symbol)
         {
             List<BaseComponent> symbolComps = new List<BaseComponent>();
             XmlDocument xmlDoc = new XmlDocument();
@@ -439,6 +419,11 @@ namespace Scada.Scheme
 
 
                     symbolComps.Add(component);
+
+                    if(component is Symbol sym)
+                    {
+                        LoadSymbol(symbolPath,rootElem, sym);
+                    }
 
                     // добавление входных каналов представления
                     if (component is IDynamicComponent dynamicComponent)
@@ -512,13 +497,17 @@ namespace Scada.Scheme
                         images[image.Name] = image;
                 }
             }
-            setNewSymbolCompsIDs(symbolComps);
+            SetNewSymbolCompsIDs(symbolComps,symbol);
         }
 
-        private void setNewSymbolCompsIDs(List<BaseComponent> components)
+        private void SetNewSymbolCompsIDs(List<BaseComponent> components,Symbol symbol)
         {
-
-            foreach(BaseComponent group in components.Where(x=>x is ComponentGroup)) 
+            List<int> ID = components.Select(x => x.ID).ToList();
+            foreach(BaseComponent comp in components.Where(x=> !ID.Contains(x.GroupId)))
+            {
+                comp.GroupId = symbol.ID;
+            }
+            foreach (BaseComponent group in components.Where(x=>x is ComponentGroup)) 
             {
                 int oldId = group.ID;
                 group.ID = GetNextComponentID();
@@ -531,7 +520,7 @@ namespace Scada.Scheme
                 Components[group.ID] = group;
                 group.OnItemChanged(SchemeChangeTypes.ComponentAdded, group);
             }
-            foreach(BaseComponent component in components)
+            foreach (BaseComponent component in components)
             {
                 if (component is ComponentGroup) continue;
                 component.ID = GetNextComponentID();
@@ -540,7 +529,7 @@ namespace Scada.Scheme
             }
         }
 
-        private void loadFromCurrentFile(XmlElement rootelem,Symbol symbol)
+        private void LoadFromCurrentFile(XmlElement rootelem,Symbol symbol)
         {
             List<BaseComponent> components = new List<BaseComponent>();
             if (rootelem.SelectSingleNode("Symbols") is XmlNode symbolNodes)
@@ -585,7 +574,7 @@ namespace Scada.Scheme
                             components.Add(component);
                             if (component is Symbol sym)
                             {
-                                updateSymbol(Symbolpath, symbolNode as XmlElement, sym);
+                                LoadSymbol(Symbolpath, symbolNode as XmlElement, sym);
                             }
 
                             // добавление входных каналов представления
@@ -643,7 +632,7 @@ namespace Scada.Scheme
                         }
                     }
                 }
-                setNewSymbolCompsIDs(components);
+                SetNewSymbolCompsIDs(components, symbol);
             }
         }
 

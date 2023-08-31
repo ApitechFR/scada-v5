@@ -95,7 +95,7 @@ namespace Scada.Scheme.Editor
             editor.SelectionPropsChanged += Editor_SelectionPropsChanged;
             editor.ClipboardChanged += Editor_ClipboardChanged;
             editor.History.HistoryChanged += History_HistoryChanged;
-
+            editor.SymbolDir = appData.AppDirs.SymbolDir;
             SchemeContext.GetInstance().SchemePath = editor.FileName;
         }
 
@@ -1104,6 +1104,8 @@ namespace Scada.Scheme.Editor
 
             // инициализация общих данных приложения
             appData.Init(Path.GetDirectoryName(Application.ExecutablePath), this);
+
+            editor.SymbolDir = appData.AppDirs.SymbolDir;
 
             // локализация
             LocalizeForm();
