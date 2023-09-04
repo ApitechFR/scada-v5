@@ -60,5 +60,14 @@ namespace Scada.Scheme.Model
             Value = xmlNode.GetChildAsString("Value");
             isCnlLinked = xmlNode.GetChildAsBool("isCnlLinked");
         }
+        public Alias Clone()
+        {
+            Alias alias = new Alias();
+            alias.Name = Name;
+            alias.AliasTypeName = AliasTypeName;
+            alias.Value = Value;
+            alias.isCnlLinked = isCnlLinked;
+            return alias;
+        } 
     }
 }

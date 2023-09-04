@@ -1776,11 +1776,24 @@ namespace Scada.Scheme.Editor
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
             if (editor.SchemeView.MainSymbol == null) { return; }
             Symbol parentSymbol = editor.SchemeView.MainSymbol;
-
             GridItem selectedProperty = propertyGrid.SelectedGridItem;
-            List<Alias> availableAliases = new List<Alias>();
-            availableAliases = parentSymbol.AliasList.Where(a => a.AliasTypeName == selectedProperty.PropertyDescriptor.PropertyType.Name).ToList();
+
+
             string selectedPropertyName = selectedProperty.PropertyDescriptor.Name;
+            bool isCnlProperty = false;
+            if(selectedPropertyName == "InCnlNumCustom")
+            {
+                selectedPropertyName = "InCnlNum";
+                isCnlProperty = true;
+            }
+            else if(selectedPropertyName == "CtrlCnlNumCustom")
+            {
+                selectedPropertyName = "CtrlCnlNum";
+                isCnlProperty = true;
+            }
+
+            List<Alias> availableAliases = new List<Alias>();
+            availableAliases = parentSymbol.AliasList.Where(a => isCnlProperty ? a.isCnlLinked : a.AliasTypeName == selectedProperty.PropertyDescriptor.PropertyType.Name).ToList();
             int defaultSelectionIndex = -1;
             if (selectedComponent.AliasesDictionnary.ContainsKey(selectedPropertyName))
             {
@@ -1795,6 +1808,7 @@ namespace Scada.Scheme.Editor
                 {
                     return;
                 }
+
                 //update mapping between compoennt properties and alias
                 selectedComponent.AliasesDictionnary.Remove(selectedPropertyName);
                 if(frmAliasSelection.selectedAlias != null)
@@ -1834,6 +1848,8 @@ namespace Scada.Scheme.Editor
 
         private void handleUpdateAlias(object sender, OnUpdateAliasEventArgs e)
         {
+            bool hasComponentBeenModified = false;
+
             //update values in components that use aliases
             foreach (BaseComponent c in editor.SchemeView.Components.Values)
             {
@@ -1845,28 +1861,22 @@ namespace Scada.Scheme.Editor
                 }
 
                 //find component property to update
-                var dictionnaryEntriesToModify = c.AliasesDictionnary.Where(entry => entry.Value.Name == e.OldAlias.Name).ToList();
-
+                var dictionnaryEntriesToModify = c.AliasesDictionnary.Where(entry => entry.Value.Name == e.NewAlias.Name).ToList();
+                 
+                if (hasComponentBeenModified)
+                {
+                    continue;
+                }
                 foreach (var entry in dictionnaryEntriesToModify)
                 {
-                    //todo: take in consideration alias name changes
-                    if (e.OldAlias.Name != e.NewAlias.Name)
-                    {
-                        c.AliasesDictionnary[entry.Key] = e.NewAlias;
-                    }
-
                     var componentProperty = c.GetType().GetProperty(entry.Key);
                     if (componentProperty == null)
                     {
                         continue;
                     }
 
-                    //Copy alias value in component parameter
                     componentProperty.SetValue(c, e.NewAlias.Value, null);
-
-                    //c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
-
-                    return;
+                    hasComponentBeenModified = true;
                 }
             }
             updateAliasParametersDisplay();
@@ -1877,7 +1887,6 @@ namespace Scada.Scheme.Editor
             var aliasCRUD = new FrmAliasesList(editor.SchemeView.MainSymbol);
             aliasCRUD.OnUpdateAlias += handleUpdateAlias;
             aliasCRUD.ShowDialog();
-           
         }
 
         private string findSymboleInAvailableList(string name)

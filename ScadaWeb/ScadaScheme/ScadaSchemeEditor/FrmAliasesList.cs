@@ -35,7 +35,7 @@ namespace Scada.Scheme.Editor
             foreach (var a in s.AliasList)
                 listBox1.Items.Add(a.Name);
 
-            _selectedAlias = null;
+            //_selectedAlias = null;
             button3.Enabled = false;
             button5.Enabled = false;
         }
@@ -53,7 +53,7 @@ namespace Scada.Scheme.Editor
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Alias oldAlias = _selectedAlias;
+            Alias oldAlias = _selectedAlias.Clone();
             if (listBox1.SelectedIndex == -1)
                 MessageBox.Show("Please, select an alias.");
             else
@@ -63,7 +63,7 @@ namespace Scada.Scheme.Editor
                     s.AliasCnlDictionary.Add(_selectedAlias.Name, int.Parse(_selectedAlias.Value.ToString()));
                 else if (_selectedAlias.isCnlLinked && s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name))
                     s.AliasCnlDictionary[_selectedAlias.Name] = int.Parse(_selectedAlias.Value.ToString());
-                FillListBox();  
+                FillListBox();
                 OnUpdateAlias?.Invoke(this, new OnUpdateAliasEventArgs(oldAlias, _selectedAlias));
             }
 
