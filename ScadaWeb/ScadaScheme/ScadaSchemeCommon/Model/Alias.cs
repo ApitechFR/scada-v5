@@ -3,6 +3,17 @@ using System.Xml;
 
 namespace Scada.Scheme.Model
 {
+    public class OnUpdateAliasEventArgs : EventArgs
+    {
+        public Alias OldAlias { get; }
+        public Alias NewAlias { get; }
+
+        public OnUpdateAliasEventArgs(Alias oldAlias, Alias newAlias)
+        {
+            OldAlias = oldAlias;
+            NewAlias = newAlias;
+        }
+    }
 
     [Serializable]
     public class Alias

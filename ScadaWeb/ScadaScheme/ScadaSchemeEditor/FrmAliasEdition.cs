@@ -11,34 +11,31 @@ using System.Windows.Forms;
 
 namespace Scada.Scheme.Editor
 {
-    public partial class FrmAliasCreation : Form
+    public partial class FrmAliasEdition : Form
     {
-        public char frmType;
         public Alias currentAlias;
 
-        public FrmAliasCreation(char frmType, Alias currentAlias)
+        public FrmAliasEdition(bool isCreationForm, Alias currentAlias)
         {
             InitializeComponent();
 
-            this.frmType = frmType;
             this.currentAlias = currentAlias;
 
-            // ouverture en création
-            if(frmType == 'C')
+            if(isCreationForm)
             {
                 textBox1.Text = "";
                 textBox2.Text = "";
                 comboBox1.SelectedIndex = -1;
                 checkBox1.Checked = false;
             }
-            else if(frmType == 'M')
+            else
             {
                 textBox1.Text = currentAlias.Name;
                 textBox2.Text = currentAlias.Value == null ? "" : currentAlias.Value.ToString();
                 checkBox1.Checked = currentAlias.isCnlLinked;
+                comboBox1.Enabled = false;
 
                 int index = GetComboBoxIndexForType(currentAlias.AliasTypeName);
-
                 if (index >= 0) comboBox1.SelectedIndex = index;
             }
         }

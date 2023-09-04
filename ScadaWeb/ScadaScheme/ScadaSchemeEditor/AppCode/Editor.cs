@@ -33,6 +33,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Xml;
 using Utils;
 
 namespace Scada.Scheme.Editor
@@ -63,6 +64,10 @@ namespace Scada.Scheme.Editor
         /// Default file name of symbols
         /// </summary>
         public const string DefSymbolFileName = "NewSymbol.sch";
+        /// <summary>
+        /// path of symbol
+        /// </summary>
+        public string SymbolPath;
 
         private readonly CompManager compManager;  // менеджер компонентов
         private readonly Log log;                  // журнал приложения
@@ -721,8 +726,13 @@ namespace Scada.Scheme.Editor
                         "Type of the creating component is not defined.");
                 }
 
-                // создание компонента
+
                 BaseComponent component = compManager.CreateComponent(NewComponentTypeName);
+
+                XmlDocument xmlDoc = new XmlDocument();
+                
+                if (SymbolPath != null)
+                    xmlDoc.Load(SymbolPath);
 
                 if (component == null)
                 {
@@ -730,6 +740,17 @@ namespace Scada.Scheme.Editor
                 }
                 else
                 {
+                    if (NewComponentTypeName.Contains("Symbol"))
+                    {
+                        
+                        XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
+
+                        if (mainSymbolNode != null)
+                        {
+                            component.LoadFromXml(mainSymbolNode);
+                        }
+                    }
+
                     component.ID = SchemeView.GetNextComponentID();
                     component.Location = new Point(x, y);
                     component.SchemeView = SchemeView;
@@ -746,16 +767,26 @@ namespace Scada.Scheme.Editor
                     }
 
                     SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
-
                     // выбор добавленного компонента
                     lock (selComponents)
                     {
                         selComponents.Clear();
                         selComponents.Add(component);
+                    
+                        XmlNode SymbolComponents = xmlDoc.SelectSingleNode(".//Components");
+                        if (SymbolComponents != null)
+                        {
+                            foreach(XmlNode nodeSymbolComponent in SymbolComponents)
+                            {
+                                BaseComponent symbolComponent = CreateComponentOfSymbol(x, y, nodeSymbolComponent);
+                                symbolComponent.GroupId = component.ID;
+                            }
+                        }  
                     }
 
                     OnSelectionChanged();
                     PointerMode = PointerMode.Select;
+                    SymbolPath = null;
                     return true;
                 }
             }
@@ -773,6 +804,53 @@ namespace Scada.Scheme.Editor
                     "Error creating scheme component");
                 return false;
             }
+        }
+
+        public BaseComponent CreateComponentOfSymbol(int x, int y, XmlNode node)
+        {
+            string[] name = node.Name.Split(':');
+            string componentTypeName = "";
+            switch (name[0])
+            {
+                case "basic":
+                    componentTypeName = "Scada.Web.Plugins.SchBasicComp." + name[1];
+                    break;
+                case "shape":
+                    componentTypeName = "Scada.Web.Plugins.SchShapeComp." + name[1];
+                    break;
+                default:
+                    componentTypeName = "Scada.Scheme.Model." + name[0];
+                    break;
+            }
+
+            BaseComponent component = compManager.CreateComponent(componentTypeName);
+            if (component == null)
+            {
+                return null;
+            }
+            else
+            {
+                component.LoadFromXml(node);
+                component.ID = SchemeView.GetNextComponentID();
+                component.Location = new Point(x + component.Location.X, y + component.Location.Y);
+                component.SchemeView = SchemeView;
+                component.ItemChanged += Scheme_ItemChanged;
+
+                lock (SchemeView.SyncRoot)
+                {
+                    SchemeView.Components[component.ID] = component;
+                }
+                if (SchemeView.isSymbol)
+                {
+                    component.GroupId = SchemeView.MainSymbol.ID;
+                }
+
+                SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
+
+                return component;
+            }
+
+            return null;
         }
 
         /// <summary>

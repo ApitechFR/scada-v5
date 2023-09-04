@@ -143,7 +143,7 @@ namespace Scada.Scheme.Editor
             this.toolStripButton2});
             this.toolStrip.Location = new System.Drawing.Point(0, 28);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(410, 27);
+            this.toolStrip.Size = new System.Drawing.Size(411, 27);
             this.toolStrip.TabIndex = 0;
             this.toolStrip.MouseEnter += new System.EventHandler(this.FrmMain_MouseEnter);
             // 
@@ -213,7 +213,7 @@ namespace Scada.Scheme.Editor
             // 
             this.miSaveSymbolAs.Image = global::Scada.Scheme.Editor.Properties.Resources.component;
             this.miSaveSymbolAs.Name = "miSaveSymbolAs";
-            this.miSaveSymbolAs.Size = new System.Drawing.Size(206, 26);
+            this.miSaveSymbolAs.Size = new System.Drawing.Size(224, 26);
             this.miSaveSymbolAs.Text = "Save Symbol As...";
             this.miSaveSymbolAs.Click += new System.EventHandler(this.miSaveSymbolAs_Click);
             // 
@@ -340,7 +340,7 @@ namespace Scada.Scheme.Editor
             this.statusStrip.Location = new System.Drawing.Point(0, 554);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip.Size = new System.Drawing.Size(410, 26);
+            this.statusStrip.Size = new System.Drawing.Size(411, 26);
             this.statusStrip.TabIndex = 2;
             this.statusStrip.MouseEnter += new System.EventHandler(this.FrmMain_MouseEnter);
             // 
@@ -361,7 +361,7 @@ namespace Scada.Scheme.Editor
             this.tabControl.Multiline = true;
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(410, 499);
+            this.tabControl.Size = new System.Drawing.Size(411, 499);
             this.tabControl.TabIndex = 1;
             this.tabControl.MouseEnter += new System.EventHandler(this.FrmMain_MouseEnter);
             // 
@@ -371,8 +371,8 @@ namespace Scada.Scheme.Editor
             this.pageComponents.Location = new System.Drawing.Point(4, 25);
             this.pageComponents.Margin = new System.Windows.Forms.Padding(4);
             this.pageComponents.Name = "pageComponents";
-            this.pageComponents.Padding = new System.Windows.Forms.Padding(3);
-            this.pageComponents.Size = new System.Drawing.Size(402, 470);
+            this.pageComponents.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.pageComponents.Size = new System.Drawing.Size(403, 470);
             this.pageComponents.TabIndex = 2;
             this.pageComponents.Text = "Components";
             this.pageComponents.UseVisualStyleBackColor = true;
@@ -410,11 +410,11 @@ namespace Scada.Scheme.Editor
             listViewItem4,
             listViewItem5});
             this.lvCompTypes.LabelWrap = false;
-            this.lvCompTypes.Location = new System.Drawing.Point(3, 3);
+            this.lvCompTypes.Location = new System.Drawing.Point(3, 2);
             this.lvCompTypes.Margin = new System.Windows.Forms.Padding(4);
             this.lvCompTypes.MultiSelect = false;
             this.lvCompTypes.Name = "lvCompTypes";
-            this.lvCompTypes.Size = new System.Drawing.Size(396, 464);
+            this.lvCompTypes.Size = new System.Drawing.Size(397, 466);
             this.lvCompTypes.SmallImageList = this.ilCompTypes;
             this.lvCompTypes.TabIndex = 0;
             this.lvCompTypes.UseCompatibleStateImageBehavior = false;
@@ -437,6 +437,8 @@ namespace Scada.Scheme.Editor
             this.pageProperties.Location = new System.Drawing.Point(4, 25);
             this.pageProperties.Margin = new System.Windows.Forms.Padding(4);
             this.pageProperties.Name = "pageProperties";
+            this.pageProperties.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.pageProperties.Size = new System.Drawing.Size(403, 470);
             this.pageProperties.Padding = new System.Windows.Forms.Padding(3);
             this.pageProperties.Size = new System.Drawing.Size(402, 464);
             this.pageProperties.TabIndex = 0;
@@ -446,6 +448,8 @@ namespace Scada.Scheme.Editor
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(3, 26);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.splitContainer1.Location = new System.Drawing.Point(3, 3);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -457,6 +461,8 @@ namespace Scada.Scheme.Editor
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
+            this.splitContainer1.Size = new System.Drawing.Size(397, 442);
+            this.splitContainer1.SplitterDistance = 404;
             this.splitContainer1.Size = new System.Drawing.Size(396, 458);
             this.splitContainer1.SplitterDistance = 428;
             this.splitContainer1.TabIndex = 3;
@@ -465,8 +471,11 @@ namespace Scada.Scheme.Editor
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.splitContainer2.Size = new System.Drawing.Size(397, 404);
+            this.splitContainer2.SplitterDistance = 29;
             // 
             // splitContainer2.Panel1
             // 
@@ -510,6 +519,7 @@ namespace Scada.Scheme.Editor
             this.toolStripButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(397, 34);
             this.toolStrip1.Size = new System.Drawing.Size(396, 26);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
@@ -521,6 +531,7 @@ namespace Scada.Scheme.Editor
             this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
+            this.toolStripButton1.Size = new System.Drawing.Size(29, 31);
             this.toolStripButton1.Size = new System.Drawing.Size(29, 23);
             this.toolStripButton1.Text = "toolStripButton1";
             this.toolStripButton1.ToolTipText = "Link to a symbol property";
@@ -572,7 +583,7 @@ namespace Scada.Scheme.Editor
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip.Size = new System.Drawing.Size(410, 28);
+            this.menuStrip.Size = new System.Drawing.Size(411, 28);
             this.menuStrip.TabIndex = 3;
             // 
             // miFile
@@ -776,7 +787,7 @@ namespace Scada.Scheme.Editor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(410, 580);
+            this.ClientSize = new System.Drawing.Size(411, 580);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.toolStrip);
             this.Controls.Add(this.menuStrip);
@@ -786,7 +797,7 @@ namespace Scada.Scheme.Editor
             this.MainMenuStrip = this.menuStrip;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(261, 356);
+            this.MinimumSize = new System.Drawing.Size(261, 355);
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Scheme Editor";
