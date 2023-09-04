@@ -1,4 +1,5 @@
 ﻿using Scada.Scheme.Model;
+using Scada.Scheme.Model.PropertyGrid;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -34,6 +35,11 @@ namespace Scada.Scheme.Editor
                 textBox2.Text = currentAlias.Value == null ? "" : currentAlias.Value.ToString();
                 checkBox1.Checked = currentAlias.isCnlLinked;
                 comboBox1.Enabled = false;
+                if (checkBox1.Checked)
+                {
+                    comboBox1.Enabled = false;
+                    btn_browseCnl.Visible = true;
+                }
 
                 int index = GetComboBoxIndexForType(currentAlias.AliasTypeName);
                 if (index >= 0) comboBox1.SelectedIndex = index;
@@ -57,7 +63,7 @@ namespace Scada.Scheme.Editor
         {
             bool isOKtoClose = true;
 
-            if (textBox1.Text == "" || textBox2.Text == "" || comboBox1.SelectedItem == null)
+            if (textBox1.Text == "" || textBox2.Text == "" || (!checkBox1.Checked && comboBox1.SelectedItem == null))
                 MessageBox.Show("Please, enter a name, a type and a value.");
             else
             {
@@ -104,19 +110,32 @@ namespace Scada.Scheme.Editor
 
                 currentAlias.isCnlLinked = checkBox1.Checked;
 
-                if (currentAlias.isCnlLinked)
-                {
-                    if (int.TryParse(textBox2.Text, out int result) && selectedValue == "Int32")
-                        currentAlias.Value = result;
-                    else
-                    {
-                        MessageBox.Show("Please, enter an int32 value and choose int32 type.");
-                        isOKtoClose = false;
-                    }
-                }
-
-                if(isOKtoClose) this.Close();
+                if (isOKtoClose) this.Close();
             }
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                comboBox1.Enabled = false;
+                comboBox1.SelectedIndex = -1;
+                btn_browseCnl.Visible = true;
+            }
+            else
+            {
+                comboBox1.Enabled = true;
+                btn_browseCnl.Visible = false;
+            }
+        }
+
+        private void btn_browseCnl_Click(object sender, EventArgs e)
+        {
+            FrmIDcustomDialog form = new FrmIDcustomDialog();
+            form.ShowDialog();
+            textBox2.Text = $"{form.getValue()}";
+            currentAlias.AliasTypeName = "String";
+            currentAlias.Value = form.getValue().ToString();
         }
     }
 }

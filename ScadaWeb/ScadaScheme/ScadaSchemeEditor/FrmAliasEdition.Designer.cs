@@ -37,6 +37,7 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.btn_browseCnl = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -77,7 +78,7 @@
             // 
             this.textBox2.Location = new System.Drawing.Point(77, 149);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(227, 22);
+            this.textBox2.Size = new System.Drawing.Size(214, 22);
             this.textBox2.TabIndex = 5;
             // 
             // comboBox1
@@ -103,6 +104,7 @@
             this.checkBox1.TabIndex = 7;
             this.checkBox1.Text = "Linked to a channel";
             this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // button1
             // 
@@ -124,11 +126,23 @@
             this.button2.Text = "Cancel";
             this.button2.UseVisualStyleBackColor = true;
             // 
-            // FrmAliasCreation
+            // btn_browseCnl
+            // 
+            this.btn_browseCnl.Location = new System.Drawing.Point(297, 146);
+            this.btn_browseCnl.Name = "btn_browseCnl";
+            this.btn_browseCnl.Size = new System.Drawing.Size(75, 29);
+            this.btn_browseCnl.TabIndex = 10;
+            this.btn_browseCnl.Text = "Browse";
+            this.btn_browseCnl.UseVisualStyleBackColor = true;
+            this.btn_browseCnl.Visible = false;
+            this.btn_browseCnl.Click += new System.EventHandler(this.btn_browseCnl_Click);
+            // 
+            // FrmAliasEdition
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(384, 235);
+            this.Controls.Add(this.btn_browseCnl);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.checkBox1);
@@ -139,7 +153,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Name = "FrmAliasCreation";
+            this.Name = "FrmAliasEdition";
             this.Text = "Alias";
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -157,5 +171,6 @@
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btn_browseCnl;
     }
 }
