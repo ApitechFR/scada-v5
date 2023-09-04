@@ -1780,17 +1780,17 @@ namespace Scada.Scheme.Editor
 
 
             string selectedPropertyName = selectedProperty.PropertyDescriptor.Name;
-            bool isCnlProperty = false;
-            if(selectedPropertyName == "InCnlNumCustom")
-            {
-                selectedPropertyName = "InCnlNum";
-                isCnlProperty = true;
-            }
-            else if(selectedPropertyName == "CtrlCnlNumCustom")
-            {
-                selectedPropertyName = "CtrlCnlNum";
-                isCnlProperty = true;
-            }
+            bool isCnlProperty = (selectedPropertyName == "InCnlNumCustom" || selectedPropertyName == "CtrlCnlNumCustom");
+            //if(selectedPropertyName == "InCnlNumCustom")
+            //{
+            //    selectedPropertyName = "InCnlNum";
+            //    isCnlProperty = true;
+            //}
+            //else if(selectedPropertyName == "CtrlCnlNumCustom")
+            //{
+            //    selectedPropertyName = "CtrlCnlNum";
+            //    isCnlProperty = true;
+            //}
 
             List<Alias> availableAliases = new List<Alias>();
             availableAliases = parentSymbol.AliasList.Where(a => isCnlProperty ? a.isCnlLinked : a.AliasTypeName == selectedProperty.PropertyDescriptor.PropertyType.Name).ToList();
@@ -1809,7 +1809,7 @@ namespace Scada.Scheme.Editor
                     return;
                 }
 
-                //update mapping between compoennt properties and alias
+                //update mapping between component properties and alias
                 selectedComponent.AliasesDictionnary.Remove(selectedPropertyName);
                 if(frmAliasSelection.selectedAlias != null)
                 {
@@ -1821,6 +1821,13 @@ namespace Scada.Scheme.Editor
                 if(frmAliasSelection.selectedAlias != null)
                 {
                     componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
+                    if (isCnlProperty)
+                    {
+                        var componentChannelPropertyName = selectedPropertyName.Substring(0, selectedPropertyName.Length - 6);
+                        var componentChannelProperty = selectedComponent.GetType().GetProperty(componentChannelPropertyName);
+                        var ChannelNumber = editor.SchemeView.MainSymbol.AliasCnlDictionary[frmAliasSelection.selectedAlias.Name];
+                        componentChannelProperty.SetValue(selectedComponent, ChannelNumber, null);
+                    }
                 }
 
                 propertyGrid.SelectedObject = selectedComponent;
