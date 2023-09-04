@@ -294,6 +294,31 @@ namespace Scada.Scheme.Model
             Size.AppendElem(xmlElem, "Size", Size);
             xmlElem.AppendElem("ZIndex", ZIndex);
             xmlElem.AppendElem("GroupID", GroupId);
+
+            XmlElement aliasListElem = xmlElem.SelectSingleNode("AliasList") as XmlElement;
+            if (aliasListElem == null)
+            {
+                aliasListElem = xmlElem.OwnerDocument.CreateElement("AliasList");
+                xmlElem.AppendChild(aliasListElem);
+            }
+
+            foreach (var kvp in AliasesDictionnary)
+            {
+                string aliasName = kvp.Value.Name;
+
+                bool aliasExists = aliasListElem
+                    .SelectNodes($"Alias[AliasName='{aliasName}']")
+                    .Count > 0;
+
+                if (!aliasExists)
+                {
+                    XmlElement aliasElem = xmlElem.OwnerDocument.CreateElement("Alias");
+                    aliasElem.AppendElem("AliasName", aliasName);
+                    aliasElem.AppendElem("AttributeName", kvp.Key.ToString());
+                    aliasListElem.AppendChild(aliasElem);
+                }
+            }
+
         }
 
         /// <summary>
