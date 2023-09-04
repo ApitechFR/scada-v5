@@ -254,6 +254,10 @@ namespace Scada.Scheme
                     component.SchemeView = this;
                     component.LoadFromXml(compNode);
                     Components[component.ID] = component;
+                    if (component.ID > maxComponentID)
+                        maxComponentID = component.ID;
+                    Components[component.ID] = component;
+
 
                     if (component is Symbol symbol)
                     {
@@ -285,9 +289,7 @@ namespace Scada.Scheme
                     AddCtrlCnlNums(component.GetCtrlCnlNums(), ctrlCnlOffset);
 
                     // определение макс. идентификатора компонентов
-                    if (component.ID > maxComponentID)
-                        maxComponentID = component.ID;
-                    Components[component.ID] = component;
+
                 }
             }
 
@@ -423,8 +425,7 @@ namespace Scada.Scheme
 
                     if(component is Symbol sym)
                     {
-                        //------------- TO DO : ---------------
-                        //LoadSymbol(symbolPath,rootElem, sym);
+                        LoadSymbol(symbolPath,rootElem, sym);
                     }
 
                     // добавление входных каналов представления
@@ -452,8 +453,7 @@ namespace Scada.Scheme
                     AddCtrlCnlNums(component.GetCtrlCnlNums(), ctrlCnlOffset);
 
                     // определение макс. идентификатора компонентов
-                    if (component.ID > maxComponentID)
-                        maxComponentID = component.ID;
+                
                 }
             }
 
@@ -527,7 +527,6 @@ namespace Scada.Scheme
                 if (component is ComponentGroup) continue;
                 component.ID = GetNextComponentID();
                 Components[component.ID] = component;
-                component.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
             }
         }
 
@@ -573,6 +572,9 @@ namespace Scada.Scheme
                             // загрузка компонента и добавление его в представление
                             component.SchemeView = this;
                             component.LoadFromXml(compNode);
+                            Point location = new Point(component.Location.X + symbol.Location.X, component.Location.Y + symbol.Location.Y);
+                            component.Location = location;
+
                             components.Add(component);
                             if (component is Symbol sym)
                             {
