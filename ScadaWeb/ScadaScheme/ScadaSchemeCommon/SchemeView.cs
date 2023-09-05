@@ -354,9 +354,9 @@ namespace Scada.Scheme
                 {
                     XmlDocument xmlDoc = new XmlDocument();
                     xmlDoc.Load(symbolIndexPath);
-                    XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}'");
+                    XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
 
-                    LoadFromSymbolFile(indexEntry.GetChildAsString("path"), symbol);
+                    LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
                     
                 }
                 else
@@ -379,9 +379,9 @@ namespace Scada.Scheme
             XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
 
             if (indexEntry == null) return true;
-
-
-            return indexEntry.GetChildAsDateTime("lastModificationDate") <= symbol.LastModificationDate;
+            DateTime fileDate = DateTime.Parse( indexEntry.Attributes["lastModificationDate"].Value);
+            bool res = fileDate <= symbol.LastModificationDate;
+            return res;
         }
 
         private void LoadFromSymbolFile(string symbolPath, Symbol symbol)
