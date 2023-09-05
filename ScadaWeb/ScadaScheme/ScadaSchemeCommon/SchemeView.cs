@@ -356,6 +356,8 @@ namespace Scada.Scheme
                     xmlDoc.Load(symbolIndexPath);
                     XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
 
+                    symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
+
                     LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
                     
                 }
