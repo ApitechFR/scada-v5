@@ -658,6 +658,8 @@ namespace Scada.Scheme.Editor
 
             // установка доступности кнопок
              SetButtonsEnabled();
+
+           updateAliasParametersDisplay();
         }
 
 
