@@ -249,6 +249,21 @@ namespace Scada.Scheme
                     // загрузка компонента и добавление его в представление
                     component.SchemeView = this;
                     component.LoadFromXml(compNode);
+
+                    if(MainSymbol != null)
+                    {
+                        foreach(var kvp in component.AliasesDictionnary)
+                        {
+                            foreach(Alias alias in MainSymbol.AliasList)
+                            {
+                                if(alias.Name == kvp.Value.Name)
+                                {
+                                    component.AliasesDictionnary[kvp.Key] = alias;
+                                }
+                            }
+                        }
+                    }
+
                     Components[component.ID] = component;
 
                     //SI COMPOSANT EST UN SYMBOL:

@@ -52,7 +52,8 @@ namespace Scada.Scheme.Model
             SymbolId = xmlNode.GetChildAsString("SymbolId");
             LastModificationDate = xmlNode.GetChildAsDateTime("LastModificationDate");
 
-            if (xmlNode.SelectSingleNode("AliasList") is XmlNode aliasListNode)
+            //if (xmlNode.SelectSingleNode("AliasList") is XmlNode aliasListNode)
+            if (xmlNode.LastChild is XmlNode aliasListNode)
             {
                 List<Alias> listTemp = new List<Alias>();
 
@@ -68,7 +69,9 @@ namespace Scada.Scheme.Model
                 }
                 AliasList.AddRange(listTemp);
             }
+
         }
+
         public void ResetSymbolId()
         {
             SymbolId = Guid.NewGuid().ToString();
