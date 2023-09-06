@@ -1871,10 +1871,6 @@ namespace Scada.Scheme.Editor
                 //find component property to update
                 var dictionnaryEntriesToModify = c.AliasesDictionnary.Where(entry => entry.Value.Name == e.NewAlias.Name).ToList();
                  
-                if (hasComponentBeenModified)
-                {
-                    continue;
-                }
                 foreach (var entry in dictionnaryEntriesToModify)
                 {
                     var componentProperty = c.GetType().GetProperty(entry.Key);
@@ -1891,7 +1887,6 @@ namespace Scada.Scheme.Editor
                         var ChannelNumber = editor.SchemeView.MainSymbol.AliasCnlDictionary[e.NewAlias.Name];
                         componentChannelProperty.SetValue(c, ChannelNumber, null);
                     }
-                    hasComponentBeenModified = true;
                 }
             }
             updateAliasParametersDisplay();
