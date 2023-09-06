@@ -25,7 +25,7 @@ namespace Scada.Scheme.Model
 
         private object _value;
         public object Value { get { return _value; } set { 
-                if (value.GetType().Name == AliasTypeName)
+                if (value != null && value.GetType().Name == AliasTypeName)
                 {
                     _value = value;
                 }

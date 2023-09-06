@@ -921,22 +921,21 @@ namespace Scada.Scheme.Editor
             bool isDisabled = false;
 
             List<BaseComponent> compToSelect = new List<BaseComponent>();
-            lock (((TreeViewMultipleSelection)treeView1).SelectedNodes)
+            lock ((treeView1).SelectedNodes)
             {
-                foreach (TreeNode tn in ((TreeViewMultipleSelection)treeView1).SelectedNodes)
+                foreach (TreeNode tn in (treeView1).SelectedNodes)
                 {
-
                     if (tn.Tag != null && tn.Tag.ToString() != "")
                     {
                         if (tn.Parent == null)
                         {
-                            this.noTreeviewSelectionEffect = true;
+                            noTreeviewSelectionEffect = true;
                             BaseComponent component = tn.Tag as BaseComponent;
                             compToSelect.Add(component);
                         }
-                        else if (!tn.Parent.Text.Contains("Symbol"))
+                        else if (!tn.Parent.Text.Contains("Symbol") || editor.SchemeView.MainSymbol != null)
                         {
-                            this.noTreeviewSelectionEffect = true;
+                            noTreeviewSelectionEffect = true;
                             BaseComponent component = tn.Tag as BaseComponent;
                             compToSelect.Add(component);
                         }
@@ -953,7 +952,7 @@ namespace Scada.Scheme.Editor
                         {
                             foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
                             {
-                                this.noTreeviewSelectionEffect = true;
+                                noTreeviewSelectionEffect = true;
 
                                 editor.SelectComponent(child.ID, true);
                             }
@@ -1883,6 +1882,13 @@ namespace Scada.Scheme.Editor
                     }
 
                     componentProperty.SetValue(c, e.NewAlias.Value, null);
+                    if(entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom")
+                    {
+                        var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
+                        var componentChannelProperty = c.GetType().GetProperty(componentChannelPropertyName);
+                        var ChannelNumber = editor.SchemeView.MainSymbol.AliasCnlDictionary[e.NewAlias.Name];
+                        componentChannelProperty.SetValue(c, ChannelNumber, null);
+                    }
                     hasComponentBeenModified = true;
                 }
             }
