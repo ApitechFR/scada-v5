@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using static Scada.Data.Tables.EventTableLight;
 
@@ -35,7 +36,7 @@ namespace Scada.Scheme.Editor
             foreach (var a in s.AliasList)
                 listBox1.Items.Add(a.Name);
 
-            _selectedAlias = null;
+            //_selectedAlias = null;
             button3.Enabled = false;
             button5.Enabled = false;
         }
@@ -47,13 +48,19 @@ namespace Scada.Scheme.Editor
             new FrmAliasEdition(true, alias).ShowDialog();
             s.AliasList.Add(alias);
             if (alias.isCnlLinked)
-                s.AliasCnlDictionary.Add(alias.Name, int.Parse(alias.Value.ToString()));
+            {
+                //find channel number
+                Match match = Regex.Match(alias.Value.ToString(), @"\((\d+)\)");
+                string matchValue = match.Groups[1].Value;
+                int channelNumber = int.Parse(matchValue);
+                s.AliasCnlDictionary.Add(alias.Name, channelNumber);
+            }
             FillListBox();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Alias oldAlias = _selectedAlias;
+            Alias oldAlias = _selectedAlias.Clone();
             if (listBox1.SelectedIndex == -1)
                 MessageBox.Show("Please, select an alias.");
             else
@@ -62,7 +69,13 @@ namespace Scada.Scheme.Editor
                 if (_selectedAlias.isCnlLinked && !s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name))
                     s.AliasCnlDictionary.Add(_selectedAlias.Name, int.Parse(_selectedAlias.Value.ToString()));
                 else if (_selectedAlias.isCnlLinked && s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name))
-                    s.AliasCnlDictionary[_selectedAlias.Name] = int.Parse(_selectedAlias.Value.ToString());
+                {
+                    //find channel number
+                    Match match = Regex.Match(_selectedAlias.Value.ToString(), @"\((\d+)\)");
+                    string matchValue = match.Groups[1].Value;
+                    int channelNumber = int.Parse(matchValue);
+                    s.AliasCnlDictionary[_selectedAlias.Name] = channelNumber;
+                }
                 FillListBox();  
                 OnUpdateAlias?.Invoke(this, new OnUpdateAliasEventArgs(oldAlias, _selectedAlias));
             }

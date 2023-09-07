@@ -274,6 +274,19 @@ namespace Scada.Scheme.Model
             Size = Size.GetChildAsSize(xmlNode, "Size");
             ZIndex = xmlNode.GetChildAsInt("ZIndex");
             GroupId = xmlNode.GetChildAsInt("GroupID",defaultVal:-1);
+
+            XmlNode aliasList = xmlNode.SelectSingleNode("AliasList");
+            if (aliasList != null)
+            {
+                foreach (XmlNode aliasNode in aliasList.SelectNodes("Alias"))
+                {
+                    string aliasName = aliasNode.GetChildAsString("AliasName");
+                    string attributeName = aliasNode.GetChildAsString("AttributeName");
+                    Alias alias = new Alias();
+                    alias.Name = aliasName;
+                    AliasesDictionnary[attributeName] = alias;
+                }
+            }
         }
 
         /// <summary>
@@ -294,6 +307,31 @@ namespace Scada.Scheme.Model
             Size.AppendElem(xmlElem, "Size", Size);
             xmlElem.AppendElem("ZIndex", ZIndex);
             xmlElem.AppendElem("GroupID", GroupId);
+
+            XmlElement aliasListElem = xmlElem.SelectSingleNode("AliasList") as XmlElement;
+            if (aliasListElem == null)
+            {
+                aliasListElem = xmlElem.OwnerDocument.CreateElement("AliasList");
+                xmlElem.AppendChild(aliasListElem);
+            }
+
+            foreach (var kvp in AliasesDictionnary)
+            {
+                string aliasName = kvp.Value.Name;
+
+                bool aliasExists = aliasListElem
+                    .SelectNodes($"Alias[AliasName='{aliasName}']")
+                    .Count > 0;
+
+                if (!aliasExists)
+                {
+                    XmlElement aliasElem = xmlElem.OwnerDocument.CreateElement("Alias");
+                    aliasElem.AppendElem("AliasName", aliasName);
+                    aliasElem.AppendElem("AttributeName", kvp.Key.ToString());
+                    aliasListElem.AppendChild(aliasElem);
+                }
+            }
+
         }
 
         /// <summary>
