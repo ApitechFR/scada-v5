@@ -1858,7 +1858,6 @@ namespace Scada.Scheme.Editor
 
         private void handleUpdateAlias(object sender, OnUpdateAliasEventArgs e)
         {
-            bool hasComponentBeenModified = false;
 
             //update values in components that use aliases
             foreach (BaseComponent c in editor.SchemeView.Components.Values)
@@ -1890,7 +1889,11 @@ namespace Scada.Scheme.Editor
                         componentChannelProperty.SetValue(c, ChannelNumber, null);
                     }
                 }
+
+                c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
             }
+
+            editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.SchemeDocChanged, editor.SchemeView.SchemeDoc);
             updateAliasParametersDisplay();
         }
 
