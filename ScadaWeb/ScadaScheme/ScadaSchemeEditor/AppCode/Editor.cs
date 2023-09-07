@@ -69,6 +69,8 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public string SymbolPath;
 
+        public string SymbolDir;
+
         private readonly CompManager compManager;  // менеджер компонентов
         private readonly Log log;                  // журнал приложения
         private List<Change> changes;              // изменения схемы
@@ -281,7 +283,7 @@ namespace Scada.Scheme.Editor
             {
                 lock (SchemeView.SyncRoot)
                 {
-                    loadOK = SchemeView.LoadFromFile(fileName, out errMsg);
+                    loadOK = SchemeView.LoadFromFile(fileName,SymbolDir, out errMsg);
                 }
 
                 if (!loadOK)
@@ -849,8 +851,6 @@ namespace Scada.Scheme.Editor
 
                 return component;
             }
-
-            return null;
         }
 
         /// <summary>
@@ -990,45 +990,6 @@ namespace Scada.Scheme.Editor
             }
         }
 
-        /// <summary>
-        /// Returns every BaseComponents in the group
-        /// </summary>
-        public List<BaseComponent> getGroupedComponents(int groupID)
-        {
-            List<BaseComponent> groupedComponents = new List<BaseComponent>();
-            if (groupID == -1) return groupedComponents;
-            foreach (BaseComponent component in SchemeView.Components.Values)
-            {
-                if (component.GroupId == groupID) { groupedComponents.Add(component); }
-            }
-
-            foreach (BaseComponent componentGroup in SchemeView.Components.Values.Where(x => x.GroupId == groupID).DefaultIfEmpty().ToList())
-            {
-                if (componentGroup == null) break;
-                groupedComponents.AddRange(getGroupedComponents(componentGroup.ID));
-            }
-
-            return groupedComponents;
-
-        }
-
-        public BaseComponent getHihghestGroup(BaseComponent comp)
-        {
-            int groupID = comp.GroupId;
-
-            if (SchemeView.MainSymbol != null && (groupID == -1 || groupID == SchemeView.MainSymbol.ID))
-            {
-                return comp;
-            }
-
-            BaseComponent group = SchemeView.Components.Values.Where(x => x.ID == groupID).FirstOrDefault();
-            if (group == null) return comp;
-            while (group.GroupId != -1)
-            {
-                group = getHihghestGroup(group);
-            }
-            return group;
-        }
 
         /// <summary>
         /// Отменить выбор компонента схемы
@@ -1091,8 +1052,8 @@ namespace Scada.Scheme.Editor
             {
                 case SelectAction.Select:
                     SchemeView.Components.TryGetValue(componentID, out BaseComponent component);
-                    BaseComponent group = getHihghestGroup(component);
-                    List<BaseComponent> groupedComponents = getGroupedComponents(group.ID);
+                    BaseComponent group =   SchemeView.getHihghestGroup(component);
+                    List<BaseComponent> groupedComponents = SchemeView.getGroupedComponents(group.ID);
                     if (groupedComponents.Count != 0)
                     {
                         DeselectAll();
@@ -1269,8 +1230,8 @@ namespace Scada.Scheme.Editor
                 groupId = -1;
                 return false;
             }
-            groupId = getHihghestGroup(components[0]).ID;
-            List<BaseComponent> groupList = getGroupedComponents(groupId);
+            groupId = SchemeView.getHihghestGroup(components[0]).ID;
+            List<BaseComponent> groupList = SchemeView.getGroupedComponents(groupId);
             if (components.Length != groupList.Count + 1)
             {
                 groupId = -1;
