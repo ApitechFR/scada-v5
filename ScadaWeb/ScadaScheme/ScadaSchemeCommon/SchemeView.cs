@@ -256,13 +256,13 @@ namespace Scada.Scheme
 
                     if(MainSymbol != null)
                     {
-                        foreach(var kvp in component.AliasesDictionnary)
+                        for (int i = 0; i < component.AliasesDictionnary.Count; i++)
                         {
-                            foreach(Alias alias in MainSymbol.AliasList)
+                            foreach (Alias alias in MainSymbol.AliasList)
                             {
-                                if(alias.Name == kvp.Value.Name)
+                                if (alias.Name == component.AliasesDictionnary.Values.ToList()[i].Name)
                                 {
-                                    component.AliasesDictionnary[kvp.Key] = alias;
+                                    component.AliasesDictionnary[component.AliasesDictionnary.Keys.ToList()[i]] = alias;
                                 }
                             }
                         }
