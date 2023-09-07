@@ -274,6 +274,19 @@ namespace Scada.Scheme.Model
             Size = Size.GetChildAsSize(xmlNode, "Size");
             ZIndex = xmlNode.GetChildAsInt("ZIndex");
             GroupId = xmlNode.GetChildAsInt("GroupID",defaultVal:-1);
+
+            XmlNode aliasList = xmlNode.SelectSingleNode("AliasList");
+            if (aliasList != null)
+            {
+                foreach (XmlNode aliasNode in aliasList.SelectNodes("Alias"))
+                {
+                    string aliasName = aliasNode.GetChildAsString("AliasName");
+                    string attributeName = aliasNode.GetChildAsString("AttributeName");
+                    Alias alias = new Alias();
+                    alias.Name = aliasName;
+                    AliasesDictionnary[attributeName] = alias;
+                }
+            }
         }
 
         /// <summary>

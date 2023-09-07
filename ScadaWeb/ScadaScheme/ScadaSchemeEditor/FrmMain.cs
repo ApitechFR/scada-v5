@@ -95,7 +95,7 @@ namespace Scada.Scheme.Editor
             editor.SelectionPropsChanged += Editor_SelectionPropsChanged;
             editor.ClipboardChanged += Editor_ClipboardChanged;
             editor.History.HistoryChanged += History_HistoryChanged;
-
+            editor.SymbolDir = appData.AppDirs.SymbolDir;
             SchemeContext.GetInstance().SchemePath = editor.FileName;
         }
 
@@ -427,10 +427,10 @@ namespace Scada.Scheme.Editor
 
             if (!loadOK)
                 ScadaUiUtils.ShowError(errMsg);
+                        
+            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = true;
+            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = false;
 
-
-            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStrip1.Visible =  true;
-            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = toolStrip1.Visible = false;
         }
 
         /// <summary>
@@ -869,7 +869,7 @@ namespace Scada.Scheme.Editor
             List<BaseComponent> emptyGroups = new List<BaseComponent>();
             foreach(BaseComponent group in editor.SchemeView.Components.Values.Where(x=>x is ComponentGroup))
             {
-                if (editor.getGroupedComponents(group.ID).Count == 0)
+                if (editor.SchemeView.getGroupedComponents(group.ID).Count == 0)
                 {
                     emptyGroups.Add(group);
 
@@ -952,7 +952,7 @@ namespace Scada.Scheme.Editor
                         //case symbol in schema
                         if(editor.SchemeView.MainSymbol == null)
                         {
-                            foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
+                            foreach (BaseComponent child in editor.SchemeView.getGroupedComponents(comp.ID))
                             {
                                 noTreeviewSelectionEffect = true;
 
@@ -961,7 +961,7 @@ namespace Scada.Scheme.Editor
                         }
                         else if (comp.ID != editor.SchemeView.MainSymbol.ID)
                         {
-                            foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
+                            foreach (BaseComponent child in editor.SchemeView.getGroupedComponents(comp.ID))
                             {
                                 this.noTreeviewSelectionEffect = true;
 
@@ -1106,6 +1106,8 @@ namespace Scada.Scheme.Editor
 
             // инициализация общих данных приложения
             appData.Init(Path.GetDirectoryName(Application.ExecutablePath), this);
+
+            editor.SymbolDir = appData.AppDirs.SymbolDir;
 
             // локализация
             LocalizeForm();
@@ -1378,17 +1380,17 @@ namespace Scada.Scheme.Editor
             {
                 if (comp is ComponentGroup)
                 {
-                    if ( Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() - 1) < diff)
+                    if ( Math.Abs(compArray.Length - editor.SchemeView.getGroupedComponents(comp.ID).Count() - 1) < diff)
                     {
-                        diff = Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() - 1);
+                        diff = Math.Abs(compArray.Length - editor.SchemeView.getGroupedComponents(comp.ID).Count() - 1);
                         highestGroupID = comp.ID;
                     }
                 }
                 else
                 {
-                    if (Math.Abs(compArray.Length - editor.getGroupedComponents(comp.GroupId).Count()) < diff)
+                    if (Math.Abs(compArray.Length - editor.SchemeView.getGroupedComponents(comp.GroupId).Count()) < diff)
                     {
-                        diff = Math.Abs(compArray.Length - editor.getGroupedComponents(comp.GroupId).Count());
+                        diff = Math.Abs(compArray.Length - editor.SchemeView.getGroupedComponents(comp.GroupId).Count());
                         highestGroupID = comp.GroupId;
                     }
                 }
@@ -1411,7 +1413,7 @@ namespace Scada.Scheme.Editor
             
             foreach (BaseComponent comp in selection)
             {
-                if (!editor.getGroupedComponents(highestSelectedGroupId).Contains(comp))
+                if (!editor.SchemeView.getGroupedComponents(highestSelectedGroupId).Contains(comp))
                 {
                     if(comp is ComponentGroup)
                     {
@@ -1650,7 +1652,7 @@ namespace Scada.Scheme.Editor
                 if (propertyGrid.SelectedObject is ComponentGroup group)
                 {
                     //Edit all the components within the group
-                    List<BaseComponent> components = editor.getGroupedComponents(group.ID);
+                    List<BaseComponent> components = editor.SchemeView.getGroupedComponents(group.ID);
                     if (e.ChangedItem.Label == "X" || e.ChangedItem.Label == "Y" || e.ChangedItem.Label == "ZIndex")
                     {
                         foreach (BaseComponent component in components)
