@@ -576,9 +576,14 @@ namespace Scada.Scheme.Editor
                         cbSchComp.Items.Add(editor.SchemeView.SchemeDoc);
 
                         foreach (BaseComponent component in editor.SchemeView.Components.Values)
-                        {
-                            cbSchComp.Items.Add(component);
+                        {                            
                             addComponentToTree(component);
+
+                            if(editor.SchemeView.getHihghestGroup(component) is Symbol symbol && editor.SchemeView.isSymbol && symbol.ID==editor.SchemeView.MainSymbol.ID )
+                            {
+                                continue;
+                            }
+                            cbSchComp.Items.Add(component);
                         }
                     }
                 }
@@ -1016,8 +1021,24 @@ namespace Scada.Scheme.Editor
                         // привязка события на изменение компонента
                         ((BaseComponent)changedObject).ItemChanged += Scheme_ItemChanged;
 
+
                         // добавление компонента в выпадающий список
-                        cbSchComp.Items.Add(changedObject);
+                        BaseComponent group = editor.SchemeView.getHihghestGroup((BaseComponent)changedObject);
+                        if (group is Symbol && group.ID != ((BaseComponent)changedObject).ID)
+                        {
+                            if (editor.SchemeView.isSymbol && group.ID == editor.SchemeView.MainSymbol.ID)
+                            {
+                                cbSchComp.Items.Add(changedObject);
+                            }
+                            else
+                            {
+                                //do nothing
+                            }
+                        }
+                        else
+                        {
+                            cbSchComp.Items.Add(changedObject);
+                        }
                         addComponentToTree((BaseComponent)changedObject);
 
                         break;
