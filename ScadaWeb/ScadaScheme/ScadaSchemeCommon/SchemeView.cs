@@ -576,9 +576,8 @@ namespace Scada.Scheme
 
                         foreach (XmlNode compNode in componentsNode.ChildNodes)
                         {
-                            // создание компонента
                             BaseComponent component = compManager.CreateComponent(compNode, out string errMsg);
-
+                            
                             if (component == null)
                             {
                                 component = new UnknownComponent { XmlNode = compNode };
@@ -591,6 +590,29 @@ namespace Scada.Scheme
                             component.LoadFromXml(compNode);
                             Point location = new Point(component.Location.X + symbol.Location.X, component.Location.Y + symbol.Location.Y);
                             component.Location = location;
+
+
+                            foreach(Alias a in symbol.AliasList){
+                                var dictionnaryEntriesToModify = component.AliasesDictionnary.Where(entry => entry.Value.Name == a.Name).ToList();
+
+                                foreach (var entry in dictionnaryEntriesToModify)
+                                {
+                                    var componentProperty = component.GetType().GetProperty(entry.Key);
+                                    if (componentProperty == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    componentProperty.SetValue(component, a.Value, null);
+                                    if (entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom")
+                                    {
+                                        var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
+                                        var componentChannelProperty = component.GetType().GetProperty(componentChannelPropertyName);
+                                        var ChannelNumber = symbol.AliasCnlDictionary[a.Name];
+                                        componentChannelProperty.SetValue(component, ChannelNumber, null);
+                                    }
+                                }
+                            }
 
                             components.Add(component);
                             if (component is Symbol sym)

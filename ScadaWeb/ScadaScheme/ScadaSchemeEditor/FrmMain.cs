@@ -427,10 +427,8 @@ namespace Scada.Scheme.Editor
 
             if (!loadOK)
                 ScadaUiUtils.ShowError(errMsg);
-                        
-            if (editor.SchemeView.isSymbol) toolStripButton2.Enabled = true;
-            if (!editor.SchemeView.isSymbol) toolStripButton2.Enabled = false;
 
+            toolStripButton2.Enabled = editor.SchemeView.isSymbol;
         }
 
         /// <summary>
@@ -669,9 +667,10 @@ namespace Scada.Scheme.Editor
             this.noTreeviewSelectionEffect = false;
 
             // установка доступности кнопок
-             SetButtonsEnabled();
+            SetButtonsEnabled();
 
-           updateAliasParametersDisplay();
+            toolStripButton2.Enabled = editor.SchemeView.isSymbol || cbSchComp.SelectedItem is Symbol;
+            updateAliasParametersDisplay();
         }
 
 
@@ -1665,9 +1664,8 @@ namespace Scada.Scheme.Editor
             { 
                 editor.DeselectAll();
             }
-
-
-                schCompChanging = false;
+            toolStripButton2.Enabled = editor.SchemeView.isSymbol || cbSchComp.SelectedItem is Symbol;
+            schCompChanging = false;
         }
 
         private void propertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
@@ -1890,7 +1888,6 @@ namespace Scada.Scheme.Editor
 
         private void handleUpdateAlias(object sender, OnUpdateAliasEventArgs e)
         {
-
             //update values in components that use aliases
             foreach (BaseComponent c in editor.SchemeView.Components.Values)
             {
@@ -1898,6 +1895,10 @@ namespace Scada.Scheme.Editor
                 if (e.NewAlias == null)
                 {
                     c.AliasesDictionnary = c.AliasesDictionnary.Where(entry => entry.Value.Name!= e.OldAlias.Name).ToDictionary(pair => pair.Key, pair => pair.Value);
+                    continue;
+                }
+                if (!editor.SchemeView.isSymbol && c.GroupId != (cbSchComp.SelectedItem as Symbol).ID)
+                {
                     continue;
                 }
 
@@ -1924,14 +1925,12 @@ namespace Scada.Scheme.Editor
 
                 c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
             }
-
-            editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.SchemeDocChanged, editor.SchemeView.SchemeDoc);
             updateAliasParametersDisplay();
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
-            var aliasCRUD = new FrmAliasesList(editor.SchemeView.MainSymbol);
+            var aliasCRUD = new FrmAliasesList(editor.SchemeView.isSymbol ? editor.SchemeView.MainSymbol : cbSchComp.SelectedItem as Symbol, editor.SchemeView.isSymbol);
             aliasCRUD.OnUpdateAlias += handleUpdateAlias;
             aliasCRUD.ShowDialog();
         }

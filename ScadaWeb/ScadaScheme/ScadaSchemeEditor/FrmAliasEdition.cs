@@ -16,7 +16,7 @@ namespace Scada.Scheme.Editor
     {
         public Alias currentAlias;
 
-        public FrmAliasEdition(bool isCreationForm, Alias currentAlias)
+        public FrmAliasEdition(bool isCreationForm, Alias currentAlias, bool allowRename)
         {
             InitializeComponent();
 
@@ -35,6 +35,8 @@ namespace Scada.Scheme.Editor
                 textBox2.Text = currentAlias.Value == null ? "" : currentAlias.Value.ToString();
                 checkBox1.Checked = currentAlias.isCnlLinked;
                 comboBox1.Enabled = false;
+                checkBox1.Enabled = false;
+                textBox1.Enabled = allowRename;
                 if (checkBox1.Checked)
                 {
                     comboBox1.Enabled = false;

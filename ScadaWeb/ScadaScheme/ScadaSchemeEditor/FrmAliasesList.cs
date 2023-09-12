@@ -18,12 +18,15 @@ namespace Scada.Scheme.Editor
 
         Symbol s;
         private Alias _selectedAlias;
+        private bool allowCreation;
         public event EventHandler<OnUpdateAliasEventArgs> OnUpdateAlias;
 
-        public FrmAliasesList(Symbol symbol)
+        public FrmAliasesList(Symbol symbol, bool allowCreation)
         {
             InitializeComponent();
             s = symbol;
+            this.allowCreation=allowCreation;
+            button2.Enabled = allowCreation;
             button3.Enabled = false;
             button5.Enabled = false;
             FillListBox();
@@ -45,7 +48,7 @@ namespace Scada.Scheme.Editor
         {
             Alias alias = new Alias();
 
-            new FrmAliasEdition(true, alias).ShowDialog();
+            new FrmAliasEdition(true, alias, true).ShowDialog();
             s.AliasList.Add(alias);
             if (alias.isCnlLinked)
             {
@@ -65,7 +68,7 @@ namespace Scada.Scheme.Editor
                 MessageBox.Show("Please, select an alias.");
             else
             {
-                new FrmAliasEdition(false, _selectedAlias).ShowDialog();
+                new FrmAliasEdition(false, _selectedAlias, allowCreation).ShowDialog();
                 if (_selectedAlias.isCnlLinked && !s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name))
                     s.AliasCnlDictionary.Add(_selectedAlias.Name, int.Parse(_selectedAlias.Value.ToString()));
                 else if (_selectedAlias.isCnlLinked && s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name))
@@ -86,7 +89,7 @@ namespace Scada.Scheme.Editor
         {
             bool isRowSelected = listBox1.SelectedIndex != -1;
             button3.Enabled = isRowSelected;
-            button5.Enabled = isRowSelected;
+            button5.Enabled = isRowSelected && allowCreation;
             if (isRowSelected)
             {
                 _selectedAlias = s.AliasList[listBox1.SelectedIndex];
