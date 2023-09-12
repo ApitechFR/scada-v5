@@ -445,7 +445,14 @@ namespace Scada.Scheme.Editor
 
             if (string.IsNullOrEmpty(editor.FileName))
             {
-                sfdScheme.FileName = !asSymbol ? Editor.DefSchemeFileName : Editor.DefSymbolFileName;
+                if (asSymbol) {
+                    if (editor.SchemeView.MainSymbol.Name == "Symbol") sfdScheme.FileName = Editor.DefSymbolFileName;
+                    else sfdScheme.FileName = editor.SchemeView.MainSymbol.Name + ".sch";
+                }
+                else
+                {
+                    sfdScheme.FileName = Editor.DefSchemeFileName;
+                }
                 sfdScheme.RestoreDirectory = false;
                 if (asSymbol) sfdScheme.InitialDirectory = Path.GetFullPath(appData.AppDirs.SymbolDir);
                 saveAs = true;
@@ -1689,6 +1696,10 @@ namespace Scada.Scheme.Editor
 
                             component.OnItemChanged(SchemeChangeTypes.ComponentChanged, component);
                         }
+                    }
+                    if (group is Symbol && editor.SchemeView.isSymbol && editor.SchemeView.MainSymbol.ID == group.ID)
+                    {
+
                     }
                     group.OnItemChanged(SchemeChangeTypes.ComponentChanged, group);
                 }
