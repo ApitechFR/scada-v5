@@ -752,7 +752,7 @@ namespace Scada.Scheme.Editor
                             component.LoadFromXml(mainSymbolNode);
                         }
                     }
-
+                    this.History.BeginPoint();
                     component.ID = SchemeView.GetNextComponentID();
                     component.Location = new Point(x, y);
                     component.SchemeView = SchemeView;
@@ -787,6 +787,7 @@ namespace Scada.Scheme.Editor
                     }
 
                     OnSelectionChanged();
+                    this.History.EndPoint();
                     PointerMode = PointerMode.Select;
                     SymbolPath = null;
                     return true;
@@ -832,6 +833,7 @@ namespace Scada.Scheme.Editor
             }
             else
             {
+                this.History.BeginPoint();
                 component.LoadFromXml(node);
                 component.ID = SchemeView.GetNextComponentID();
                 component.Location = new Point(x + component.Location.X, y + component.Location.Y);
@@ -847,8 +849,7 @@ namespace Scada.Scheme.Editor
                     component.GroupId = SchemeView.MainSymbol.ID;
                 }
 
-                SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
-
+                component.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
                 return component;
             }
         }
