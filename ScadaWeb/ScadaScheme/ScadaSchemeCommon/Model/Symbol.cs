@@ -1,10 +1,8 @@
-﻿using Scada.Data.Tables;
+﻿using Scada.Scheme.Model.PropertyGrid;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.Linq;
-using System.Text;
 using System.Xml;
+using CM = System.ComponentModel;
 
 namespace Scada.Scheme.Model
 {
@@ -14,8 +12,14 @@ namespace Scada.Scheme.Model
     [Serializable]
     public class Symbol : ComponentGroup
     {
+        #region Attributes
+        [CM.Browsable(false)]
+        #endregion
         public Dictionary<string,int> AliasCnlDictionary { get; set; }
 
+        #region Attributes
+        [CM.Browsable(false)]
+        #endregion
         public List<Alias> AliasList { get; set; }
         public string SymbolId { get; private set; }
         public DateTime LastModificationDate { get; set;}
