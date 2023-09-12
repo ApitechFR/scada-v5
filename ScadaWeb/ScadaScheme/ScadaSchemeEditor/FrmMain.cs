@@ -110,17 +110,19 @@ namespace Scada.Scheme.Editor
                 {
                     //Populate available symbols from index.xml
                     XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(xmlPath);
-                    XmlNodeList entries = xmlDoc.SelectNodes("//symbol");
-                    foreach (XmlNode entry in entries)
+                    if (!editor.SchemeView.isSymbol)
                     {
-                        string name = entry.Attributes["name"].Value;
-                        string path = entry.Attributes["path"].Value;
+                        xmlDoc.Load(xmlPath);
+                        XmlNodeList entries = xmlDoc.SelectNodes("//symbol");
+                        foreach (XmlNode entry in entries)
+                        {
+                            string name = entry.Attributes["name"].Value;
+                            string path = entry.Attributes["path"].Value;
 
-                        symbolsDictionary[name] = path;
+                            symbolsDictionary[name] = path;
+                        }
                     }
                     availableSymbols = symbolsDictionary;
-
                     //Delete current symbols from list
                     List<ListViewItem> itemsToRemove = lvCompTypes.Items.Cast<ListViewItem>().Where(item => item.Group.Header=="Symbols").ToList();
                     foreach (ListViewItem itemToRemove in itemsToRemove)
@@ -583,12 +585,16 @@ namespace Scada.Scheme.Editor
                         foreach (BaseComponent component in editor.SchemeView.Components.Values)
                         {                            
                             addComponentToTree(component);
-
-                            if(editor.SchemeView.getHihghestGroup(component) is Symbol symbol && editor.SchemeView.isSymbol && symbol.ID==editor.SchemeView.MainSymbol.ID )
+                            BaseComponent group = editor.SchemeView.getHihghestGroup(component);
+                            if (group is Symbol symbol && group.ID != component.ID)
                             {
-                                continue;
+                                if(editor.SchemeView.isSymbol && symbol.ID == editor.SchemeView.MainSymbol.ID) 
+                                    cbSchComp.Items.Add(component);
                             }
-                            cbSchComp.Items.Add(component);
+                            else
+                            {
+                                cbSchComp.Items.Add(component);
+                            }
                         }
                     }
                 }
@@ -1278,6 +1284,7 @@ namespace Scada.Scheme.Editor
                     ofdScheme.InitialDirectory = Path.GetDirectoryName(ofdScheme.FileName);
                     InitScheme(ofdScheme.FileName);
                     SchemeContext.GetInstance().SchemePath = ofdScheme.FileName;
+                    RefreshAvailableSymbols();
                 }
             }
         }
