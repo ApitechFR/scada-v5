@@ -228,15 +228,18 @@ namespace Scada.Scheme.Editor
 
 			try
 			{
-				if (File.Exists(xmlPath) && !editor.SchemeView.isSymbol)
+
+				if (File.Exists(xmlPath))
 				{
 					Dictionary<string, string> symbolsDictionary = LoadSymbolsFromXml(xmlPath);
 
 					availableSymbols = symbolsDictionary;
 
 					RemoveExistingSymbolsFromListView();
-
-					AddNewSymbolsToListView(symbolsDictionary);
+                    if (!editor.SchemeView.isSymbol)
+                    {
+                        AddNewSymbolsToListView(symbolsDictionary);
+                    }
 				}
 			}
 			catch (Exception ex)
