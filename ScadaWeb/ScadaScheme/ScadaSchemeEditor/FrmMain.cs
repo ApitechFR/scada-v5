@@ -100,31 +100,89 @@ namespace Scada.Scheme.Editor
         }
 
 
-		//<summary>
-        //Load symbols from index.xml
-        //</summary>
+		/// <summary>
+		/// Loads symbols from an XML file, taking into account their validity.
+		/// Invalid symbols (whose associated files do not exist) are removed from the XML file.
+		/// </summary>
+		/// <param name="xmlPath">Path to the XML file containing the symbols.</param>
+		/// <returns>Returns a dictionary containing the names and paths of valid symbols.</returns>
 		private Dictionary<string, string> LoadSymbolsFromXml(string xmlPath)
 		{
 			Dictionary<string, string> symbolsDictionary = new Dictionary<string, string>();
-			XmlDocument xmlDoc = new XmlDocument();
-			xmlDoc.Load(xmlPath);
-			XmlNodeList entries = xmlDoc.SelectNodes("//symbol");
+			string tempXmlPath = xmlPath + ".temp";
 
-			foreach (XmlNode entry in entries)
-			{
-				if (entry.Attributes["name"] != null && entry.Attributes["path"] != null)
-				{
-					string name = entry.Attributes["name"].Value;
-					string path = entry.Attributes["path"].Value;
+			XmlReaderSettings readerSettings = new XmlReaderSettings();
+			
+			XmlWriterSettings writerSettings = new XmlWriterSettings();
+			writerSettings.Indent = true; // Enable indentation
+			writerSettings.IndentChars = "    "; // Use 4 spaces for indentation
+            try
+            {
 
-					if (File.Exists(path))
-					{
-						symbolsDictionary[name] = path;
-					}
-				}
+                using (XmlReader reader = XmlReader.Create(xmlPath, readerSettings))
+                using (XmlWriter writer = XmlWriter.Create(tempXmlPath, writerSettings))
+                {
+                    while (reader.Read())
+                    {
+                        switch (reader.NodeType)
+                        {
+                            case XmlNodeType.Element:
+                                bool shouldWrite = true;
+
+                                if (reader.Name == "symbol")
+                                {
+                                    string name = reader.GetAttribute("name");
+                                    string path = reader.GetAttribute("path");
+
+                                    if (File.Exists(path))
+                                    {
+                                        symbolsDictionary[name] = path;
+                                    }
+                                    else
+                                    {
+                                        shouldWrite = false;
+                                    }
+                                }
+
+                                if (shouldWrite)
+                                {
+                                    writer.WriteStartElement(reader.Name);
+                                    writer.WriteAttributes(reader, true);
+                                }
+                                break;
+
+                            case XmlNodeType.Text:
+                                writer.WriteString(reader.Value);
+                                break;
+
+                            case XmlNodeType.XmlDeclaration:
+                            case XmlNodeType.ProcessingInstruction:
+                                writer.WriteProcessingInstruction(reader.Name, reader.Value);
+                                break;
+
+                            case XmlNodeType.Comment:
+                                writer.WriteComment(reader.Value);
+                                break;
+
+                            case XmlNodeType.EndElement:
+                                writer.WriteEndElement();
+                                break;
+                        }
+                    }
+                }
+
+                //replace the original XML file with the temporary one
+                File.Delete(xmlPath);
+                File.Move(tempXmlPath, xmlPath);
+            }
+			catch (Exception ex)
+            {
+				throw new ApplicationException("An error occurred while processing the XML file.", ex);
 			}
+
 			return symbolsDictionary;
 		}
+
 
 		//<summary>
 		//Supprime les symboles existants du ListView
@@ -155,13 +213,14 @@ namespace Scada.Scheme.Editor
 			}
 			lvCompTypes.Groups.Add(symbolsViewGroup);
 		}
+
 		//<summary>
-		//Refresh available symbols
-		//Vérifie si le fichier XML existe et que nous ne sommes pas dans une vue de symbole
-		// Charge les symboles à partir du fichier XML
-		// Met à jour la variable membre
-		// Supprime les symboles existants du ListView
-		// Ajoute de nouveaux symboles au ListView
+		// Refresh available symbols
+		// Checks if the XML file exists and that we are not in a symbol view
+		// Loads symbols from the XML file
+		// Updates the member variable
+		// Removes existing symbols from the ListView
+		// Adds new symbols to the ListView
 		//</summary>
 		private void RefreshAvailableSymbols()
 		{
@@ -182,7 +241,7 @@ namespace Scada.Scheme.Editor
 			}
 			catch (Exception ex)
 			{
-				log.WriteException(ex, "Erreur lors du rafraîchissement des symboles disponibles : " + ex.Message);
+				log.WriteException(ex, "Error : " + ex.Message);
 			}
 		}
 
@@ -251,9 +310,9 @@ namespace Scada.Scheme.Editor
             }
         }
 
-/// <summary>
-/// Локализовать форму.
-/// </summary>
+    /// <summary>
+    /// Локализовать форму.
+    /// </summary>
         private void LocalizeForm()
         {
             if (!Localization.LoadDictionaries(appData.AppDirs.LangDir, "ScadaData", out string errMsg))
@@ -468,6 +527,9 @@ namespace Scada.Scheme.Editor
                 ScadaUiUtils.ShowError(errMsg);
 
             toolStripButton2.Enabled = editor.SchemeView.isSymbol;
+
+            if(!editor.SchemeView.isSymbol)
+                RefreshAvailableSymbols();  
         }
 
         /// <summary>
@@ -504,8 +566,10 @@ namespace Scada.Scheme.Editor
 
             if (saveAs && sfdScheme.ShowDialog() == DialogResult.OK)
                 fileName = sfdScheme.FileName;
+			    if (asSymbol) editor.SchemeView.MainSymbol.Name = Path.GetFileNameWithoutExtension(fileName);
 
-            if (!string.IsNullOrEmpty(fileName))
+
+			if (!string.IsNullOrEmpty(fileName))
             {
                 // сохранение схемы
                 if (asSymbol && editor.SaveSchemeToFile(fileName, out string errMsg2, asSymbol))
@@ -567,7 +631,6 @@ namespace Scada.Scheme.Editor
                     newEntry.SetAttribute("lastModificationDate", DateTime.Now.ToString());
                     xmlDoc.DocumentElement.AppendChild(newEntry);
                 }
-
                 xmlDoc.Save(xmlPath);
             }
             catch (Exception ex)
@@ -1331,7 +1394,7 @@ namespace Scada.Scheme.Editor
         {
             // сохранение схемы
             SaveScheme(false,editor.SchemeView.isSymbol);
-        }
+		}
 
         private void miFileSaveAs_Click(object sender, EventArgs e)
         {
