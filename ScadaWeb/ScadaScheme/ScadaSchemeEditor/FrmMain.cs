@@ -1950,5 +1950,10 @@ namespace Scada.Scheme.Editor
             }
             return "";
         }
+
+        private void btnFileNew_ButtonClick(object sender, EventArgs e)
+        {
+
+        }
     }
 }
