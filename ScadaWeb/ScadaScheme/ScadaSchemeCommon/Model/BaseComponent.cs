@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Drawing.Design;
+using System.Linq;
 using System.Text;
 using System.Web.Script.Serialization;
 using System.Xml;
@@ -362,6 +363,23 @@ namespace Scada.Scheme.Model
             ItemChanged?.Invoke(this, changeType, changedObject, oldKey);
         }
 
+        public void updateAliasesDictionary(Symbol symbol)
+        {
+            List<string> newAliases = symbol.AliasList.Select(x => x.Name).ToList();
+            List<string> obsoleteAliases = new List<string>();
+            foreach (var item in AliasesDictionnary)
+            {
+                if (!newAliases.Contains(item.Value.Name))
+                {
+                    obsoleteAliases.Add(item.Key);
+                }
+            }
+            foreach (string item in obsoleteAliases)
+            {
+                AliasesDictionnary.Remove(item);
+            }
+
+        }
 
         /// <summary>
         /// Событие возникающее при изменении компонента.

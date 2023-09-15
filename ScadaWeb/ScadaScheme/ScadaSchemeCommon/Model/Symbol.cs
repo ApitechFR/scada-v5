@@ -1,6 +1,7 @@
 ﻿using Scada.Scheme.Model.PropertyGrid;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using CM = System.ComponentModel;
 
@@ -74,6 +75,31 @@ namespace Scada.Scheme.Model
                 AliasList.AddRange(listTemp);
             }
 
+        }
+        public List<Alias> updateAliasList(Symbol symbol)
+        {
+            List<string> oldNames = AliasList.Select(x=>x.Name).ToList();
+            List<string> newNames = symbol.AliasList.Select(x=>x.Name).ToList();
+            List<Alias> removeList = new List<Alias>();
+            foreach(Alias oldAlias in AliasList)
+            {
+                if (!newNames.Contains(oldAlias.Name))
+                {
+                    removeList.Add(oldAlias);
+                }
+            }
+            foreach (Alias newAlias in symbol.AliasList) 
+            {
+                if(!oldNames.Contains(newAlias.Name)) 
+                {
+                    AliasList.Add(newAlias);
+                }
+            }
+            foreach(Alias obsoleteAlias in removeList)
+            {
+                AliasList.Remove(obsoleteAlias);
+            }
+            return AliasList;
         }
 
         public void ResetSymbolId()

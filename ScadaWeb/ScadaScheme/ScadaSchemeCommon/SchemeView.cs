@@ -410,6 +410,27 @@ namespace Scada.Scheme
 
             int inCnlOffset = templateArgs.InCnlOffset;
             int ctrlCnlOffset = templateArgs.CtrlCnlOffset;
+            if(rootElem.SelectSingleNode("MainSymbol") is XmlNode mainSymbolNode)
+            {
+                CompManager compManager = CompManager.GetInstance();
+                Point location = new Point(symbol.Location.X,symbol.Location.Y);
+                int Id = symbol.ID;
+
+                Symbol newSymbol = compManager.CreateComponent(mainSymbolNode, out string errMsg) as Symbol;
+                if (symbol == null)
+                {
+                    LoadErrors.Add(errMsg);
+                }
+                newSymbol.LoadFromXml(mainSymbolNode);
+
+                newSymbol.ID=Id;
+                newSymbol.Location = location;
+                newSymbol.AliasList = symbol.updateAliasList(newSymbol);
+
+                symbol = newSymbol;
+
+
+            }
 
             // load scheme components
             if (rootElem.SelectSingleNode("Components") is XmlNode componentsNode)
@@ -437,10 +458,31 @@ namespace Scada.Scheme
                     Point location = new Point(component.Location.X + symbol.Location.X, component.Location.Y + symbol.Location.Y);
                     component.Location = location;
 
-
+                    component.updateAliasesDictionary(symbol);
                     symbolComps.Add(component);
 
-                    if(component is Symbol sym)
+
+                    foreach (var entry in component.AliasesDictionnary)
+                    {
+                        var componentProperty = component.GetType().GetProperty(entry.Key);
+                        if (componentProperty == null)
+                        {
+                            continue;
+                        }
+
+                        componentProperty.SetValue(component, symbol.AliasList.Where(x=>x.Name==entry.Value.Name).First().Value, null);
+                        if (entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom")
+                        {
+                            var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
+                            var componentChannelProperty = component.GetType().GetProperty(componentChannelPropertyName);
+                            var ChannelNumber = symbol.AliasCnlDictionary[entry.Value.Name];
+                            componentChannelProperty.SetValue(component, ChannelNumber, null);
+                        }
+                    }
+
+
+
+                    if (component is Symbol sym)
                     {
                         LoadSymbol(symbolPath,rootElem, sym);
                     }
