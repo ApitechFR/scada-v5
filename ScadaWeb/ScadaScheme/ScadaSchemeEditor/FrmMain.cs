@@ -99,58 +99,95 @@ namespace Scada.Scheme.Editor
             SchemeContext.GetInstance().SchemePath = editor.FileName;
         }
 
-        private void RefreshAvailableSymbols()
-        {
-            string xmlPath = Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml";
+
+		//<summary>
+        //Load symbols from index.xml
+        //</summary>
+		private Dictionary<string, string> LoadSymbolsFromXml(string xmlPath)
+		{
 			Dictionary<string, string> symbolsDictionary = new Dictionary<string, string>();
+			XmlDocument xmlDoc = new XmlDocument();
+			xmlDoc.Load(xmlPath);
+			XmlNodeList entries = xmlDoc.SelectNodes("//symbol");
 
-            try
-            {
-                if (File.Exists(xmlPath))
-                {
-                    //Populate available symbols from index.xml
-                    XmlDocument xmlDoc = new XmlDocument();
-                    if (!editor.SchemeView.isSymbol)
-                    {
-                        xmlDoc.Load(xmlPath);
-                        XmlNodeList entries = xmlDoc.SelectNodes("//symbol");
-                        foreach (XmlNode entry in entries)
-                        {
-                            string name = entry.Attributes["name"].Value;
-                            string path = entry.Attributes["path"].Value;
+			foreach (XmlNode entry in entries)
+			{
+				if (entry.Attributes["name"] != null && entry.Attributes["path"] != null)
+				{
+					string name = entry.Attributes["name"].Value;
+					string path = entry.Attributes["path"].Value;
 
-                            symbolsDictionary[name] = path;
-                        }
-                    }
-                    availableSymbols = symbolsDictionary;
-                    //Delete current symbols from list
-                    List<ListViewItem> itemsToRemove = lvCompTypes.Items.Cast<ListViewItem>().Where(item => item.Group.Header=="Symbols").ToList();
-                    foreach (ListViewItem itemToRemove in itemsToRemove)
-                    {
-                        lvCompTypes.Items.Remove(itemToRemove);
-                    }
-                    var groupToRemove = lvCompTypes.Groups.Cast<ListViewGroup>().Where(group => group.Header == "Symbols").FirstOrDefault();
-                    if(groupToRemove != null)
-                    {
-                        lvCompTypes.Groups.Remove(groupToRemove);
-                    }
+					if (File.Exists(path))
+					{
+						symbolsDictionary[name] = path;
+					}
+				}
+			}
+			return symbolsDictionary;
+		}
 
-                    //Add symbols to list
-                    ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
-                    foreach (var s in availableSymbols)
-                    {
-                        lvCompTypes.Items.Add(new ListViewItem(s.Key, "component.png", symbolsViewGroup){ IndentCount = 1 });
-                    }
-                    lvCompTypes.Groups.Add(symbolsViewGroup);
+		//<summary>
+		//Supprime les symboles existants du ListView
+		//</summary>
+		private void RemoveExistingSymbolsFromListView()
+		{
+			var itemsToRemove = lvCompTypes.Items.Cast<ListViewItem>().Where(item => item.Group.Header == "Symbols").ToList();
+			foreach (ListViewItem itemToRemove in itemsToRemove)
+			{
+				lvCompTypes.Items.Remove(itemToRemove);
+			}
 
-                }
-            }
-            catch (Exception ex)
-            {
-                log.WriteException(ex, "Error: " + ex.Message);
-            }
-        }
-        private void lvCompTypes_MouseClick(object sender, MouseEventArgs e)
+			var groupToRemove = lvCompTypes.Groups.Cast<ListViewGroup>().Where(group => group.Header == "Symbols").FirstOrDefault();
+			if (groupToRemove != null)
+			{
+				lvCompTypes.Groups.Remove(groupToRemove);
+			}
+		}
+		//<summary>
+		//Ajoute de nouveaux symboles au ListView
+		//</summary>
+		private void AddNewSymbolsToListView(Dictionary<string, string> symbols)
+		{
+			ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
+			foreach (var s in symbols)
+			{
+				lvCompTypes.Items.Add(new ListViewItem(s.Key, "component.png", symbolsViewGroup) { IndentCount = 1 });
+			}
+			lvCompTypes.Groups.Add(symbolsViewGroup);
+		}
+		//<summary>
+		//Refresh available symbols
+		//Vérifie si le fichier XML existe et que nous ne sommes pas dans une vue de symbole
+		// Charge les symboles à partir du fichier XML
+		// Met à jour la variable membre
+		// Supprime les symboles existants du ListView
+		// Ajoute de nouveaux symboles au ListView
+		//</summary>
+		private void RefreshAvailableSymbols()
+		{
+			string xmlPath = Path.Combine(Path.GetFullPath(appData.AppDirs.SymbolDir), "index.xml");
+
+			try
+			{
+				if (File.Exists(xmlPath) && !editor.SchemeView.isSymbol)
+				{
+					Dictionary<string, string> symbolsDictionary = LoadSymbolsFromXml(xmlPath);
+
+					availableSymbols = symbolsDictionary;
+
+					RemoveExistingSymbolsFromListView();
+
+					AddNewSymbolsToListView(symbolsDictionary);
+				}
+			}
+			catch (Exception ex)
+			{
+				log.WriteException(ex, "Erreur lors du rafraîchissement des symboles disponibles : " + ex.Message);
+			}
+		}
+
+        
+		private void lvCompTypes_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
