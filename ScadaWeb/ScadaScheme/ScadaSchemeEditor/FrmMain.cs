@@ -102,7 +102,7 @@ namespace Scada.Scheme.Editor
         private void RefreshAvailableSymbols()
         {
             string xmlPath = Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml";
-            Dictionary<string, string> symbolsDictionary = new Dictionary<string, string>();
+			Dictionary<string, string> symbolsDictionary = new Dictionary<string, string>();
 
             try
             {
@@ -436,6 +436,7 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Сохранить схему.
         /// </summary>
+        /// 
         private bool SaveScheme(bool saveAs,bool asSymbol = false)
         {
             bool result = false;
@@ -1609,13 +1610,33 @@ namespace Scada.Scheme.Editor
             if (lvCompTypes.SelectedItems.Count > 0 && lvCompTypes.SelectedItems[0].Group.Header == "Symbols")
             {
                 editor.SymbolPath = findSymboleInAvailableList(lvCompTypes.SelectedItems[0].Text);
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(editor.SymbolPath);
+                if (File.Exists(editor.SymbolPath))
+                {
 
-                XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
-                XmlNode nameNode = mainSymbolNode.SelectSingleNode("Name");
-                typeName = nameNode.InnerText + " - Symbol";
-            }
+               
+                    XmlDocument xmlDoc = new XmlDocument();
+
+                    try
+                    {
+
+						xmlDoc.Load(editor.SymbolPath);
+
+						XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
+						XmlNode nameNode = mainSymbolNode.SelectSingleNode("Name");
+						typeName = nameNode.InnerText + " - Symbol";
+					}
+					catch (Exception ex)
+                    {
+						MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						return;
+					}
+
+				}
+				else
+                {
+					MessageBox.Show("Symbol not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
             else
             {
                 typeName = lvCompTypes.SelectedItems.Count > 0 ?
