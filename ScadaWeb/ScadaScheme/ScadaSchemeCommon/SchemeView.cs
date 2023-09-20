@@ -930,7 +930,7 @@ namespace Scada.Scheme
 
             BaseComponent group = Components.Values.Where(x => x.ID == groupID).FirstOrDefault();
             if (group == null) return comp;
-            while (group.GroupId != -1)
+            while (group.GroupId != -1 && group.GroupId != MainSymbol.ID)
             {
                 group = getHihghestGroup(group);
             }
