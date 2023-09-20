@@ -15,12 +15,14 @@ namespace Scada.Scheme.Editor
     public partial class FrmAliasEdition : Form
     {
         public Alias currentAlias;
+        private bool isInSymbol;
 
-        public FrmAliasEdition(bool isCreationForm, Alias currentAlias, bool allowRename)
+        public FrmAliasEdition(bool isCreationForm, Alias currentAlias, bool allowRename, bool isInSymbol)
         {
             InitializeComponent();
 
             this.currentAlias = currentAlias;
+            this.isInSymbol = isInSymbol;
 
             if(isCreationForm)
             {
@@ -37,14 +39,24 @@ namespace Scada.Scheme.Editor
                 comboBox1.Enabled = false;
                 checkBox1.Enabled = false;
                 textBox1.Enabled = allowRename;
+
                 if (checkBox1.Checked)
                 {
                     comboBox1.Enabled = false;
-                    btn_browseCnl.Visible = true;
+                    if (isInSymbol)
+                    {
+                        textBox2.Enabled = false;
+                        btn_browseCnl.Visible = false;
+                        textBox2.Text = "0";
+                    }
+                    else
+                        btn_browseCnl.Visible = true;
+
                 }
 
                 int index = GetComboBoxIndexForType(currentAlias.AliasTypeName);
                 if (index >= 0) comboBox1.SelectedIndex = index;
+                if(checkBox1.Checked) comboBox1.SelectedIndex = -1;
             }
         }
 
@@ -111,6 +123,12 @@ namespace Scada.Scheme.Editor
                 }
 
                 currentAlias.isCnlLinked = checkBox1.Checked;
+                if (currentAlias.isCnlLinked && isInSymbol)
+                {
+                    currentAlias.AliasTypeName = "Int32";
+                    if (int.TryParse(textBox2.Text, out int result))
+                        currentAlias.Value = result;
+                }
 
                 if (isOKtoClose) this.Close();
             }
@@ -122,12 +140,20 @@ namespace Scada.Scheme.Editor
             {
                 comboBox1.Enabled = false;
                 comboBox1.SelectedIndex = -1;
-                btn_browseCnl.Visible = true;
+                if (isInSymbol)
+                {
+                    textBox2.Enabled = false;
+                    btn_browseCnl.Visible = false;
+                    textBox2.Text = "0";
+                }
+                else
+                    btn_browseCnl.Visible = true;
             }
             else
             {
                 comboBox1.Enabled = true;
                 btn_browseCnl.Visible = false;
+                textBox2.Enabled = true;
             }
         }
 
