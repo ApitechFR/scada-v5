@@ -22,7 +22,13 @@ namespace Scada.Scheme.Model
         [CM.Browsable(false)]
         #endregion
         public List<Alias> AliasList { get; set; }
+        #region Attributes
+        [CM.Browsable(false)]
+        #endregion
         public string SymbolId { get; private set; }
+        #region Attributes
+        [CM.Browsable(false)]
+        #endregion
         public DateTime LastModificationDate { get; set;}
 
         public Symbol() :base() {
