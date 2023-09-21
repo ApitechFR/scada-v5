@@ -80,9 +80,24 @@ namespace Scada.Scheme.Editor
                 {
                     //find channel number
                     Match match = Regex.Match(_selectedAlias.Value.ToString(), @"\((\d+)\)");
-                    string matchValue = match.Groups[1].Value;
-                    int channelNumber = int.Parse(matchValue);
-                    s.AliasCnlDictionary[_selectedAlias.Name] = channelNumber;
+                    if(match.Success)
+                    {
+						string matchValue = match.Groups[1].Value;
+
+                        if(int.TryParse(matchValue, out int channelNumber))
+                        {
+							s.AliasCnlDictionary[_selectedAlias.Name] = channelNumber;
+
+						}
+						else
+                        {
+                            Console.WriteLine("Error parsing channel number");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("match failed");
+                    }  
                 }
                 else if (_selectedAlias.isCnlLinked && s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name) && isInSymbol)
                 {
