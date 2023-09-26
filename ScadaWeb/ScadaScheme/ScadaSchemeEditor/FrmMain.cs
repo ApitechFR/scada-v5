@@ -2049,10 +2049,21 @@ namespace Scada.Scheme.Editor
                     {
                         var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
                         var componentChannelProperty = c.GetType().GetProperty(componentChannelPropertyName);
-                        var ChannelNumber = editor.SchemeView.MainSymbol.AliasCnlDictionary[e.NewAlias.Name];
-                        componentChannelProperty.SetValue(c, ChannelNumber, null);
-                    }
-                }
+
+						if (editor?.SchemeView?.MainSymbol?.AliasCnlDictionary != null && e?.NewAlias?.Name != null)
+						{
+							if (editor.SchemeView.MainSymbol.AliasCnlDictionary.TryGetValue(e.NewAlias.Name, out var ChannelNumber))
+							{
+								componentChannelProperty.SetValue(c, ChannelNumber, null);
+							}
+							else
+							{
+								Console.WriteLine($" {e.NewAlias.Name} Not found in the dictionnary.");
+							}
+						}
+						
+					}
+				}
 
                 c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
             }
