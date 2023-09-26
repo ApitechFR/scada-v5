@@ -512,8 +512,10 @@ namespace Scada.Scheme.Editor
                 loadOK = true;
                 errMsg = "";
                 editor.NewScheme(isSymbol);
+				miSaveSymbol.Visible = isSymbol;
 
-            }
+
+			}
             else
             {
                 loadOK = editor.LoadSchemeFromFile(fileName, out errMsg,isSymbol);
