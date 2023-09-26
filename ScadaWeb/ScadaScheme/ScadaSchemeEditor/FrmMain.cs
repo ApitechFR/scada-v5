@@ -512,8 +512,10 @@ namespace Scada.Scheme.Editor
                 loadOK = true;
                 errMsg = "";
                 editor.NewScheme(isSymbol);
+				miSaveSymbol.Visible = isSymbol;
 
-            }
+
+			}
             else
             {
                 loadOK = editor.LoadSchemeFromFile(fileName, out errMsg,isSymbol);
@@ -1984,7 +1986,7 @@ namespace Scada.Scheme.Editor
                 var oldProperty = selectedProperty.Value;
                 if(frmAliasSelection.selectedAlias != null)
                 {
-                    componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value, null);
+                    componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value.ToString(), null);
                     if (isCnlProperty)
                     {
                         var componentChannelPropertyName = selectedPropertyName.Substring(0, selectedPropertyName.Length - 6);
@@ -2044,7 +2046,7 @@ namespace Scada.Scheme.Editor
                         continue;
                     }
 
-                    componentProperty.SetValue(c, e.NewAlias.Value, null);
+                    componentProperty.SetValue(c, e.NewAlias.Value.ToString(), null);
                     if(entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom")
                     {
                         var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
