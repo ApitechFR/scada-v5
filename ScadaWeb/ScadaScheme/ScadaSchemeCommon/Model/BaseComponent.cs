@@ -276,10 +276,10 @@ namespace Scada.Scheme.Model
             ZIndex = xmlNode.GetChildAsInt("ZIndex");
             GroupId = xmlNode.GetChildAsInt("GroupID",defaultVal:-1);
 
-            XmlNode aliasList = xmlNode.SelectSingleNode("AliasList");
+            XmlNode aliasList = xmlNode.SelectSingleNode("AliasListOfComponent");
             if (aliasList != null)
             {
-                foreach (XmlNode aliasNode in aliasList.SelectNodes("Alias"))
+                foreach (XmlNode aliasNode in aliasList.SelectNodes("AliasOfComponent"))
                 {
                     string aliasName = aliasNode.GetChildAsString("AliasName");
                     string attributeName = aliasNode.GetChildAsString("AttributeName");

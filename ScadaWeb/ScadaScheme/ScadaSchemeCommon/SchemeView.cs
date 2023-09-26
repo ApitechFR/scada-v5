@@ -779,12 +779,15 @@ namespace Scada.Scheme
                 rootElem.AppendChild(groupsElem);
                 rootElem.AppendChild(symbols);
 
+                string symbolID = "";
+
                 List<string> symbolsList = new List<string>();
 
                 foreach (BaseComponent component in Components.Values)
                 {
-                    if (getHihghestGroup(component) is Symbol sym && sym.ID != component.ID) 
+                    if ((getHihghestGroup(component) is Symbol sym && sym.ID != component.ID) && (isSymbol||asSymbol))
                     { continue; }
+
                     if (component is UnknownComponent)
                     {
                         componentsElem.AppendChild(((UnknownComponent)component).XmlNode);
@@ -801,10 +804,10 @@ namespace Scada.Scheme
                             prefixes.Add(compLibSpec.XmlPrefix);
                         }
 
-                        // создание XML-элемента компонента
-                        XmlElement componentElem = compLibSpec == null ?
-                            xmlDoc.CreateElement(compType.Name) /*стандартный компонент*/ :
-                            xmlDoc.CreateElement(compLibSpec.XmlPrefix, compType.Name, compLibSpec.XmlNs);
+                        XmlElement componentElem = componentElem = compLibSpec == null ?
+                                xmlDoc.CreateElement(compType.Name) /*стандартный компонент*/ :
+                                xmlDoc.CreateElement(compLibSpec.XmlPrefix, compType.Name, compLibSpec.XmlNs);
+
                         if ((isSymbol || asSymbol) && component.ID == MainSymbol.ID)
                         {
                             componentElem = xmlDoc.CreateElement("MainSymbol");
@@ -812,15 +815,21 @@ namespace Scada.Scheme
 
                         component.SaveToXml(componentElem);
 
+                        if(((getHihghestGroup(component) is Symbol symb && symb.ID != component.ID)) && !string.IsNullOrEmpty(symbolID)){
+                            componentElem.AppendElem("LinkedSymbolID", symbolID);
+                        }
 
-                        if (component is ComponentGroup) 
-                        { 
-                            if(component is Symbol symbol)
+                        if (component is ComponentGroup)
+                        {
+                            if (component is Symbol symbol)
                             {
-                                componentsElem.AppendChild(componentElem);
+                                symbolID = symbol.SymbolId;
+
+                                if ((isSymbol || asSymbol))
+                                    componentsElem.AppendChild(componentElem);
 
                                 if ((isSymbol || asSymbol) && symbol.ID == MainSymbol.ID)
-                                {   
+                                {
                                     groupsElem.AppendChild(componentElem);
                                     rootElem.AppendChild(componentElem);
                                 }
@@ -831,15 +840,14 @@ namespace Scada.Scheme
                                         XmlElement symbolTemplate = componentElem.Clone() as XmlElement;
 
                                         symbols.AppendChild(symbolTemplate);
-                                        saveSymbolTemplateToXml(symbolTemplate, symbol,compManager);
+                                        saveSymbolTemplateToXml(symbolTemplate, symbol, compManager);
                                         symbolsList.Add(symbol.SymbolId);
                                     }
                                 }
                             }
-                            else groupsElem.AppendChild(componentElem); 
+                            else groupsElem.AppendChild(componentElem);
                         }
                         else componentsElem.AppendChild(componentElem);
-
                     }
                 }
 
@@ -869,7 +877,7 @@ namespace Scada.Scheme
         {
             XmlElement componentsElem = node.OwnerDocument.CreateElement("Components");
             XmlElement groupsElem = node.OwnerDocument.CreateElement("Groups");
-
+            
             node.AppendChild(componentsElem);
             node.AppendChild(groupsElem);
 
