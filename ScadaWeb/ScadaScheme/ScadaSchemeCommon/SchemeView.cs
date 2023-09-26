@@ -238,8 +238,19 @@ namespace Scada.Scheme
                 LoadErrors.AddRange(compManager.LoadErrors);
                 SortedDictionary<int, ComponentBinding> componentBindings = templateBindings?.ComponentBindings;
 
+                XmlNode symbolNode = xmlDoc.SelectSingleNode("//Symbol");
+                if(symbolNode != null)
+                {
+                    XmlElement newSymbolElement = xmlDoc.CreateElement("Symbol");
+                    newSymbolElement.InnerXml = symbolNode.InnerXml;
+                    componentsNode.PrependChild(newSymbolElement);
+                }
+
                 foreach (XmlNode compNode in componentsNode.ChildNodes)
                 {
+                    XmlNode linkNode = compNode.SelectSingleNode("LinkedSymbolID");
+                    if (linkNode != null) continue;
+
                     // создание компонента
                     BaseComponent component = compManager.CreateComponent(compNode, out string errMsg);
 
@@ -306,6 +317,9 @@ namespace Scada.Scheme
                     // определение макс. идентификатора компонентов
 
                 }
+
+                if (symbolNode != null)
+                    symbolNode.ParentNode.RemoveChild(symbolNode);
             }
 
 
