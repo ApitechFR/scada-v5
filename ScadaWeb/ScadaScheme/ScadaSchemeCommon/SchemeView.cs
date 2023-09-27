@@ -805,7 +805,8 @@ namespace Scada.Scheme
 
                 foreach (BaseComponent component in Components.Values)
                 {
-                    if ((getHihghestGroup(component) is Symbol sym && sym.ID != component.ID) && (isSymbol||asSymbol))
+                    //change
+                    if ((getHihghestGroup(component) is Symbol sym && sym.ID != component.ID) && (isSymbol || asSymbol) && component.ID == MainSymbol.ID)
                     { continue; }
 
                     if (component is UnknownComponent)
@@ -845,7 +846,7 @@ namespace Scada.Scheme
                             {
                                 symbolID = symbol.SymbolId;
 
-                                if ((isSymbol || asSymbol))
+                                if ((isSymbol || asSymbol) && component.ID == MainSymbol.ID)//change
                                     componentsElem.AppendChild(componentElem);
 
                                 if ((isSymbol || asSymbol) && symbol.ID == MainSymbol.ID)
