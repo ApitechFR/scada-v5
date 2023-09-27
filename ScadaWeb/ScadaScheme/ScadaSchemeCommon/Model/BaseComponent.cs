@@ -276,10 +276,10 @@ namespace Scada.Scheme.Model
             ZIndex = xmlNode.GetChildAsInt("ZIndex");
             GroupId = xmlNode.GetChildAsInt("GroupID",defaultVal:-1);
 
-            XmlNode aliasList = xmlNode.SelectSingleNode("AliasList");
+            XmlNode aliasList = xmlNode.SelectSingleNode("AliasListOfComponent");
             if (aliasList != null)
             {
-                foreach (XmlNode aliasNode in aliasList.SelectNodes("Alias"))
+                foreach (XmlNode aliasNode in aliasList.SelectNodes("AliasOfComponent"))
                 {
                     string aliasName = aliasNode.GetChildAsString("AliasName");
                     string attributeName = aliasNode.GetChildAsString("AttributeName");
@@ -309,10 +309,10 @@ namespace Scada.Scheme.Model
             xmlElem.AppendElem("ZIndex", ZIndex);
             xmlElem.AppendElem("GroupID", GroupId);
 
-            XmlElement aliasListElem = xmlElem.SelectSingleNode("AliasList") as XmlElement;
+            XmlElement aliasListElem = xmlElem.SelectSingleNode("AliasListOfComponent") as XmlElement;
             if (aliasListElem == null)
             {
-                aliasListElem = xmlElem.OwnerDocument.CreateElement("AliasList");
+                aliasListElem = xmlElem.OwnerDocument.CreateElement("AliasListOfComponent");
                 xmlElem.AppendChild(aliasListElem);
             }
 
@@ -321,12 +321,12 @@ namespace Scada.Scheme.Model
                 string aliasName = kvp.Value.Name;
 
                 bool aliasExists = aliasListElem
-                    .SelectNodes($"Alias[AliasName='{aliasName}']")
+                    .SelectNodes($"AliasOfComponent[AliasName='{aliasName}']")
                     .Count > 0;
 
                 if (!aliasExists)
                 {
-                    XmlElement aliasElem = xmlElem.OwnerDocument.CreateElement("Alias");
+                    XmlElement aliasElem = xmlElem.OwnerDocument.CreateElement("AliasOfComponent");
                     aliasElem.AppendElem("AliasName", aliasName);
                     aliasElem.AppendElem("AttributeName", kvp.Key.ToString());
                     aliasListElem.AppendChild(aliasElem);
