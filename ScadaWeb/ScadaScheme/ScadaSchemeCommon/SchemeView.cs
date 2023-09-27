@@ -238,12 +238,16 @@ namespace Scada.Scheme
                 LoadErrors.AddRange(compManager.LoadErrors);
                 SortedDictionary<int, ComponentBinding> componentBindings = templateBindings?.ComponentBindings;
 
-                XmlNode symbolNode = xmlDoc.SelectSingleNode("//Symbol");
-                if(symbolNode != null)
+
+                XmlNodeList symbolNodes = xmlDoc.SelectNodes("/SchemeView/Symbols/Symbol");
+                List<XmlNode> lstNode = new List<XmlNode>();
+
+                foreach (XmlNode symbolNode in symbolNodes)
                 {
                     XmlElement newSymbolElement = xmlDoc.CreateElement("Symbol");
                     newSymbolElement.InnerXml = symbolNode.InnerXml;
                     componentsNode.PrependChild(newSymbolElement);
+                    lstNode.Add(symbolNode);
                 }
 
                 foreach (XmlNode compNode in componentsNode.ChildNodes)
@@ -318,8 +322,10 @@ namespace Scada.Scheme
 
                 }
 
-                if (symbolNode != null)
-                    symbolNode.ParentNode.RemoveChild(symbolNode);
+                //if (symbolNode != null)
+                //    symbolNode.ParentNode.RemoveChild(symbolNode);
+                foreach (XmlNode n in lstNode)
+                    n.ParentNode.RemoveChild(n);
             }
 
 
