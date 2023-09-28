@@ -100,156 +100,121 @@ namespace Scada.Scheme.Editor
         }
 
 
-		/// <summary>
-		/// Loads symbols from an XML file, taking into account their validity.
-		/// Invalid symbols (whose associated files do not exist) are removed from the XML file.
-		/// </summary>
-		/// <param name="xmlPath">Path to the XML file containing the symbols.</param>
-		/// <returns>Returns a dictionary containing the names and paths of valid symbols.</returns>
-		private Dictionary<string, string> LoadSymbolsFromXml(string xmlPath)
-		{
-			Dictionary<string, string> symbolsDictionary = new Dictionary<string, string>();
-			string tempXmlPath = xmlPath + ".temp";
+        /// <summary>
+        /// Loads symbols from an XML file, taking into account their validity.
+        /// Invalid symbols (whose associated files do not exist) are removed from the XML file.
+        /// </summary>
+        /// <param name="xmlPath">Path to the XML file containing the symbols.</param>
+        /// <returns>Returns a dictionary containing the names and paths of valid symbols.</returns>
+        private Dictionary<string, string> LoadSymbolsFromXml(string xmlPath)
+        {
+            Dictionary<string, string> symbolsDictionary = new Dictionary<string, string>();
 
-			XmlReaderSettings readerSettings = new XmlReaderSettings();
-			
-			XmlWriterSettings writerSettings = new XmlWriterSettings();
-			writerSettings.Indent = true; // Enable indentation
-			writerSettings.IndentChars = "    "; // Use 4 spaces for indentation
             try
             {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(xmlPath);
+                XmlNodeList symbolNodes = xmlDoc.SelectNodes("//symbol");
 
-                using (XmlReader reader = XmlReader.Create(xmlPath, readerSettings))
-                using (XmlWriter writer = XmlWriter.Create(tempXmlPath, writerSettings))
+                List<XmlNode> nodesToRemove = new List<XmlNode>();
+
+                foreach (XmlNode symbolNode in symbolNodes)
                 {
-                    while (reader.Read())
+                    XmlElement symbolElement = (XmlElement)symbolNode;
+                    string name = symbolElement.GetAttribute("name");
+                    string path = symbolElement.GetAttribute("path");
+
+                    if (File.Exists(path))
                     {
-                        switch (reader.NodeType)
-                        {
-                            case XmlNodeType.Element:
-                                bool shouldWrite = true;
-
-                                if (reader.Name == "symbol")
-                                {
-                                    string name = reader.GetAttribute("name");
-                                    string path = reader.GetAttribute("path");
-
-                                    if (File.Exists(path))
-                                    {
-                                        symbolsDictionary[name] = path;
-                                    }
-                                    else
-                                    {
-                                        shouldWrite = false;
-                                    }
-                                }
-
-                                if (shouldWrite)
-                                {
-                                    writer.WriteStartElement(reader.Name);
-                                    writer.WriteAttributes(reader, true);
-                                }
-                                break;
-
-                            case XmlNodeType.Text:
-                                writer.WriteString(reader.Value);
-                                break;
-
-                            case XmlNodeType.XmlDeclaration:
-                            case XmlNodeType.ProcessingInstruction:
-                                writer.WriteProcessingInstruction(reader.Name, reader.Value);
-                                break;
-
-                            case XmlNodeType.Comment:
-                                writer.WriteComment(reader.Value);
-                                break;
-
-                            case XmlNodeType.EndElement:
-                                writer.WriteEndElement();
-                                break;
-                        }
+                        symbolsDictionary[name] = path;
+                    }
+                    else
+                    {
+                        nodesToRemove.Add(symbolNode);
                     }
                 }
 
-                //replace the original XML file with the temporary one
-                File.Delete(xmlPath);
-                File.Move(tempXmlPath, xmlPath);
+                foreach (XmlNode nodeToRemove in nodesToRemove)
+                {
+                    nodeToRemove.ParentNode.RemoveChild(nodeToRemove);
+                }
+
+                xmlDoc.Save(xmlPath);
             }
-			catch (Exception ex)
+            catch (Exception ex)
             {
-				throw new ApplicationException("An error occurred while processing the XML file.", ex);
-			}
+                throw new ApplicationException("An error occurred while processing the XML file.", ex);
+            }
 
-			return symbolsDictionary;
-		}
+            return symbolsDictionary;
+        }
 
+        //<summary>
+        //Supprime les symboles existants du ListView
+        //</summary>
+        private void RemoveExistingSymbolsFromListView()
+        {
+            var itemsToRemove = lvCompTypes.Items.Cast<ListViewItem>().Where(item => item.Group.Header == "Symbols").ToList();
+            foreach (ListViewItem itemToRemove in itemsToRemove)
+            {
+                lvCompTypes.Items.Remove(itemToRemove);
+            }
 
-		//<summary>
-		//Supprime les symboles existants du ListView
-		//</summary>
-		private void RemoveExistingSymbolsFromListView()
-		{
-			var itemsToRemove = lvCompTypes.Items.Cast<ListViewItem>().Where(item => item.Group.Header == "Symbols").ToList();
-			foreach (ListViewItem itemToRemove in itemsToRemove)
-			{
-				lvCompTypes.Items.Remove(itemToRemove);
-			}
+            var groupToRemove = lvCompTypes.Groups.Cast<ListViewGroup>().Where(group => group.Header == "Symbols").FirstOrDefault();
+            if (groupToRemove != null)
+            {
+                lvCompTypes.Groups.Remove(groupToRemove);
+            }
+        }
+        //<summary>
+        //Ajoute de nouveaux symboles au ListView
+        //</summary>
+        private void AddNewSymbolsToListView(Dictionary<string, string> symbols)
+        {
+            ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
+            foreach (var s in symbols)
+            {
+                lvCompTypes.Items.Add(new ListViewItem(s.Key, "component.png", symbolsViewGroup) { IndentCount = 1 });
+            }
+            lvCompTypes.Groups.Add(symbolsViewGroup);
+        }
 
-			var groupToRemove = lvCompTypes.Groups.Cast<ListViewGroup>().Where(group => group.Header == "Symbols").FirstOrDefault();
-			if (groupToRemove != null)
-			{
-				lvCompTypes.Groups.Remove(groupToRemove);
-			}
-		}
-		//<summary>
-		//Ajoute de nouveaux symboles au ListView
-		//</summary>
-		private void AddNewSymbolsToListView(Dictionary<string, string> symbols)
-		{
-			ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
-			foreach (var s in symbols)
-			{
-				lvCompTypes.Items.Add(new ListViewItem(s.Key, "component.png", symbolsViewGroup) { IndentCount = 1 });
-			}
-			lvCompTypes.Groups.Add(symbolsViewGroup);
-		}
+        //<summary>
+        // Refresh available symbols
+        // Checks if the XML file exists and that we are not in a symbol view
+        // Loads symbols from the XML file
+        // Updates the member variable
+        // Removes existing symbols from the ListView
+        // Adds new symbols to the ListView
+        //</summary>
+        private void RefreshAvailableSymbols()
+        {
+            string xmlPath = Path.Combine(Path.GetFullPath(appData.AppDirs.SymbolDir), "index.xml");
 
-		//<summary>
-		// Refresh available symbols
-		// Checks if the XML file exists and that we are not in a symbol view
-		// Loads symbols from the XML file
-		// Updates the member variable
-		// Removes existing symbols from the ListView
-		// Adds new symbols to the ListView
-		//</summary>
-		private void RefreshAvailableSymbols()
-		{
-			string xmlPath = Path.Combine(Path.GetFullPath(appData.AppDirs.SymbolDir), "index.xml");
+            try
+            {
 
-			try
-			{
+                if (File.Exists(xmlPath))
+                {
+                    Dictionary<string, string> symbolsDictionary = LoadSymbolsFromXml(xmlPath);
 
-				if (File.Exists(xmlPath))
-				{
-					Dictionary<string, string> symbolsDictionary = LoadSymbolsFromXml(xmlPath);
+                    availableSymbols = symbolsDictionary;
 
-					availableSymbols = symbolsDictionary;
-
-					RemoveExistingSymbolsFromListView();
+                    RemoveExistingSymbolsFromListView();
                     if (!editor.SchemeView.isSymbol)
                     {
                         AddNewSymbolsToListView(symbolsDictionary);
                     }
-				}
-			}
-			catch (Exception ex)
-			{
-				log.WriteException(ex, "Error : " + ex.Message);
-			}
-		}
+                }
+            }
+            catch (Exception ex)
+            {
+                log.WriteException(ex, "Error : " + ex.Message);
+            }
+        }
 
-        
-		private void lvCompTypes_MouseClick(object sender, MouseEventArgs e)
+
+        private void lvCompTypes_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
@@ -313,9 +278,9 @@ namespace Scada.Scheme.Editor
             }
         }
 
-    /// <summary>
-    /// Локализовать форму.
-    /// </summary>
+        /// <summary>
+        /// Локализовать форму.
+        /// </summary>
         private void LocalizeForm()
         {
             if (!Localization.LoadDictionaries(appData.AppDirs.LangDir, "ScadaData", out string errMsg))
@@ -512,10 +477,10 @@ namespace Scada.Scheme.Editor
                 loadOK = true;
                 errMsg = "";
                 editor.NewScheme(isSymbol);
-				miSaveSymbol.Visible = isSymbol;
+                miSaveSymbol.Visible = isSymbol;
 
 
-			}
+            }
             else
             {
                 loadOK = editor.LoadSchemeFromFile(fileName, out errMsg,isSymbol);
@@ -532,9 +497,7 @@ namespace Scada.Scheme.Editor
                 ScadaUiUtils.ShowError(errMsg);
 
             toolStripButton2.Enabled = editor.SchemeView.isSymbol;
-
-            if(!editor.SchemeView.isSymbol)
-                RefreshAvailableSymbols();  
+            RefreshAvailableSymbols();
         }
 
         /// <summary>
@@ -566,22 +529,21 @@ namespace Scada.Scheme.Editor
             {
                 fileName = editor.FileName;
                 sfdScheme.InitialDirectory = Path.GetDirectoryName(fileName);
-                sfdScheme.FileName = Path.GetFileName(fileName); 
+                sfdScheme.FileName = Path.GetFileName(fileName);
             }
 
             if (saveAs && sfdScheme.ShowDialog() == DialogResult.OK)
                 fileName = sfdScheme.FileName;
-			    if (asSymbol) editor.SchemeView.MainSymbol.Name = Path.GetFileNameWithoutExtension(fileName);
+            if (asSymbol) editor.SchemeView.MainSymbol.Name = Path.GetFileNameWithoutExtension(fileName);
 
 
-			if (!string.IsNullOrEmpty(fileName))
+            if (!string.IsNullOrEmpty(fileName))
             {
                 // сохранение схемы
                 if (asSymbol && editor.SaveSchemeToFile(fileName, out string errMsg2, asSymbol))
                 {
                     updateSymbolIndex(Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml", fileName);
                     result = true;
-                    RefreshAvailableSymbols();
                 }
                 else if (editor.SaveSchemeToFile(fileName, out string errMsg, asSymbol)) result = true;
                 else
@@ -689,7 +651,7 @@ namespace Scada.Scheme.Editor
                         cbSchComp.Items.Add(editor.SchemeView.SchemeDoc);
 
                         foreach (BaseComponent component in editor.SchemeView.Components.Values)
-                        {                            
+                        {
                             addComponentToTree(component);
                             BaseComponent group = editor.SchemeView.getHihghestGroup(component);
                             if (group is Symbol symbol && group.ID != component.ID)
@@ -1012,7 +974,7 @@ namespace Scada.Scheme.Editor
         /// </summary>
         private void removeEmptyGroups(TreeNodeCollection nodes)
         {
-            
+
             for (int i = 0; i < nodes.Count;)
             {
                 if (nodes[i].Tag != null && ((BaseComponent)(nodes[i].Tag)).GetType() == new ComponentGroup().GetType() && nodes[i].Nodes.Count == 0)
@@ -1064,7 +1026,7 @@ namespace Scada.Scheme.Editor
                             BaseComponent component = tn.Tag as BaseComponent;
                             compToSelect.Add(component);
                         }
-                        
+
                     }
                 }
                 editor.DeselectAll();
@@ -1311,7 +1273,7 @@ namespace Scada.Scheme.Editor
             }
             SchemeContext.GetInstance().SchemePath = editor.FileName;
 
-            RefreshAvailableSymbols();
+            //RefreshAvailableSymbols();
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -1399,7 +1361,7 @@ namespace Scada.Scheme.Editor
         {
             // сохранение схемы
             SaveScheme(false,editor.SchemeView.isSymbol);
-		}
+        }
 
         private void miFileSaveAs_Click(object sender, EventArgs e)
         {
@@ -1550,7 +1512,7 @@ namespace Scada.Scheme.Editor
 
             bool allSelectedAreTheSameGroup = true;
 
-            
+
             foreach (BaseComponent comp in selection)
             {
                 if (!editor.SchemeView.getGroupedComponents(highestSelectedGroupId).Contains(comp))
@@ -1579,10 +1541,10 @@ namespace Scada.Scheme.Editor
                 highestSelectedGroupId = -1;
             }
 
-            
+
 
             editor.History.BeginPoint();
-            
+
             //Ungroups
             if (allSelectedAreTheSameGroup && countCheck)
             {
@@ -1607,7 +1569,7 @@ namespace Scada.Scheme.Editor
                         }
                         editor.SchemeView.Components.Remove(group.ID);
                         editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentDeleted, group);
-                        
+
                     }
                 }
                 else
@@ -1616,9 +1578,9 @@ namespace Scada.Scheme.Editor
                     {
 
                         editor.SchemeView.Components.TryGetValue(comp.GroupId, out BaseComponent currentGroup);
-                            comp.GroupId = currentGroup.GroupId;
-                            editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
-                    
+                        comp.GroupId = currentGroup.GroupId;
+                        editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
+
                     }
 
                     editor.SchemeView.Components.TryGetValue(highestSelectedGroupId, out BaseComponent group);
@@ -1646,7 +1608,7 @@ namespace Scada.Scheme.Editor
 
                 if (!allSelectedAreTheSameGroup)
                     MessageBox.Show("Cannot group component from different groups", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                
+
                 else
                 {
                     foreach (BaseComponent c in selection.OrderBy(x=>x.ZIndex))
@@ -1718,30 +1680,30 @@ namespace Scada.Scheme.Editor
                 if (File.Exists(editor.SymbolPath))
                 {
 
-               
+
                     XmlDocument xmlDoc = new XmlDocument();
 
                     try
                     {
 
-						xmlDoc.Load(editor.SymbolPath);
+                        xmlDoc.Load(editor.SymbolPath);
 
-						XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
-						XmlNode nameNode = mainSymbolNode.SelectSingleNode("Name");
-						typeName = nameNode.InnerText + " - Symbol";
-					}
-					catch (Exception ex)
+                        XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
+                        XmlNode nameNode = mainSymbolNode.SelectSingleNode("Name");
+                        typeName = nameNode.InnerText + " - Symbol";
+                    }
+                    catch (Exception ex)
                     {
-						MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-						return;
-					}
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
 
-				}
-				else
+                }
+                else
                 {
-					MessageBox.Show("Symbol not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				}
-			}
+                    MessageBox.Show("Symbol not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
             else
             {
                 typeName = lvCompTypes.SelectedItems.Count > 0 ?
@@ -1773,7 +1735,7 @@ namespace Scada.Scheme.Editor
                 editor.SelectComponent(component.ID);
                 if (component.GroupId != -1)
                 {
-                    TreeNode SymbolNode = findNode(treeView1.Nodes, n => 
+                    TreeNode SymbolNode = findNode(treeView1.Nodes, n =>
                         {
                             BaseComponent bc = (BaseComponent)n.Tag;
                             return (bc.ID == component.GroupId && bc.GetType() == typeof(Symbol));
@@ -1794,7 +1756,7 @@ namespace Scada.Scheme.Editor
                 updateAliasParametersDisplay();
             }
             else
-            { 
+            {
                 editor.DeselectAll();
             }
             toolStripButton2.Enabled = editor.SchemeView.isSymbol || cbSchComp.SelectedItem is Symbol;
@@ -1984,10 +1946,34 @@ namespace Scada.Scheme.Editor
 
                 //Copy alias value in component parameter
                 var oldProperty = selectedProperty.Value;
-                if(frmAliasSelection.selectedAlias != null)
+
+                if (frmAliasSelection.selectedAlias != null)
                 {
-                    componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value.ToString(), null);
-                    if (isCnlProperty)
+                    
+					//   componentProperty.SetValue(selectedComponent, int.TryParse(frmAliasSelection.selectedAlias.Value), null);
+					                 
+					if (oldProperty.GetType().Name.Equals("Int32")  )
+					{
+						componentProperty.SetValue(selectedComponent, (int)(frmAliasSelection.selectedAlias.Value), null);
+					}
+					else if (oldProperty.GetType().Name.Equals("Double") )
+					{
+						componentProperty.SetValue(selectedComponent, (double)frmAliasSelection.selectedAlias.Value, null);
+					}
+					else if (oldProperty.GetType().Name.Equals("Boolean") )
+					{
+						componentProperty.SetValue(selectedComponent,frmAliasSelection.selectedAlias.Value, null);
+					}
+					else if (oldProperty.GetType().Name.Equals("String"))
+					{
+						componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value.ToString(), null);
+					}
+					else
+					{
+						Console.WriteLine($"Type {oldProperty.GetType().Name} not handled");
+					}
+
+					if (isCnlProperty)
                     {
                         var componentChannelPropertyName = selectedPropertyName.Substring(0, selectedPropertyName.Length - 6);
                         var componentChannelProperty = selectedComponent.GetType().GetProperty(componentChannelPropertyName);
@@ -2019,7 +2005,7 @@ namespace Scada.Scheme.Editor
                 InitScheme(isSymbol:true);
         }
 
-        private void handleUpdateAlias(object sender, OnUpdateAliasEventArgs e)
+		private void handleUpdateAlias(object sender, OnUpdateAliasEventArgs e)
         {
             //update values in components that use aliases
             foreach (BaseComponent c in editor.SchemeView.Components.Values)
@@ -2046,7 +2032,32 @@ namespace Scada.Scheme.Editor
                         continue;
                     }
 
-                    componentProperty.SetValue(c, e.NewAlias.Value.ToString(), null);
+                    if (componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name.Equals("Int32"))
+                    {
+                        componentProperty.SetValue(c, (int)e.NewAlias.Value, null);
+                    }
+                    else if (componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name.Equals("Double"))
+                    {
+
+                        componentProperty.SetValue(c, (double)e.NewAlias.Value, null);
+
+                    }
+                    else if (componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name.Equals("Boolean"))
+                    {
+
+                        componentProperty.SetValue(c, e.NewAlias.Value, null);
+                    }
+                    else if (componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name.Equals("String"))
+                    {
+
+                        componentProperty.SetValue(c, e.NewAlias.Value.ToString(), null);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Type {componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name} not handled");
+                    }
+
+					//componentProperty.SetValue(c, e.NewAlias.Value, null);
                     if(entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom")
                     {
                         var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
