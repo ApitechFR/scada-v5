@@ -64,7 +64,7 @@ namespace Scada.Scheme.Model
             LastModificationDate = xmlNode.GetChildAsDateTime("LastModificationDate");
 
             //if (xmlNode.SelectSingleNode("AliasList") is XmlNode aliasListNode)
-            if (xmlNode.LastChild is XmlNode aliasListNode)
+            if (xmlNode.SelectSingleNode("AliasList") is XmlNode aliasListNode)
             {
                 List<Alias> listTemp = new List<Alias>();
 
