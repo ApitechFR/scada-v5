@@ -57,7 +57,24 @@ namespace Scada.Scheme.Model
 
             Name = xmlNode.GetChildAsString("Name");
             AliasTypeName = xmlNode.GetChildAsString("AliasType");
-            Value = xmlNode.GetChildAsString("Value");
+            switch (AliasTypeName)
+            {
+                case "String":
+                    Value = xmlNode.GetChildAsString("Value");
+                    break;
+                case "Int32":
+                    Value = xmlNode.GetChildAsInt("Value");
+                    break;
+                case "Double":
+                    Value = xmlNode.GetChildAsInt("Value");
+                    break;
+                case "Boolean":
+                    Value = xmlNode.GetChildAsBool("Value");
+                    break;
+                default:
+                    Value = xmlNode.GetChildAsString("Value");
+                    break;
+            }
             isCnlLinked = xmlNode.GetChildAsBool("isCnlLinked");
         }
         public Alias Clone()
