@@ -1921,7 +1921,7 @@ namespace Scada.Scheme.Editor
             //}
 
             List<Alias> availableAliases = new List<Alias>();
-            availableAliases = parentSymbol.AliasList.Where(a => isCnlProperty ? a.isCnlLinked : a.AliasTypeName == selectedProperty.PropertyDescriptor.PropertyType.Name).ToList();
+            availableAliases = parentSymbol.AliasList.Where(a => isCnlProperty ? a.isCnlLinked : (!a.isCnlLinked && a.AliasTypeName   == selectedProperty.PropertyDescriptor.PropertyType.Name)).ToList();
             int defaultSelectionIndex = -1;
             if (selectedComponent.AliasesDictionnary.ContainsKey(selectedPropertyName))
             {
