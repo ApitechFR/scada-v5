@@ -645,8 +645,18 @@ namespace Scada.Scheme
                                         continue;
                                     }
 
-                                    componentProperty.SetValue(component, a.Value, null);
-                                    if (entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom")
+                                    if(a.Value.GetType().Name.Equals("Int32") && a.isCnlLinked)
+                                    {
+
+                                        componentProperty.SetValue(component, a.Value.ToString(), null);
+                                    }
+                                    else
+                                    {
+
+                                     componentProperty.SetValue(component, a.Value, null);
+                                    }
+
+									if (entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom")
                                     {
                                         var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
                                         var componentChannelProperty = component.GetType().GetProperty(componentChannelPropertyName);
