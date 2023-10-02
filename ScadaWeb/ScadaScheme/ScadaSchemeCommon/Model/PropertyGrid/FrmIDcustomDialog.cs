@@ -177,13 +177,13 @@ namespace Scada.Scheme.Model.PropertyGrid
                     foreach (XmlNode cnlNode in root.SelectNodes("Cnl"))
                     {
                         string[] tab = new string[10];
-                        tab[0] = cnlNode.SelectSingleNode("CnlNum").InnerText;
-                        tab[1] = cnlNode.SelectSingleNode("Name").InnerText;
-                        tab[2] = cnlNode.SelectSingleNode("CnlTypeID").InnerText;
-                        tab[3] = cnlNode.SelectSingleNode("ObjNum").InnerText;
-                        tab[4] = cnlNode.SelectSingleNode("DeviceNum").InnerText;
-                        tab[5] = cnlNode.SelectSingleNode("TagNum").InnerText;
-                        tab[6] = cnlNode.SelectSingleNode("TagCode").InnerText;
+                        tab[0] = cnlNode.SelectSingleNode("CnlNum")?.InnerText;
+                        tab[1] = cnlNode.SelectSingleNode("Name")?.InnerText;
+                        tab[2] = cnlNode.SelectSingleNode("CnlTypeID")?.InnerText;
+                        tab[3] = cnlNode.SelectSingleNode("ObjNum")?.InnerText;
+                        tab[4] = cnlNode.SelectSingleNode("DeviceNum")?.InnerText;
+                        tab[5] = cnlNode.SelectSingleNode("TagNum")?.InnerText;
+                        tab[6] = cnlNode.SelectSingleNode("TagCode")?.InnerText;
                         _lstProperties.Add(tab);
                     }
                     break;

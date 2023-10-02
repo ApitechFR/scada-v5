@@ -36,8 +36,6 @@ namespace Scada.Web.Plugins
 				attrTranslator.TranslateAttrs(typeof(AdvancedCondition));
 				attrTranslator.TranslateAttrs(typeof(BarGraphCondition));
 				attrTranslator.TranslateAttrs(typeof(PopupSize));
-
-
             }
         }
 	}

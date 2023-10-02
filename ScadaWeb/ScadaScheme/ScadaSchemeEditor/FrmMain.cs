@@ -23,6 +23,7 @@
  * Modified : 2019
  */
 
+using Scada.Scheme.Editor.AppCode;
 using Scada.Scheme.Editor.Properties;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
@@ -36,10 +37,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
+using System.Xml;
 using Utils;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-
+using Button = System.Windows.Forms.Button;
+using ListViewItem = System.Windows.Forms.ListViewItem;
 
 namespace Scada.Scheme.Editor
 {
@@ -64,6 +68,7 @@ namespace Scada.Scheme.Editor
         private bool schCompChanging;       // пользователь изменяет выбранный элемент cbSchComp
         private FormStateDTO formStateDTO;  // состояние формы для передачи
         private bool noTreeviewSelectionEffect;
+        private Dictionary<string, string> availableSymbols;
 
 
         /// <summary>
@@ -90,10 +95,188 @@ namespace Scada.Scheme.Editor
             editor.SelectionPropsChanged += Editor_SelectionPropsChanged;
             editor.ClipboardChanged += Editor_ClipboardChanged;
             editor.History.HistoryChanged += History_HistoryChanged;
-
+            editor.SymbolDir = appData.AppDirs.SymbolDir;
             SchemeContext.GetInstance().SchemePath = editor.FileName;
         }
 
+
+        /// <summary>
+        /// Loads symbols from an XML file, taking into account their validity.
+        /// Invalid symbols (whose associated files do not exist) are removed from the XML file.
+        /// </summary>
+        /// <param name="xmlPath">Path to the XML file containing the symbols.</param>
+        /// <returns>Returns a dictionary containing the names and paths of valid symbols.</returns>
+        private Dictionary<string, string> LoadSymbolsFromXml(string xmlPath)
+        {
+            Dictionary<string, string> symbolsDictionary = new Dictionary<string, string>();
+
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(xmlPath);
+                XmlNodeList symbolNodes = xmlDoc.SelectNodes("//symbol");
+
+                List<XmlNode> nodesToRemove = new List<XmlNode>();
+
+                foreach (XmlNode symbolNode in symbolNodes)
+                {
+                    XmlElement symbolElement = (XmlElement)symbolNode;
+                    string name = symbolElement.GetAttribute("name");
+                    string path = symbolElement.GetAttribute("path");
+
+                    if (File.Exists(path))
+                    {
+                        symbolsDictionary[name] = path;
+                    }
+                    else
+                    {
+                        nodesToRemove.Add(symbolNode);
+                    }
+                }
+
+                foreach (XmlNode nodeToRemove in nodesToRemove)
+                {
+                    nodeToRemove.ParentNode.RemoveChild(nodeToRemove);
+                }
+
+                xmlDoc.Save(xmlPath);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("An error occurred while processing the XML file.", ex);
+            }
+
+            return symbolsDictionary;
+        }
+
+        //<summary>
+        //Supprime les symboles existants du ListView
+        //</summary>
+        private void RemoveExistingSymbolsFromListView()
+        {
+            var itemsToRemove = lvCompTypes.Items.Cast<ListViewItem>().Where(item => item.Group.Header == "Symbols").ToList();
+            foreach (ListViewItem itemToRemove in itemsToRemove)
+            {
+                lvCompTypes.Items.Remove(itemToRemove);
+            }
+
+            var groupToRemove = lvCompTypes.Groups.Cast<ListViewGroup>().Where(group => group.Header == "Symbols").FirstOrDefault();
+            if (groupToRemove != null)
+            {
+                lvCompTypes.Groups.Remove(groupToRemove);
+            }
+        }
+        //<summary>
+        //Ajoute de nouveaux symboles au ListView
+        //</summary>
+        private void AddNewSymbolsToListView(Dictionary<string, string> symbols)
+        {
+            ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
+            foreach (var s in symbols)
+            {
+                lvCompTypes.Items.Add(new ListViewItem(s.Key, "component.png", symbolsViewGroup) { IndentCount = 1 });
+            }
+            lvCompTypes.Groups.Add(symbolsViewGroup);
+        }
+
+        //<summary>
+        // Refresh available symbols
+        // Checks if the XML file exists and that we are not in a symbol view
+        // Loads symbols from the XML file
+        // Updates the member variable
+        // Removes existing symbols from the ListView
+        // Adds new symbols to the ListView
+        //</summary>
+        private void RefreshAvailableSymbols()
+        {
+            string xmlPath = Path.Combine(Path.GetFullPath(appData.AppDirs.SymbolDir), "index.xml");
+
+            try
+            {
+
+                if (File.Exists(xmlPath))
+                {
+                    Dictionary<string, string> symbolsDictionary = LoadSymbolsFromXml(xmlPath);
+
+                    availableSymbols = symbolsDictionary;
+
+                    RemoveExistingSymbolsFromListView();
+                    if (!editor.SchemeView.isSymbol)
+                    {
+                        AddNewSymbolsToListView(symbolsDictionary);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.WriteException(ex, "Error : " + ex.Message);
+            }
+        }
+
+
+        private void lvCompTypes_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
+                string symbolPath = availableSymbols[clickedItem.Text];
+                if (clickedItem != null)
+                {
+                    ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
+                    ToolStripMenuItem optionMenuItem = new ToolStripMenuItem("Delete symbol");
+                    contextMenuStrip.Items.Add(optionMenuItem);
+                    optionMenuItem.Click += (s, args) =>
+                    {
+                        if (MessageBox.Show(string.Format("Delete {0} ?", clickedItem.Text), "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            DeleteSymbol(symbolPath);
+                        }
+
+                    };
+                    contextMenuStrip.Show(lvCompTypes, e.Location);
+                }
+            }
+        }
+        private void DeleteSymbol(string symbolPath)
+        {
+            if (System.IO.File.Exists(symbolPath))
+            {
+                System.IO.File.Delete(symbolPath);
+            }
+
+            string indexFile = Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml"; // Remplacez par le chemin du fichier XML
+            XmlDocument indexXmlDocument = new XmlDocument();
+            indexXmlDocument.Load(indexFile);
+
+            XmlNodeList elements = indexXmlDocument.SelectNodes("//symbol[@path='" + symbolPath + "']");
+            if (elements.Count > 0)
+            {
+                XmlNode elementToDelete = elements[0];
+                elementToDelete.ParentNode.RemoveChild(elementToDelete);
+                indexXmlDocument.Save(indexFile);
+            }
+            RefreshAvailableSymbols();
+        }
+        private void ListView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
+        {
+            e.DrawDefault = true;
+
+            // Dessiner un bouton dans la deuxième colonne de l'élément 2
+            if (e.ItemIndex == 1 && e.ColumnIndex == 1)
+            {
+                Button button = new Button();
+                button.Text = "Cliquez";
+                button.Size = e.SubItem.Bounds.Size;
+                button.Location = new System.Drawing.Point(e.SubItem.Bounds.Left, e.SubItem.Bounds.Top);
+
+                button.Click += (s, evt) =>
+                {
+                    MessageBox.Show("Bouton cliqué pour l'élément 2");
+                };
+
+                e.Item.ListView.Controls.Add(button);
+            }
+        }
 
         /// <summary>
         /// Локализовать форму.
@@ -284,7 +467,7 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла.
         /// </summary>
-        private void InitScheme(string fileName = "")
+        private void InitScheme(string fileName = "", bool isSymbol = false)
         {
             bool loadOK;
             string errMsg;
@@ -293,11 +476,14 @@ namespace Scada.Scheme.Editor
             {
                 loadOK = true;
                 errMsg = "";
-                editor.NewScheme();
+                editor.NewScheme(isSymbol);
+                miSaveSymbol.Visible = isSymbol;
+
+
             }
             else
             {
-                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg);
+                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg,isSymbol);
             }
 
             appData.AssignViewStamp(editor.SchemeView);
@@ -309,12 +495,16 @@ namespace Scada.Scheme.Editor
 
             if (!loadOK)
                 ScadaUiUtils.ShowError(errMsg);
+
+            toolStripButton2.Enabled = editor.SchemeView.isSymbol;
+            RefreshAvailableSymbols();
         }
 
         /// <summary>
         /// Сохранить схему.
         /// </summary>
-        private bool SaveScheme(bool saveAs)
+        /// 
+        private bool SaveScheme(bool saveAs,bool asSymbol = false)
         {
             bool result = false;
             bool refrPropGrid = propertyGrid.SelectedObject is SchemeDocument document &&
@@ -323,7 +513,16 @@ namespace Scada.Scheme.Editor
 
             if (string.IsNullOrEmpty(editor.FileName))
             {
-                sfdScheme.FileName = Editor.DefSchemeFileName;
+                if (asSymbol) {
+                    if (editor.SchemeView.MainSymbol.Name == "Symbol") sfdScheme.FileName = Editor.DefSymbolFileName;
+                    else sfdScheme.FileName = editor.SchemeView.MainSymbol.Name + ".sch";
+                }
+                else
+                {
+                    sfdScheme.FileName = Editor.DefSchemeFileName;
+                }
+                sfdScheme.RestoreDirectory = false;
+                if (asSymbol) sfdScheme.InitialDirectory = Path.GetFullPath(appData.AppDirs.SymbolDir);
                 saveAs = true;
             }
             else
@@ -335,14 +534,18 @@ namespace Scada.Scheme.Editor
 
             if (saveAs && sfdScheme.ShowDialog() == DialogResult.OK)
                 fileName = sfdScheme.FileName;
+            if (asSymbol) editor.SchemeView.MainSymbol.Name = Path.GetFileNameWithoutExtension(fileName);
+
 
             if (!string.IsNullOrEmpty(fileName))
             {
                 // сохранение схемы
-                if (editor.SaveSchemeToFile(fileName, out string errMsg))
+                if (asSymbol && editor.SaveSchemeToFile(fileName, out string errMsg2, asSymbol))
                 {
+                    updateSymbolIndex(Path.GetFullPath(appData.AppDirs.SymbolDir) + "\\index.xml", fileName);
                     result = true;
                 }
+                else if (editor.SaveSchemeToFile(fileName, out string errMsg, asSymbol)) result = true;
                 else
                 {
                     log.WriteError(errMsg);
@@ -356,6 +559,53 @@ namespace Scada.Scheme.Editor
 
             return result;
         }
+
+        private void updateSymbolIndex(string xmlPath, string symbolFileName)
+        {
+            try
+            {
+                Symbol currentSymbol = editor.SchemeView.MainSymbol;
+                XmlDocument xmlDoc = new XmlDocument();
+
+                if (File.Exists(xmlPath))
+                {
+                    xmlDoc.Load(xmlPath);
+                }
+                else
+                {
+                    XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
+                    XmlElement root = xmlDoc.CreateElement("symbols");
+                    xmlDoc.InsertBefore(xmlDeclaration, xmlDoc.DocumentElement);
+                    xmlDoc.AppendChild(root);
+                }
+
+                XmlNode entryToUpdate = xmlDoc.SelectSingleNode($"//symbol[@path='{symbolFileName}']");
+
+                if (entryToUpdate != null)
+                {
+                    entryToUpdate.Attributes["lastModificationDate"].Value = DateTime.Now.ToString();
+                }
+                else
+                {
+                    if (xmlDoc.SelectSingleNode($"//symbol[@symbolId='{currentSymbol.SymbolId}']") != null)
+                    {
+                        currentSymbol.ResetSymbolId();
+                    }
+                    XmlElement newEntry = xmlDoc.CreateElement("symbol");
+                    newEntry.SetAttribute("name", currentSymbol.Name != "" ? currentSymbol.Name : Path.GetFileNameWithoutExtension(symbolFileName));
+                    newEntry.SetAttribute("path", symbolFileName);
+                    newEntry.SetAttribute("symbolId", currentSymbol.SymbolId);
+                    newEntry.SetAttribute("lastModificationDate", DateTime.Now.ToString());
+                    xmlDoc.DocumentElement.AppendChild(newEntry);
+                }
+                xmlDoc.Save(xmlPath);
+            }
+            catch (Exception ex)
+            {
+                log.WriteException(ex,"Error: " + ex.Message);
+            }
+        }
+
 
         /// <summary>
         /// Подтвердить возможность закрыть схему.
@@ -402,8 +652,17 @@ namespace Scada.Scheme.Editor
 
                         foreach (BaseComponent component in editor.SchemeView.Components.Values)
                         {
-                            cbSchComp.Items.Add(component);
                             addComponentToTree(component);
+                            BaseComponent group = editor.SchemeView.getHihghestGroup(component);
+                            if (group is Symbol symbol && group.ID != component.ID)
+                            {
+                                if(editor.SchemeView.isSymbol && symbol.ID == editor.SchemeView.MainSymbol.ID) 
+                                    cbSchComp.Items.Add(component);
+                            }
+                            else
+                            {
+                                cbSchComp.Items.Add(component);
+                            }
                         }
                     }
                 }
@@ -483,6 +742,9 @@ namespace Scada.Scheme.Editor
 
             // установка доступности кнопок
             SetButtonsEnabled();
+
+            toolStripButton2.Enabled = editor.SchemeView.isSymbol || cbSchComp.SelectedItem is Symbol;
+            updateAliasParametersDisplay();
         }
 
 
@@ -692,7 +954,7 @@ namespace Scada.Scheme.Editor
             List<BaseComponent> emptyGroups = new List<BaseComponent>();
             foreach(BaseComponent group in editor.SchemeView.Components.Values.Where(x=>x is ComponentGroup))
             {
-                if (editor.getGroupedComponents(group.ID).Count == 0)
+                if (editor.SchemeView.getGroupedComponents(group.ID).Count == 0)
                 {
                     emptyGroups.Add(group);
 
@@ -712,7 +974,7 @@ namespace Scada.Scheme.Editor
         /// </summary>
         private void removeEmptyGroups(TreeNodeCollection nodes)
         {
-            
+
             for (int i = 0; i < nodes.Count;)
             {
                 if (nodes[i].Tag != null && ((BaseComponent)(nodes[i].Tag)).GetType() == new ComponentGroup().GetType() && nodes[i].Nodes.Count == 0)
@@ -743,16 +1005,28 @@ namespace Scada.Scheme.Editor
 
         public void treeView1_onNodeSelection(object sender, TreeViewEventArgs e)
         {
+            bool isDisabled = false;
+
             List<BaseComponent> compToSelect = new List<BaseComponent>();
-            lock (((TreeViewMultipleSelection)treeView1).SelectedNodes)
+            lock ((treeView1).SelectedNodes)
             {
-                foreach (TreeNode tn in ((TreeViewMultipleSelection)treeView1).SelectedNodes)
+                foreach (TreeNode tn in (treeView1).SelectedNodes)
                 {
                     if (tn.Tag != null && tn.Tag.ToString() != "")
                     {
-                        this.noTreeviewSelectionEffect = true;
-                        BaseComponent component = tn.Tag as BaseComponent;
-                        compToSelect.Add(component);
+                        if (tn.Parent == null)
+                        {
+                            noTreeviewSelectionEffect = true;
+                            BaseComponent component = tn.Tag as BaseComponent;
+                            compToSelect.Add(component);
+                        }
+                        else if (!tn.Parent.Text.Contains("Symbol") || editor.SchemeView.MainSymbol != null)
+                        {
+                            noTreeviewSelectionEffect = true;
+                            BaseComponent component = tn.Tag as BaseComponent;
+                            compToSelect.Add(component);
+                        }
+
                     }
                 }
                 editor.DeselectAll();
@@ -760,17 +1034,31 @@ namespace Scada.Scheme.Editor
                 {
                     if (comp is ComponentGroup)
                     {
-                        foreach (BaseComponent child in editor.getGroupedComponents(comp.ID))
+                        //case symbol in schema
+                        if(editor.SchemeView.MainSymbol == null)
                         {
-                            this.noTreeviewSelectionEffect = true;
+                            foreach (BaseComponent child in editor.SchemeView.getGroupedComponents(comp.ID))
+                            {
+                                noTreeviewSelectionEffect = true;
 
-                            editor.SelectComponent(child.ID, true);
+                                editor.SelectComponent(child.ID, true);
+                            }
+                        }
+                        else if (comp.ID != editor.SchemeView.MainSymbol.ID)
+                        {
+                            foreach (BaseComponent child in editor.SchemeView.getGroupedComponents(comp.ID))
+                            {
+                                this.noTreeviewSelectionEffect = true;
+
+                                editor.SelectComponent(child.ID, true);
+                            }
                         }
                     }
                     this.noTreeviewSelectionEffect = true;
 
                     editor.SelectComponent(comp.ID, true);
 
+                    if (isDisabled) btnEditDelete.Enabled = false;
                 }
             }
         }
@@ -813,8 +1101,24 @@ namespace Scada.Scheme.Editor
                         // привязка события на изменение компонента
                         ((BaseComponent)changedObject).ItemChanged += Scheme_ItemChanged;
 
+
                         // добавление компонента в выпадающий список
-                        cbSchComp.Items.Add(changedObject);
+                        BaseComponent group = editor.SchemeView.getHihghestGroup((BaseComponent)changedObject);
+                        if (group is Symbol && group.ID != ((BaseComponent)changedObject).ID)
+                        {
+                            if (editor.SchemeView.isSymbol && group.ID == editor.SchemeView.MainSymbol.ID)
+                            {
+                                cbSchComp.Items.Add(changedObject);
+                            }
+                            else
+                            {
+                                //do nothing
+                            }
+                        }
+                        else
+                        {
+                            cbSchComp.Items.Add(changedObject);
+                        }
                         addComponentToTree((BaseComponent)changedObject);
 
                         break;
@@ -904,6 +1208,8 @@ namespace Scada.Scheme.Editor
             // инициализация общих данных приложения
             appData.Init(Path.GetDirectoryName(Application.ExecutablePath), this);
 
+            editor.SymbolDir = appData.AppDirs.SymbolDir;
+
             // локализация
             LocalizeForm();
             LocalizeAttributes();
@@ -966,6 +1272,8 @@ namespace Scada.Scheme.Editor
                 Close();
             }
             SchemeContext.GetInstance().SchemePath = editor.FileName;
+
+            //RefreshAvailableSymbols();
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -1044,6 +1352,7 @@ namespace Scada.Scheme.Editor
                     ofdScheme.InitialDirectory = Path.GetDirectoryName(ofdScheme.FileName);
                     InitScheme(ofdScheme.FileName);
                     SchemeContext.GetInstance().SchemePath = ofdScheme.FileName;
+                    RefreshAvailableSymbols();
                 }
             }
         }
@@ -1051,13 +1360,13 @@ namespace Scada.Scheme.Editor
         private void miFileSave_Click(object sender, EventArgs e)
         {
             // сохранение схемы
-            SaveScheme(false);
+            SaveScheme(false,editor.SchemeView.isSymbol);
         }
 
         private void miFileSaveAs_Click(object sender, EventArgs e)
         {
             // сохранение схемы с выбором имени файла
-            SaveScheme(true);
+            SaveScheme(true,editor.SchemeView.isSymbol);
         }
 
         private void miFileOpenBrowser_Click(object sender, EventArgs e)
@@ -1111,6 +1420,7 @@ namespace Scada.Scheme.Editor
             // обновление списка компонентов, т.к. при отмене происходит подмена объектов
             FillSchemeComponents();
             ShowSchemeSelection();
+            updateAliasParametersDisplay();
         }
 
         private void miEditRedo_Click(object sender, EventArgs e)
@@ -1123,6 +1433,7 @@ namespace Scada.Scheme.Editor
             // обновление списка компонентов, т.к. при возврате происходит подмена объектов
             FillSchemeComponents();
             ShowSchemeSelection();
+            updateAliasParametersDisplay();
         }
 
         private void miEditPointer_Click(object sender, EventArgs e)
@@ -1171,17 +1482,17 @@ namespace Scada.Scheme.Editor
             {
                 if (comp is ComponentGroup)
                 {
-                    if ( Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() - 1) < diff)
+                    if ( Math.Abs(compArray.Length - editor.SchemeView.getGroupedComponents(comp.ID).Count() - 1) < diff)
                     {
-                        diff = Math.Abs(compArray.Length - editor.getGroupedComponents(comp.ID).Count() - 1);
+                        diff = Math.Abs(compArray.Length - editor.SchemeView.getGroupedComponents(comp.ID).Count() - 1);
                         highestGroupID = comp.ID;
                     }
                 }
                 else
                 {
-                    if (Math.Abs(compArray.Length - editor.getGroupedComponents(comp.GroupId).Count()) < diff)
+                    if (Math.Abs(compArray.Length - editor.SchemeView.getGroupedComponents(comp.GroupId).Count()) < diff)
                     {
-                        diff = Math.Abs(compArray.Length - editor.getGroupedComponents(comp.GroupId).Count());
+                        diff = Math.Abs(compArray.Length - editor.SchemeView.getGroupedComponents(comp.GroupId).Count());
                         highestGroupID = comp.GroupId;
                     }
                 }
@@ -1201,10 +1512,10 @@ namespace Scada.Scheme.Editor
 
             bool allSelectedAreTheSameGroup = true;
 
-            
+
             foreach (BaseComponent comp in selection)
             {
-                if (!editor.getGroupedComponents(highestSelectedGroupId).Contains(comp))
+                if (!editor.SchemeView.getGroupedComponents(highestSelectedGroupId).Contains(comp))
                 {
                     if(comp is ComponentGroup)
                     {
@@ -1230,10 +1541,10 @@ namespace Scada.Scheme.Editor
                 highestSelectedGroupId = -1;
             }
 
-            
+
 
             editor.History.BeginPoint();
-            
+
             //Ungroups
             if (allSelectedAreTheSameGroup && countCheck)
             {
@@ -1258,7 +1569,7 @@ namespace Scada.Scheme.Editor
                         }
                         editor.SchemeView.Components.Remove(group.ID);
                         editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentDeleted, group);
-                        
+
                     }
                 }
                 else
@@ -1267,9 +1578,9 @@ namespace Scada.Scheme.Editor
                     {
 
                         editor.SchemeView.Components.TryGetValue(comp.GroupId, out BaseComponent currentGroup);
-                            comp.GroupId = currentGroup.GroupId;
-                            editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
-                    
+                        comp.GroupId = currentGroup.GroupId;
+                        editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, comp);
+
                     }
 
                     editor.SchemeView.Components.TryGetValue(highestSelectedGroupId, out BaseComponent group);
@@ -1297,7 +1608,7 @@ namespace Scada.Scheme.Editor
 
                 if (!allSelectedAreTheSameGroup)
                     MessageBox.Show("Cannot group component from different groups", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                
+
                 else
                 {
                     foreach (BaseComponent c in selection.OrderBy(x=>x.ZIndex))
@@ -1359,8 +1670,45 @@ namespace Scada.Scheme.Editor
         {
             // выбор компонента для добавления на схему
             compTypesChanging = true;
-            string typeName = lvCompTypes.SelectedItems.Count > 0 ?
-                lvCompTypes.SelectedItems[0].Tag as string : "";
+
+            string typeName = "";
+
+            //Symboles
+            if (lvCompTypes.SelectedItems.Count > 0 && lvCompTypes.SelectedItems[0].Group.Header == "Symbols")
+            {
+                editor.SymbolPath = findSymboleInAvailableList(lvCompTypes.SelectedItems[0].Text);
+                if (File.Exists(editor.SymbolPath))
+                {
+
+
+                    XmlDocument xmlDoc = new XmlDocument();
+
+                    try
+                    {
+
+                        xmlDoc.Load(editor.SymbolPath);
+
+                        XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
+                        XmlNode nameNode = mainSymbolNode.SelectSingleNode("Name");
+                        typeName = nameNode.InnerText + " - Symbol";
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                }
+                else
+                {
+                    MessageBox.Show("Symbol not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                typeName = lvCompTypes.SelectedItems.Count > 0 ?
+                    lvCompTypes.SelectedItems[0].Tag as string : "";
+            }
 
             if (string.IsNullOrEmpty(typeName))
             {
@@ -1383,25 +1731,47 @@ namespace Scada.Scheme.Editor
             schCompChanging = true;
 
             if (cbSchComp.SelectedItem is BaseComponent component)
+            {
                 editor.SelectComponent(component.ID);
+                if (component.GroupId != -1)
+                {
+                    TreeNode SymbolNode = findNode(treeView1.Nodes, n =>
+                        {
+                            BaseComponent bc = (BaseComponent)n.Tag;
+                            return (bc.ID == component.GroupId && bc.GetType() == typeof(Symbol));
+                        }
+                    );
+                    if(SymbolNode != null)
+                    {
+                        toolStripButton1.Enabled = true;
+                        toolStripButton1.ToolTipText = "Link to a symbol property";
+                    }
+                    else
+                    {
+                        // todo : set to false
+                        toolStripButton1.Enabled = true;
+                        toolStripButton1.ToolTipText = "The component has to be a symbol child";
+                    }
+                }
+                updateAliasParametersDisplay();
+            }
             else
+            {
                 editor.DeselectAll();
-
+            }
+            toolStripButton2.Enabled = editor.SchemeView.isSymbol || cbSchComp.SelectedItem is Symbol;
             schCompChanging = false;
         }
 
         private void propertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
-            // отслеживание изменений
-            if (propertyGrid.SelectedObjects != null)
+            if (cbSchComp.SelectedItem != null)
             {
-
                 editor.History.BeginPoint();
-
-                if (propertyGrid.SelectedObject is ComponentGroup group)
+                //Edit all the components within the group
+                if (cbSchComp.SelectedItem is ComponentGroup group)
                 {
-                    //Edit all the components within the group
-                    List<BaseComponent> components = editor.getGroupedComponents(group.ID);
+                    List<BaseComponent> components = editor.SchemeView.getGroupedComponents(group.ID);
                     if (e.ChangedItem.Label == "X" || e.ChangedItem.Label == "Y" || e.ChangedItem.Label == "ZIndex")
                     {
                         foreach (BaseComponent component in components)
@@ -1411,29 +1781,323 @@ namespace Scada.Scheme.Editor
 
                             if (e.ChangedItem.Label == "X") location.X += valueDiff;
                             else if (e.ChangedItem.Label == "Y") location.Y += valueDiff;
-                            else component.ZIndex += valueDiff*100;
+                            else component.ZIndex += valueDiff * 100;
 
                             component.Location = location;
 
                             component.OnItemChanged(SchemeChangeTypes.ComponentChanged, component);
                         }
                     }
+
                     group.OnItemChanged(SchemeChangeTypes.ComponentChanged, group);
                 }
+
                 else
                 {
-                    foreach (object selObj in propertyGrid.SelectedObjects)
+                    if (cbSchComp.SelectedItem is SchemeDocument document)
+                        document.OnItemChanged(SchemeChangeTypes.SchemeDocChanged, cbSchComp.SelectedItem);
+                    else if (cbSchComp.SelectedItem is BaseComponent component)
+                        component.OnItemChanged(SchemeChangeTypes.ComponentChanged, cbSchComp.SelectedItem);
+                }
+                editor.History.EndPoint();
+                updateAliasParametersDisplay();
+            }
+        }
+        public GridItem GetRootGridItem(GridItem gridItem)
+        {
+            return gridItem.Parent != null ? GetRootGridItem(gridItem.Parent) : gridItem;
+        }
+        public List<GridItem> GetPropertyGridItems(PropertyGrid propertyGrid)
+        {
+            List<GridItem> gridItems = new List<GridItem>();
+            var rootItem = GetRootGridItem(propertyGrid.SelectedGridItem);
+            if (propertyGrid != null && rootItem != null)
+            {
+                GetSubGridItems(rootItem, gridItems);
+            }
+            return gridItems;
+        }
+        private void GetSubGridItems(GridItem gridItem, List<GridItem> gridItems)
+        {
+            if (gridItem != null)
+            {
+                foreach (GridItem item in gridItem.GridItems)
+                {
+                    if(item.PropertyDescriptor != null)
                     {
-                        if (selObj is SchemeDocument document)
-                            document.OnItemChanged(SchemeChangeTypes.SchemeDocChanged, selObj);
-                        else if (selObj is BaseComponent component)
-                            component.OnItemChanged(SchemeChangeTypes.ComponentChanged, selObj);
+                        gridItems.Add(item);
+                    }
+                    GetSubGridItems(item, gridItems);
+                }
+            }
+        }
+        /// <summary>
+        /// Updates propertyGrid display, considering links between component parameters and aliases
+        /// </summary>
+        private void updateAliasParametersDisplay()
+        {
+            BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
+            if (selectedComponent == null)
+            {
+                return;
+            }
+            propertyGrid.SelectedObject = selectedComponent;
+            var aliasRelatedPropertiesNames = selectedComponent.AliasesDictionnary.Keys.ToArray();
+            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(selectedComponent);
+            var aliasRelatedProperties = GetPropertyGridItems(propertyGrid);
+            aliasRelatedProperties = aliasRelatedProperties.Where(item => aliasRelatedPropertiesNames.Contains(item.PropertyDescriptor.Name)).ToList();
+            ICustomTypeDescriptor customTypeDescriptor = TypeDescriptor.GetProvider(selectedComponent).GetTypeDescriptor(selectedComponent);
+            PropertyDescriptorCollection newProperties = new PropertyDescriptorCollection(new PropertyDescriptor[] { });
+            foreach (PropertyDescriptor prop in properties)
+            {
+                if (!aliasRelatedPropertiesNames.Contains(prop.Name))
+                {
+                    newProperties.Add(prop);
+                }
+            }
+            foreach (var aliasProperty in aliasRelatedProperties)
+            {
+                PropertyDescriptor aliasRelatedPropDescriptor = aliasProperty.PropertyDescriptor;
+                if (aliasRelatedPropDescriptor != null)
+                {
+                    PropertyDescriptor customPropertyDescriptor = new CustomPropertyDescriptor(aliasRelatedPropDescriptor, aliasProperty.Label + " (Alias)", true);
+                    newProperties.Add(customPropertyDescriptor);
+                }
+            }
+
+            
+
+            propertyGrid.SelectedObject = new AppCode.CustomTypeDescriptor(customTypeDescriptor, newProperties);
+        }
+        private void propertyGrid_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
+        {
+            if(e.NewSelection == null || e.NewSelection.PropertyDescriptor == null)
+            {
+                return;
+            }
+            string selectedPropertyName = e.NewSelection.PropertyDescriptor.Name;
+            BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
+            if(selectedComponent == null)
+            {
+                toolStripButton1.Enabled = false;
+                toolStripButton1.ToolTipText = "Select a component property to link an alias";
+                return;
+            }
+            if (e.NewSelection.PropertyDescriptor.IsReadOnly && !selectedComponent.AliasesDictionnary.Keys.Contains(selectedPropertyName))
+            {
+
+                toolStripButton1.Enabled = false;
+                toolStripButton1.ToolTipText = "This property cannot be modified";
+            }
+            else
+            {
+                toolStripButton1.Enabled = true;
+                toolStripButton1.ToolTipText = "Link to a symbol property";
+            }
+        }
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
+            if (editor.SchemeView.MainSymbol == null) { return; }
+            Symbol parentSymbol = editor.SchemeView.MainSymbol;
+            GridItem selectedProperty = propertyGrid.SelectedGridItem;
+
+
+            string selectedPropertyName = selectedProperty.PropertyDescriptor.Name;
+            bool isCnlProperty = (selectedPropertyName == "InCnlNumCustom" || selectedPropertyName == "CtrlCnlNumCustom");
+            //if(selectedPropertyName == "InCnlNumCustom")
+            //{
+            //    selectedPropertyName = "InCnlNum";
+            //    isCnlProperty = true;
+            //}
+            //else if(selectedPropertyName == "CtrlCnlNumCustom")
+            //{
+            //    selectedPropertyName = "CtrlCnlNum";
+            //    isCnlProperty = true;
+            //}
+
+            List<Alias> availableAliases = new List<Alias>();
+            availableAliases = parentSymbol.AliasList.Where(a => isCnlProperty ? a.isCnlLinked : (!a.isCnlLinked && a.AliasTypeName   == selectedProperty.PropertyDescriptor.PropertyType.Name)).ToList();
+            int defaultSelectionIndex = -1;
+            if (selectedComponent.AliasesDictionnary.ContainsKey(selectedPropertyName))
+            {
+                defaultSelectionIndex = availableAliases.FindIndex(a=>a.Name == selectedComponent.AliasesDictionnary[selectedPropertyName].Name);
+            }
+            FrmAliasSelection frmAliasSelection = new FrmAliasSelection(selectedProperty.Label, availableAliases, defaultSelectionIndex);
+            if (frmAliasSelection.ShowDialog() == DialogResult.OK)
+            {
+                //find component property to update
+                var componentProperty = selectedComponent.GetType().GetProperty(selectedPropertyName);
+                if(componentProperty == null)
+                {
+                    return;
+                }
+
+                //update mapping between component properties and alias
+                selectedComponent.AliasesDictionnary.Remove(selectedPropertyName);
+                if(frmAliasSelection.selectedAlias != null)
+                {
+                    selectedComponent.AliasesDictionnary.Add(selectedPropertyName, frmAliasSelection.selectedAlias);
+                }
+
+                //Copy alias value in component parameter
+                var oldProperty = selectedProperty.Value;
+
+                if (frmAliasSelection.selectedAlias != null)
+                {
+                    
+					//   componentProperty.SetValue(selectedComponent, int.TryParse(frmAliasSelection.selectedAlias.Value), null);
+					                 
+					if (oldProperty.GetType().Name.Equals("Int32")  )
+					{
+						componentProperty.SetValue(selectedComponent, (int)(frmAliasSelection.selectedAlias.Value), null);
+					}
+					else if (oldProperty.GetType().Name.Equals("Double") )
+					{
+						componentProperty.SetValue(selectedComponent, (double)frmAliasSelection.selectedAlias.Value, null);
+					}
+					else if (oldProperty.GetType().Name.Equals("Boolean") )
+					{
+						componentProperty.SetValue(selectedComponent,frmAliasSelection.selectedAlias.Value, null);
+					}
+					else if (oldProperty.GetType().Name.Equals("String"))
+					{
+						componentProperty.SetValue(selectedComponent, frmAliasSelection.selectedAlias.Value.ToString(), null);
+					}
+					else
+					{
+						Console.WriteLine($"Type {oldProperty.GetType().Name} not handled");
+					}
+
+					if (isCnlProperty)
+                    {
+                        var componentChannelPropertyName = selectedPropertyName.Substring(0, selectedPropertyName.Length - 6);
+                        var componentChannelProperty = selectedComponent.GetType().GetProperty(componentChannelPropertyName);
+                        var ChannelNumber = editor.SchemeView.MainSymbol.AliasCnlDictionary[frmAliasSelection.selectedAlias.Name];
+                        componentChannelProperty.SetValue(selectedComponent, ChannelNumber, null);
                     }
                 }
 
-                editor.History.EndPoint();
+                propertyGrid.SelectedObject = selectedComponent;
+                propertyGrid_PropertyValueChanged(propertyGrid, new PropertyValueChangedEventArgs(selectedProperty, oldProperty));
+                return;
             }
         }
-    }
 
+        private void miSaveSymbol_ButtonClick(object sender, EventArgs e)
+        {
+            SaveScheme(saveAs: false, asSymbol: true);
+        }
+
+        private void miSaveSymbolAs_Click(object sender, EventArgs e)
+        {
+            SaveScheme(saveAs: true, asSymbol: true);
+        }
+
+        private void newSymbolToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // создание новой схемы
+            if (ConfirmCloseScheme())
+                InitScheme(isSymbol:true);
+        }
+
+		private void handleUpdateAlias(object sender, OnUpdateAliasEventArgs e)
+        {
+            //update values in components that use aliases
+            foreach (BaseComponent c in editor.SchemeView.Components.Values)
+            {
+                //handle deletion
+                if (e.NewAlias == null)
+                {
+                    c.AliasesDictionnary = c.AliasesDictionnary.Where(entry => entry.Value.Name!= e.OldAlias.Name).ToDictionary(pair => pair.Key, pair => pair.Value);
+                    continue;
+                }
+                if (!editor.SchemeView.isSymbol && c.GroupId != (cbSchComp.SelectedItem as Symbol).ID)
+                {
+                    continue;
+                }
+
+                //find component property to update
+                var dictionnaryEntriesToModify = c.AliasesDictionnary.Where(entry => entry.Value.Name == e.NewAlias.Name).ToList();
+                 
+                foreach (var entry in dictionnaryEntriesToModify)
+                {
+                    var componentProperty = c.GetType().GetProperty(entry.Key);
+                    if (componentProperty == null)
+                    {
+                        continue;
+                    }
+
+                    if (componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name.Equals("Int32"))
+                    {
+                        componentProperty.SetValue(c, (int)e.NewAlias.Value, null);
+                    }
+                    else if (componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name.Equals("Double"))
+                    {
+
+                        componentProperty.SetValue(c, (double)e.NewAlias.Value, null);
+
+                    }
+                    else if (componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name.Equals("Boolean"))
+                    {
+
+                        componentProperty.SetValue(c, e.NewAlias.Value, null);
+                    }
+                    else if (componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name.Equals("String"))
+                    {
+
+                        componentProperty.SetValue(c, e.NewAlias.Value.ToString(), null);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Type {componentProperty.GetGetMethod().ReturnType.UnderlyingSystemType.Name} not handled");
+                    }
+
+					//componentProperty.SetValue(c, e.NewAlias.Value, null);
+                    if(entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom")
+                    {
+                        var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
+                        var componentChannelProperty = c.GetType().GetProperty(componentChannelPropertyName);
+
+						if (editor?.SchemeView?.MainSymbol?.AliasCnlDictionary != null && e?.NewAlias?.Name != null)
+						{
+							if (editor.SchemeView.MainSymbol.AliasCnlDictionary.TryGetValue(e.NewAlias.Name, out var ChannelNumber))
+							{
+								componentChannelProperty.SetValue(c, ChannelNumber, null);
+							}
+							else
+							{
+								Console.WriteLine($" {e.NewAlias.Name} Not found in the dictionnary.");
+							}
+						}
+						
+					}
+				}
+
+                c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+            }
+            updateAliasParametersDisplay();
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            var aliasCRUD = new FrmAliasesList(editor.SchemeView.isSymbol ? editor.SchemeView.MainSymbol : cbSchComp.SelectedItem as Symbol, editor.SchemeView.isSymbol);
+            aliasCRUD.OnUpdateAlias += handleUpdateAlias;
+            aliasCRUD.ShowDialog();
+        }
+
+        private string findSymboleInAvailableList(string name)
+        {
+            foreach(KeyValuePair<string, string> kvp in availableSymbols)
+            {
+                if (name == kvp.Key) return kvp.Value;
+            }
+            return "";
+        }
+
+        private void btnFileNew_ButtonClick(object sender, EventArgs e)
+        {
+
+        }
+    }
 }
