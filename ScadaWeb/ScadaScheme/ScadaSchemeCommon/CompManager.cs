@@ -73,7 +73,8 @@ namespace Scada.Scheme
                 { typeof(DynamicText).FullName, typeof(DynamicText) },
                 { typeof(StaticPicture).FullName, typeof(StaticPicture) },
                 { typeof(DynamicPicture).FullName, typeof(DynamicPicture) },
-                { typeof(ComponentGroup).FullName, typeof(ComponentGroup) }
+                { typeof(ComponentGroup).FullName, typeof(ComponentGroup) },
+                { typeof(Symbol).FullName, typeof(Symbol) },
             };
 
             instance = new CompManager();
@@ -290,6 +291,8 @@ namespace Scada.Scheme
                             return new DynamicPicture();
                         else if (localName == "componentgroup")
                             return new ComponentGroup();
+                        else if (localName == "symbol"||localName =="mainsymbol")
+                            return new Symbol();
                         else
                             errMsg = string.Format(SchemePhrases.UnknownComponent, nodeName);
                     }
@@ -341,6 +344,18 @@ namespace Scada.Scheme
                                 "Component factory returned an empty result."));
                         }
 
+                        return comp;
+                    }
+                    else if(compTypeName.Contains("Symbol"))
+                    {
+                        BaseComponent comp = new Symbol();
+
+                        if (comp == null)
+                        {
+                            throw new ScadaException(string.Format(Localization.UseRussian ?
+                                "Фабрика компонентов вернула пустой результат." :
+                                "Component factory returned an empty result."));
+                        }
                         return comp;
                     }
                     else

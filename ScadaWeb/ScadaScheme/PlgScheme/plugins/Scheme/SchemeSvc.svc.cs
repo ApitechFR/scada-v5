@@ -34,6 +34,7 @@ using System.ServiceModel;
 using System.ServiceModel.Activation;
 using System.ServiceModel.Web;
 using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 
 namespace Scada.Web.Plugins.Scheme
 {

@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Drawing.Design;
+using System.Linq;
 using System.Text;
 using System.Web.Script.Serialization;
 using System.Xml;
@@ -78,8 +79,17 @@ namespace Scada.Scheme.Model
             Size = Size.Default;
             ZIndex = 0;
             GroupId = -1;
+
+            AliasesDictionnary = new Dictionary<string, Alias>();
         }
 
+        /// <summary>
+        /// List of component_parameter_name/associated_alias pairs
+        /// </summary>
+        #region Attributes
+        [CM.Browsable(false)]
+        #endregion
+        public Dictionary<string, Alias> AliasesDictionnary { get; set; }
 
         /// <summary>
         /// Получить или установить цвет фона.
@@ -265,6 +275,19 @@ namespace Scada.Scheme.Model
             Size = Size.GetChildAsSize(xmlNode, "Size");
             ZIndex = xmlNode.GetChildAsInt("ZIndex");
             GroupId = xmlNode.GetChildAsInt("GroupID",defaultVal:-1);
+
+            XmlNode aliasList = xmlNode.SelectSingleNode("AliasListOfComponent");
+            if (aliasList != null)
+            {
+                foreach (XmlNode aliasNode in aliasList.SelectNodes("AliasOfComponent"))
+                {
+                    string aliasName = aliasNode.GetChildAsString("AliasName");
+                    string attributeName = aliasNode.GetChildAsString("AttributeName");
+                    Alias alias = new Alias();
+                    alias.Name = aliasName;
+                    AliasesDictionnary[attributeName] = alias;
+                }
+            }
         }
 
         /// <summary>
@@ -285,6 +308,31 @@ namespace Scada.Scheme.Model
             Size.AppendElem(xmlElem, "Size", Size);
             xmlElem.AppendElem("ZIndex", ZIndex);
             xmlElem.AppendElem("GroupID", GroupId);
+
+            XmlElement aliasListElem = xmlElem.SelectSingleNode("AliasListOfComponent") as XmlElement;
+            if (aliasListElem == null)
+            {
+                aliasListElem = xmlElem.OwnerDocument.CreateElement("AliasListOfComponent");
+                xmlElem.AppendChild(aliasListElem);
+            }
+
+            foreach (var kvp in AliasesDictionnary)
+            {
+                string aliasName = kvp.Value.Name;
+
+                bool aliasExists = aliasListElem
+                    .SelectNodes($"AliasOfComponent[AliasName='{aliasName}']")
+                    .Count > 0;
+
+                if (!aliasExists)
+                {
+                    XmlElement aliasElem = xmlElem.OwnerDocument.CreateElement("AliasOfComponent");
+                    aliasElem.AppendElem("AliasName", aliasName);
+                    aliasElem.AppendElem("AttributeName", kvp.Key.ToString());
+                    aliasListElem.AppendChild(aliasElem);
+                }
+            }
+
         }
 
         /// <summary>
@@ -315,6 +363,23 @@ namespace Scada.Scheme.Model
             ItemChanged?.Invoke(this, changeType, changedObject, oldKey);
         }
 
+        public void updateAliasesDictionary(Symbol symbol)
+        {
+            List<string> newAliases = symbol.AliasList.Select(x => x.Name).ToList();
+            List<string> obsoleteAliases = new List<string>();
+            foreach (var item in AliasesDictionnary)
+            {
+                if (!newAliases.Contains(item.Value.Name))
+                {
+                    obsoleteAliases.Add(item.Key);
+                }
+            }
+            foreach (string item in obsoleteAliases)
+            {
+                AliasesDictionnary.Remove(item);
+            }
+
+        }
 
         /// <summary>
         /// Событие возникающее при изменении компонента.

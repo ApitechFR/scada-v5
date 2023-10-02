@@ -33,14 +33,14 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
 		public List<BarGraphCondition> Conditions { get; protected set; }
 
-		[DisplayName("Bar Color"), Category(Categories.Appearance)]
-		[Description("The color of the Bar Graph.")]
+		[DisplayName("Bar Fill Color"), Category(Categories.Appearance)]
+		[Description("The fill color of the Bar Graph.")]
 		[CM.Editor(typeof(ColorEditor), typeof(UITypeEditor))]
 		[CM.DefaultValue("blue")]
 		public string BarColor { get; set; }
 
-		[DisplayName("Bar Value"), Category(Categories.Appearance)]
-		[Description("The minimum value represented by the Bar Graph.")]
+		[DisplayName("Bar Fill Level"), Category(Categories.Appearance)]
+		[Description("Fill level of the Bar Graph.")]
 		[CM.DefaultValue(10)]
 		public double Value { get; set; }
 
