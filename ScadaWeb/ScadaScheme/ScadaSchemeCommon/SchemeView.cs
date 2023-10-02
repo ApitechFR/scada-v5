@@ -23,6 +23,7 @@
  * Modified : 2020
  */
 
+using Newtonsoft.Json.Linq;
 using Scada.Client;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
@@ -489,8 +490,14 @@ namespace Scada.Scheme
                             continue;
                         }
 
-                        componentProperty.SetValue(component, symbol.AliasList.Where(x=>x.Name==entry.Value.Name).First().Value, null);
-                        if (entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom")
+                        var aliasValue = symbol.AliasList.Where(x => x.Name == entry.Value.Name).First().Value;
+                        var isCnlLinked = (entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom");
+                        if ( aliasValue.GetType().Name.Equals("Int32") && isCnlLinked)
+                        {
+                            aliasValue.ToString();
+                        }
+                        componentProperty.SetValue(component, aliasValue, null);
+                        if (isCnlLinked)
                         {
                             var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
                             var componentChannelProperty = component.GetType().GetProperty(componentChannelPropertyName);
