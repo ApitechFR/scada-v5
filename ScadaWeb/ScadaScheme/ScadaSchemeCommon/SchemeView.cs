@@ -494,7 +494,7 @@ namespace Scada.Scheme
                         var isCnlLinked = (entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom");
                         if ( aliasValue.GetType().Name.Equals("Int32") && isCnlLinked)
                         {
-                            aliasValue.ToString();
+                            aliasValue = aliasValue.ToString();
                         }
                         componentProperty.SetValue(component, aliasValue, null);
                         if (isCnlLinked)
