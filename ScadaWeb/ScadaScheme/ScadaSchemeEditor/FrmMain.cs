@@ -1765,14 +1765,12 @@ namespace Scada.Scheme.Editor
 
         private void propertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
-            // отслеживание изменений
-            if (propertyGrid.SelectedObjects != null)
+            if (cbSchComp.SelectedItem != null)
             {
-
                 editor.History.BeginPoint();
-                if (propertyGrid.SelectedObject is ComponentGroup group)
+                //Edit all the components within the group
+                if (cbSchComp.SelectedItem is ComponentGroup group)
                 {
-                    //Edit all the components within the group
                     List<BaseComponent> components = editor.SchemeView.getGroupedComponents(group.ID);
                     if (e.ChangedItem.Label == "X" || e.ChangedItem.Label == "Y" || e.ChangedItem.Label == "ZIndex")
                     {
@@ -1783,28 +1781,23 @@ namespace Scada.Scheme.Editor
 
                             if (e.ChangedItem.Label == "X") location.X += valueDiff;
                             else if (e.ChangedItem.Label == "Y") location.Y += valueDiff;
-                            else component.ZIndex += valueDiff*100;
+                            else component.ZIndex += valueDiff * 100;
 
                             component.Location = location;
 
                             component.OnItemChanged(SchemeChangeTypes.ComponentChanged, component);
                         }
                     }
-                    if (group is Symbol && editor.SchemeView.isSymbol && editor.SchemeView.MainSymbol.ID == group.ID)
-                    {
 
-                    }
                     group.OnItemChanged(SchemeChangeTypes.ComponentChanged, group);
                 }
+
                 else
                 {
-                    foreach (object selObj in propertyGrid.SelectedObjects)
-                    {
-                        if (selObj is SchemeDocument document)
-                            document.OnItemChanged(SchemeChangeTypes.SchemeDocChanged, selObj);
-                        else if (selObj is BaseComponent component)
-                            component.OnItemChanged(SchemeChangeTypes.ComponentChanged, selObj);
-                    }
+                    if (cbSchComp.SelectedItem is SchemeDocument document)
+                        document.OnItemChanged(SchemeChangeTypes.SchemeDocChanged, cbSchComp.SelectedItem);
+                    else if (cbSchComp.SelectedItem is BaseComponent component)
+                        component.OnItemChanged(SchemeChangeTypes.ComponentChanged, cbSchComp.SelectedItem);
                 }
                 editor.History.EndPoint();
                 updateAliasParametersDisplay();
@@ -1871,7 +1864,10 @@ namespace Scada.Scheme.Editor
                     newProperties.Add(customPropertyDescriptor);
                 }
             }
-            //propertyGrid.SelectedObject = new AppCode.CustomTypeDescriptor(customTypeDescriptor, newProperties);
+
+            
+
+            propertyGrid.SelectedObject = new AppCode.CustomTypeDescriptor(customTypeDescriptor, newProperties);
         }
         private void propertyGrid_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
         {
