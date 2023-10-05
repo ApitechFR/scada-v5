@@ -9,6 +9,13 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
 	public partial class FrmCustomShape : Form
 	{
+		//internationnalization vars
+		private const string ErrorReadingFile = "An error occurred while reading the file: {0}";
+		private const string ErrorDeletingTempFile = "Error deleting temporary file: {0}";
+		private const string ExternalEditorOpenWarning = "An external editor is still open. Are you sure you want to exit without finishing editing?";
+		private const string CloseEditorWarning = "By clicking OK, your editor will be closed. Make sure you have saved all your changes. Do you want to continue?";
+
+
 		public string ShapeType { get; set; }
 		public bool Saved { get; private set; }
 		private readonly string tempFilePath = Path.Combine(Path.GetTempPath(), $"tempSVG.svg");
@@ -19,18 +26,56 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		public FrmCustomShape()
 		{
 			InitializeComponent();
-			
+			UpdateButtonStates();
+
+
 		}
 
 		public FrmCustomShape(string existingShapeType) : this()
 		{
 			ShapeType = existingShapeType;
-			webBrowser1.DocumentText = ShapeType;
+			if (!string.IsNullOrWhiteSpace(ShapeType)) 
+				webBrowser1.DocumentText = ShapeType;
 			Saved = false;
+			UpdateButtonStates();
+		}
+
+		private void ShowError(string format, Exception ex)
+		{
+			MessageBox.Show(string.Format(format, ex.Message));
+		}
+
+
+		private void UpdateButtonStates()
+		{
+			bool hasContent = !string.IsNullOrWhiteSpace(webBrowser1.DocumentText);
+			btnEditExternally.Enabled = hasContent;
+			Console.WriteLine($"DocumentText has content: {hasContent}, button is enabled: {btnEditExternally.Enabled}");
+
+
+		}
+
+		private void ReadSvgFromFile(string filePath)
+		{
+			try
+			{
+				using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				using (StreamReader reader = new StreamReader(fileStream))
+				{
+					string svgCode = reader.ReadToEnd();
+					webBrowser1.DocumentText = svgCode;
+				}
+			}
+			catch (Exception ex)
+			{
+				ShowError(ErrorReadingFile, ex);
+			}
 		}
 
 		private void BtnSave_Click(object sender, EventArgs e)
 		{
+			CloseExternalEditor();
+
 			ShapeType = webBrowser1.DocumentText;
 			Saved = true;
 			this.DialogResult = DialogResult.OK;
@@ -46,81 +91,12 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 				if (openFileDialog.ShowDialog() == DialogResult.OK)
 				{
 					txtFilePath.Text = openFileDialog.FileName;
-					try
-					{
-						string svgCode = File.ReadAllText(openFileDialog.FileName);
-						webBrowser1.DocumentText = svgCode;
-					}
-					catch (Exception ex)
-					{
-						MessageBox.Show($"An error occurred while reading the file: {ex.Message}");
-					}
+					ReadSvgFromFile(openFileDialog.FileName);
+					UpdateButtonStates();
 				}
 			}
 		}
-
-		//private void BtnEditExternally_Click(object sender, EventArgs e)
-		//{
-		//	if (IsExternalEditorOpen)
-		//	{
-		//		BtnDoneEditing_Click(sender, e);
-		//		return;
-		//	}
-
-		//	try
-		//	{
-		//		File.WriteAllText(tempFilePath, webBrowser1.DocumentText);
-		//		string editorPath = Properties.Settings.Default.EditorPath;
-
-		//		if (string.IsNullOrEmpty(editorPath))
-		//		{
-		//			DialogResult result = MessageBox.Show("Voulez-vous sélectionner un éditeur personnalisé ou utiliser l'éditeur par défaut?",
-		//												  "Choix de l'éditeur",
-		//												  MessageBoxButtons.YesNoCancel,
-		//												  MessageBoxIcon.Question);
-
-		//			if (result == DialogResult.Yes)
-		//			{
-		//				using (OpenFileDialog openFileDialog = new OpenFileDialog())
-		//				{
-		//					openFileDialog.Filter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*";
-		//					if (openFileDialog.ShowDialog() == DialogResult.OK)
-		//					{
-		//						editorPath = openFileDialog.FileName;
-		//						Properties.Settings.Default.EditorPath = editorPath;
-		//						Properties.Settings.Default.Save();
-		//					}
-		//					else
-		//					{
-		//						return;
-		//					}
-		//				}
-		//			}
-		//			else if (result == DialogResult.No)
-		//			{
-		//				externalEditorProcess = Process.Start(tempFilePath);
-		//				WatchFileChanges();
-		//				IsExternalEditorOpen = true;
-		//				((Button)sender).Text = "Done";
-		//				return;
-		//			}
-		//			else
-		//			{
-		//				return;
-		//			}
-		//		}
-
-		//		externalEditorProcess = Process.Start(editorPath, tempFilePath);
-		//		WatchFileChanges();
-		//		IsExternalEditorOpen = true;
-		//		((Button)sender).Text = "Done";
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		MessageBox.Show($"Failed to open the SVG in the external editor: {ex.Message}");
-		//		Console.WriteLine(ex.Message);
-		//	}
-		//}
+		
 		private void BtnEditExternally_Click(object sender, EventArgs e)
 		{
 			if (IsExternalEditorOpen)
@@ -146,7 +122,6 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			}
 		}
 
-
 		private void WatchFileChanges()
 		{
 			if (fileWatcher == null)
@@ -167,17 +142,9 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		{
 			if (e.ChangeType == WatcherChangeTypes.Changed)
 			{
-				Invoke(new Action(() =>
-				{
-					try
-					{
-						string svgCode = File.ReadAllText(tempFilePath);
-						webBrowser1.DocumentText = svgCode;
-					}
-					catch (Exception ex)
-					{
-						MessageBox.Show($"Failed to reload the SVG: {ex.Message}");
-					}
+				Invoke(new Action(() => {
+					ReadSvgFromFile(tempFilePath);
+					UpdateButtonStates();
 				}));
 			}
 		}
@@ -185,6 +152,8 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		protected override void OnClosed(EventArgs e)
 		{
 			base.OnClosed(e);
+			CleanupTemporaryFiles();
+
 			if (fileWatcher != null)
 			{
 				fileWatcher.Changed -= OnFileChanged;  // Détacher l'événement
@@ -192,13 +161,24 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 				fileWatcher = null;
 			}
 		}
-
+		
 		private void BtnDoneEditing_Click(object sender, EventArgs e)
+		{
+			CloseExternalEditor();
+
+			if (!IsExternalEditorOpen)
+			{
+				ReadSvgFromFile(tempFilePath);
+				btnEditExternally.Text = "Edit";
+			}
+		}
+
+		private void CloseExternalEditor()
 		{
 			if (IsExternalEditorOpen && externalEditorProcess != null && !externalEditorProcess.HasExited)
 			{
-				DialogResult result = MessageBox.Show("En cliquant sur OK, votre éditeur sera fermé. Assurez-vous d'avoir enregistré toutes vos modifications. Voulez-vous continuer?",
-													  "Fermeture de l'éditeur",
+				DialogResult result = MessageBox.Show(CloseEditorWarning,
+													  "Closing the Editor",
 													  MessageBoxButtons.OKCancel,
 													  MessageBoxIcon.Warning);
 
@@ -207,44 +187,22 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 					try
 					{
 						externalEditorProcess.Kill();
-						externalEditorProcess.WaitForExit(); // Attend que le processus se termine
-						externalEditorProcess = null;
+						externalEditorProcess.WaitForExit();
 						IsExternalEditorOpen = false;
-
-						// Maintenant, lisez le fichier
-						string svgCode = File.ReadAllText(tempFilePath);
-						webBrowser1.DocumentText = svgCode;
+						btnEditExternally.Text = "Edit";
 					}
 					catch (Exception ex)
 					{
-						MessageBox.Show($"Une erreur s'est produite lors de la lecture du fichier temporaire : {ex.Message}");
+						ShowError("An error occurred while closing the external editor: {0}", ex);
 					}
 				}
 			}
-			else
-			{
-				try
-				{
-					// Si l'éditeur n'est pas en cours d'exécution, lisez simplement le fichier
-					string svgCode = File.ReadAllText(tempFilePath);
-					webBrowser1.DocumentText = svgCode;
-					IsExternalEditorOpen = false;
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show($"Une erreur s'est produproduite lors de la lecture du fichier temporaire: {ex.Message}");
-				}
-			}
-
-				// Réinitialiser le texte du bouton après la fermeture de l'éditeur
-				btnEditExternally.Text = "Edit";
 		}
-
 		protected override void OnClosing(CancelEventArgs e)
 		{
 			if (IsExternalEditorOpen && externalEditorProcess != null && !externalEditorProcess.HasExited)
 			{
-				DialogResult result = MessageBox.Show("Un éditeur externe est toujours ouvert. Êtes-vous sûr de vouloir quitter sans terminer l'édition?",
+				DialogResult result = MessageBox.Show(ExternalEditorOpenWarning,
 													  "Éditeur externe ouvert",
 													  MessageBoxButtons.OKCancel,
 													  MessageBoxIcon.Warning);
@@ -255,7 +213,6 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 					return;
 				}
 			}
-
 			base.OnClosing(e);
 		}
 
@@ -270,8 +227,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			}
 			catch (Exception ex)
 			{
-				// En cas d'erreur lors de la suppression du fichier temporaire, vous pouvez l'enregistrer dans un journal ou simplement l'ignorer, car il est dans le dossier Temp.
-				MessageBox.Show($"Error deleting temporary file: {ex.Message}");
+				ShowError(ErrorDeletingTempFile, ex);
 			}
 		}
 
@@ -281,7 +237,6 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			{
 				CleanupTemporaryFiles();
 			}
-
 			base.Dispose(disposing);
 		}
 	}
