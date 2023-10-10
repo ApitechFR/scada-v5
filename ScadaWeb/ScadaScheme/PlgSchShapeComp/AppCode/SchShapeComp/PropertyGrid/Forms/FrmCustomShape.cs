@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Text;
+using System.IO;
 using System;
-using System.ComponentModel;
-
+using Svg;
 
 namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
@@ -22,71 +23,61 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		private bool IsExternalEditorOpen { get; set; } = false;
 		private Process externalEditorProcess;
 		private FileSystemWatcher fileWatcher;
+		private string svgText;
+
 
 		public FrmCustomShape()
 		{
+
 			InitializeComponent();
 			UpdateButtonStates();
 
 
 		}
 
+		
 		public FrmCustomShape(string existingShapeType) : this()
 		{
 			ShapeType = existingShapeType;
-			if (!string.IsNullOrWhiteSpace(ShapeType)) 
-				webBrowser1.DocumentText = ShapeType;
+			if (!string.IsNullOrWhiteSpace(ShapeType))
+			{
+				svgText = ShapeType;
+				byte[] svgBytes = Encoding.UTF8.GetBytes(svgText);
+				ctrlSvgViewer1.ShowImage(svgBytes);
+			}
 			Saved = false;
 			UpdateButtonStates();
 		}
+
 
 		private void ShowError(string format, Exception ex)
 		{
 			MessageBox.Show(string.Format(format, ex.Message));
 		}
 
-
 		private void UpdateButtonStates()
 		{
-			bool hasContent = !string.IsNullOrWhiteSpace(webBrowser1.DocumentText);
+			bool hasContent = !string.IsNullOrEmpty(svgText);
 			btnEditExternally.Enabled = hasContent;
-			Console.WriteLine($"DocumentText has content: {hasContent}, button is enabled: {btnEditExternally.Enabled}");
-
-
 		}
-
-		private void ReadSvgFromFile(string filePath)
-		{
-			try
-			{
-				using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-				using (StreamReader reader = new StreamReader(fileStream))
-				{
-					string svgCode = reader.ReadToEnd();
-					webBrowser1.DocumentText = svgCode;
-				}
-			}
-			catch (Exception ex)
-			{
-				ShowError(ErrorReadingFile, ex);
-			}
-		}
-
+		
 		private void BtnSave_Click(object sender, EventArgs e)
 		{
 			CloseExternalEditor();
 
-			ShapeType = webBrowser1.DocumentText;
+			ShapeType = svgText; 
 			Saved = true;
 			this.DialogResult = DialogResult.OK;
 			this.Close();
 		}
 
+
+		
+
 		private void BtnImport_Click(object sender, EventArgs e)
 		{
 			using (OpenFileDialog openFileDialog = new OpenFileDialog())
 			{
-				
 				openFileDialog.Filter = "SVG files (*.svg)|*.svg|All files (*.*)|*.*";
 				if (openFileDialog.ShowDialog() == DialogResult.OK)
 				{
@@ -96,7 +87,21 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 				}
 			}
 		}
-		
+		private void ReadSvgFromFile(string filePath)
+		{
+			try
+			{
+				svgText = File.ReadAllText(filePath);
+				byte[] svgBytes = Encoding.UTF8.GetBytes(svgText);
+				ctrlSvgViewer1.ShowImage(svgBytes);	
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error while reading the SVG file : " + ex.Message);
+			}
+		}
+
+
 		private void BtnEditExternally_Click(object sender, EventArgs e)
 		{
 			if (IsExternalEditorOpen)
@@ -107,9 +112,8 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 			try
 			{
-				File.WriteAllText(tempFilePath, webBrowser1.DocumentText);
+				File.WriteAllText(tempFilePath, svgText);
 
-				// Utiliser l'éditeur par défaut de Windows pour ouvrir le fichier
 				externalEditorProcess = Process.Start(tempFilePath);
 				WatchFileChanges();
 				IsExternalEditorOpen = true;
@@ -156,7 +160,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 			if (fileWatcher != null)
 			{
-				fileWatcher.Changed -= OnFileChanged;  // Détacher l'événement
+				fileWatcher.Changed -= OnFileChanged;  
 				fileWatcher.Dispose();
 				fileWatcher = null;
 			}
@@ -239,6 +243,8 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			}
 			base.Dispose(disposing);
 		}
+
+
 	}
 
 }

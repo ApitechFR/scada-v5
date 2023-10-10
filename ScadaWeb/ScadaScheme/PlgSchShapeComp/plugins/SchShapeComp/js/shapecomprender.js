@@ -44,6 +44,117 @@ scada.scheme.addInfoTooltipToDiv = function (targetDiv, text) {
 }
 
 
+scada.scheme.handleBlinking = function (divComp, blinking) {
+	divComp.removeClass("no-blink slow-blink fast-blink");
+	switch (blinking) {
+		case 0:
+			break;
+		case 1:
+			divComp.addClass("slow-blink");
+			break;
+		case 2:
+			divComp.addClass("fast-blink");
+			break;
+	}
+}
+scada.scheme.updateStyles = function (divComp, cond) {
+	if (cond.Color) divComp.css("color", cond.Color);
+	if (cond.BackgroundColor) divComp.css("background-color", cond.BackgroundColor);
+	if (cond.TextContent) scada.scheme.addInfoTooltipToDiv(divComp[0], cond.TextContent);
+	if (cond.Rotation) divComp.css("transform", "rotate(" + cond.Rotation + "deg)");
+	if (cond.IsVisible !== undefined) divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
+	if (cond.Width) divComp.css("width", cond.Width);
+	if (cond.Height) divComp.css("height", cond.Height);
+}
+
+scada.scheme.applyRotation = function (divComp, props) {
+	if (props.Rotation && props.Rotation > 0) {
+		divComp.css({
+			"transform": "rotate(" + props.Rotation + "deg)",
+		})
+	}
+}
+scada.scheme.updateColors = function (divComp, cnlDataExt, isHovered, props) {
+	var statusColor = cnlDataExt.Color;
+
+	var backColor = chooseColor(isHovered, props.BackColor, props.BackColorOnHover);
+	var borderColor = chooseColor(isHovered, props.BorderColor, props.BorderColorOnHover);
+
+	setBackColor(divComp, backColor, true, statusColor);
+	setBorderColor(divComp, borderColor, true, statusColor);
+}
+
+
+/**************** Custom SVG *********************/
+scada.scheme.CustomSVGRenderer = function () {
+	scada.scheme.ComponentRenderer.call(this);
+};
+
+scada.scheme.CustomSVGRenderer.prototype = Object.create(
+	scada.scheme.ComponentRenderer.prototype,
+);
+scada.scheme.CustomSVGRenderer.constructor =
+	scada.scheme.CustomSVGRenderer;
+
+scada.scheme.CustomSVGRenderer.prototype.createDom = function (
+	component,
+	renderContext,
+) {
+	var props = component.props;
+	var divComp = $("<div id='comp" + component.id + "'></div>");
+	this.prepareComponent(divComp, component, false, true);
+	scada.scheme.applyRotation(divComp, props);
+
+	if (props.SvgCode) {
+		
+		props.SvgCode = props.SvgCode.replace(/<svg[^>]*?(\s+width\s*=\s*["'][^"']*["'])/g, '<svg');
+		props.SvgCode = props.SvgCode.replace(/<svg[^>]*?(\s+height\s*=\s*["'][^"']*["'])/g, '<svg');
+	}
+	divComp.append(props.SvgCode);
+	component.dom = divComp;
+};
+
+scada.scheme.CustomSVGRenderer.prototype.updateData = function (
+	component,
+	renderContext,
+) {
+	var props = component.props;
+
+	if (props.InCnlNum <= 0) {
+		return;
+	}
+
+	var divComp = component.dom;
+	var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
+
+	applyRotation(divComp, props);
+
+	if (!props.Conditions || cnlDataExt.Stat <= 0) { return; }
+
+	var cnlVal = cnlDataExt.Val;
+
+	for (var cond of props.Conditions) {
+        if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
+            // Set CSS properties based on Condition
+			scada.scheme.updateStyles(divComp, cond);
+          
+			scada.scheme.handleBlinking(divComp, cond.Blinking);
+            break;
+        }
+    }
+	
+};
+
+
+
+
+
+
+
+
+
+
+
 scada.scheme.SvgShapeRenderer = function () {
 	scada.scheme.ComponentRenderer.call(this);
 };
@@ -361,179 +472,9 @@ scada.scheme.PolygonRenderer.prototype.updateData = function (
 		}
 	}
 };
-/**************** Custom SVG *********************/
-scada.scheme.CustomSVGRenderer = function () {
-	scada.scheme.ComponentRenderer.call(this);
-};
-
-scada.scheme.CustomSVGRenderer.prototype = Object.create(
-	scada.scheme.ComponentRenderer.prototype,
-);
-scada.scheme.CustomSVGRenderer.constructor =
-	scada.scheme.CustomSVGRenderer;
 
 
 
-scada.scheme.CustomSVGRenderer.prototype.generateSVG = function (
-	codeSVG,
-	strokeColor,
-	fillColor,
-	strokeWidth,
-	viewBoxX,
-	viewBoxY,
-	viewBoxWidth,
-	viewBoxHeight,
-	width,
-	height,
-) {
-	if (typeof codeSVG !== 'string' || codeSVG.trim().length === 0) {
-		console.error("Invalid SVG code");
-		return;
-	}
-
-	var parser = new DOMParser();
-	var doc = parser.parseFromString(codeSVG, "image/svg+xml");
-
-	if (doc.querySelector('parsererror')) {
-		console.error("Error parsing SVG");
-		return;
-	}
-
-	var svg = doc.querySelector("svg");
-	if (!svg) {
-		console.error("No svg element found in the SVG code");
-		return;
-	}
-
-	svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-	svg.setAttribute("viewBox", `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`);
-	svg.setAttribute("width", width +"%");
-	svg.setAttribute("height", height +"%");
-	svg.setAttribute("style", "cursor:move");
-
-	var elements = svg.querySelectorAll("*");
-	elements.forEach(el => {
-			el.setAttribute("stroke", strokeColor);
-			el.setAttribute("fill", fillColor );
-			el.setAttribute("stroke-width", strokeWidth );
-		
-	});
-
-	const serializer = new XMLSerializer();
-	codeSVG = serializer.serializeToString(svg);
-
-	return codeSVG;
-};
-
-scada.scheme.CustomSVGRenderer.prototype.createDom = function (
-	component,
-	renderContext,
-) {
-	var props = component.props;
-
-	var divComp = $("<div id='comp" + component.id + "'></div>");
-	this.prepareComponent(divComp, component,false,true);
-
-	var svg = this.generateSVG(
-		props.SvgCode,
-		props.BorderColor,
-		props.BackColor,
-		props.BorderWidth,
-		props.ViewBoxX,
-		props.ViewBoxY,
-		props.ViewBoxWidth,
-		props.ViewBoxHeight,
-		props.Width,
-		props.Height);
-
-	divComp.append(svg);
-	if (props.Rotation && props.Rotation > 0) {
-		divComp.css({
-			"transform": "rotate(" + props.Rotation + "deg)",
-		})
-	}
-	component.dom = divComp;
-};
-
-scada.scheme.CustomSVGRenderer.prototype.updateData = function (
-	component,
-	renderContext,
-) {
-	var props = component.props;
-
-	if (props.InCnlNum > 0) {
-		var divComp = component.dom;
-		var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
-
-		// choose and set colors of the component
-		var statusColor = cnlDataExt.Color;
-		var isHovered = divComp.is(":hover");
-
-		var backColor = this.chooseColor(
-			isHovered,
-			props.BackColor,
-			props.BackColorOnHover,
-		);
-		var borderColor = this.chooseColor(
-			isHovered,
-			props.BorderColor,
-			props.BorderColorOnHover,
-		);
-		if (props.Rotation && props.Rotation > 0) {
-			divComp.css({
-				"transform": "rotate(" + props.Rotation +"deg)",
-			})
-		}
-		this.setBackColor(divComp, backColor, true, statusColor);
-		this.setBorderColor(divComp, borderColor, true, statusColor);
-
-		divComp.removeClass("no-blink slow-blink fast-blink");
-		if (props.Conditions && cnlDataExt.Stat > 0) {
-			var cnlVal = cnlDataExt.Val;
-
-			for (var cond of props.Conditions) {
-				if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
-					// Set CSS properties based on Condition
-					if (cond.Color) {
-						divComp.css("color", cond.Color);
-					}
-					if (cond.BackgroundColor) {
-						divComp.css("background-color", cond.BackgroundColor);
-					}
-					if (cond.TextContent) {
-						scada.scheme.addInfoTooltipToDiv(divComp[0], cond.TextContent);
-					}
-					if (cond.Rotation) {
-						divComp.css("transform", "rotate(" + cond.Rotation + "deg)");
-					}
-					divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
-					if (cond.Width) {
-						divComp.css("width", cond.Width);
-					}
-					if (cond.Height) {
-						divComp.css("height", cond.Height);
-					}
-
-					// Handle Blinking
-					switch (cond.Blinking) {
-						case 0:
-							divComp.removeClass("slow-blink fast-blink");
-							break;
-						case 1:
-							divComp.addClass("slow-blink");
-							break;
-						case 2:
-							divComp.addClass("fast-blink");
-							break;
-					}
-
-					break;
-				}
-			}
-		}
-
-	}
-};
 
 /** BarGraph */
 
