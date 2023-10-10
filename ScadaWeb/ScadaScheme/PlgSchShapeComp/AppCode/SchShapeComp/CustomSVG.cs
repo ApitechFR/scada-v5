@@ -1,11 +1,11 @@
 ﻿using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
+using Scada.Web.SchShapeComp.PropertyGrid;
 using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Design;
-using System.Windows.Forms;
 using System.Xml;
 using CM = System.ComponentModel;
 
@@ -19,7 +19,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		{
 			serBinder = PlgUtils.SerializationBinder;
 			Action = Actions.None;
-			Conditions = new List<AdvancedCondition>();
+			Conditions = new List<CustomSVGCondition>();
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "NA (0)";
@@ -47,7 +47,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[Description("The conditions for CustomSVG output depending on the value of the input channel.")]
 		[CM.DefaultValue(null), CM.TypeConverter(typeof(CollectionConverter))]
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
-		public List<AdvancedCondition> Conditions { get; protected set; }
+		public List<CustomSVGCondition> Conditions { get; protected set; }
 
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
@@ -128,11 +128,11 @@ namespace Scada.Web.Plugins.SchShapeComp
 
 			if (conditionsNode != null)
 			{
-				Conditions = new List<AdvancedCondition>();
+				Conditions = new List<CustomSVGCondition>();
 				XmlNodeList conditionNodes = conditionsNode.SelectNodes("Condition");
 				foreach (XmlNode conditionNode in conditionNodes)
 				{
-					AdvancedCondition condition = new AdvancedCondition { SchemeView = SchemeView };
+					CustomSVGCondition condition = new CustomSVGCondition { SchemeView = SchemeView };
 					condition.LoadFromXml(conditionNode);
 					Conditions.Add(condition);
 				}
@@ -152,7 +152,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 
 
 			XmlElement conditionsElem = xmlElem.AppendElem("Conditions");
-			foreach (AdvancedCondition condition in Conditions)
+			foreach (CustomSVGCondition condition in Conditions)
 			{
 				XmlElement conditionElem = conditionsElem.AppendElem("Condition");
 				condition.SaveToXml(conditionElem);
@@ -173,7 +173,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		{
 			CustomSVG cloneComponent = (CustomSVG)base.Clone();
 
-			foreach (AdvancedCondition condition in cloneComponent.Conditions)
+			foreach (CustomSVGCondition condition in cloneComponent.Conditions)
 			{
 				condition.SchemeView = schemeView;
 			}

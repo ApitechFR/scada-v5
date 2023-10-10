@@ -34,8 +34,8 @@
 			this.btnSave = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
-			this.webBrowser1 = new System.Windows.Forms.WebBrowser();
 			this.btnEditExternally = new System.Windows.Forms.Button();
+			this.ctrlSvgViewer1 = new Scada.Scheme.Model.PropertyGrid.CtrlSvgViewer();
 			this.SuspendLayout();
 			// 
 			// txtFilePath
@@ -109,17 +109,6 @@
 			this.label2.TabIndex = 7;
 			this.label2.Text = "Aperçu SVG :";
 			// 
-			// webBrowser1
-			// 
-			this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.webBrowser1.Location = new System.Drawing.Point(34, 133);
-			this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
-			this.webBrowser1.Name = "webBrowser1";
-			this.webBrowser1.Size = new System.Drawing.Size(423, 209);
-			this.webBrowser1.TabIndex = 8;
-			// 
 			// btnEditExternally
 			// 
 			this.btnEditExternally.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -132,13 +121,22 @@
 			this.btnEditExternally.UseVisualStyleBackColor = true;
 			this.btnEditExternally.Click += new System.EventHandler(this.BtnEditExternally_Click);
 			// 
+			// ctrlSvgViewer1
+			// 
+			this.ctrlSvgViewer1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.ctrlSvgViewer1.Location = new System.Drawing.Point(33, 129);
+			this.ctrlSvgViewer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.ctrlSvgViewer1.Name = "ctrlSvgViewer1";
+			this.ctrlSvgViewer1.Size = new System.Drawing.Size(430, 225);
+			this.ctrlSvgViewer1.TabIndex = 11;
+			// 
 			// FrmCustomShape
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(483, 413);
+			this.Controls.Add(this.ctrlSvgViewer1);
 			this.Controls.Add(this.btnEditExternally);
-			this.Controls.Add(this.webBrowser1);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.btnCancel);
@@ -164,7 +162,7 @@
 		private System.Windows.Forms.Button btnSave;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.WebBrowser webBrowser1;
 		private System.Windows.Forms.Button btnEditExternally;
+		private Scheme.Model.PropertyGrid.CtrlSvgViewer ctrlSvgViewer1;
 	}
 }
