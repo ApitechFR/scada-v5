@@ -36,7 +36,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		{
 			return new List<CompItem>()
 			{
-				new CompItem(Resources.svg,typeof(SvgShape)),
+				new CompItem(Resources.svg,typeof(BasicShape)),
 				new CompItem(Resources.svg,	typeof(CustomSVG)),
 				new CompItem(Resources.barre,typeof(BarGraph)),
 			};
