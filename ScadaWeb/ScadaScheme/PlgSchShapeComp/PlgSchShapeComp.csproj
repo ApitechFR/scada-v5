@@ -110,7 +110,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Resources\svg.png" />
-    <None Include="Resources\polygon.png" />
     <None Include="Resources\barre.png" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -122,9 +121,7 @@
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\AdvancedCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\BarGraphCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\ColorCondition.cs" />
-    <Compile Include="AppCode\SchShapeComp\Polygon.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\CustomSVGCondition.cs" />
-    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\PolygonCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Forms\FrmCustomShape.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -123,6 +123,9 @@
 			// 
 			// ctrlSvgViewer1
 			// 
+			this.ctrlSvgViewer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.ctrlSvgViewer1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.ctrlSvgViewer1.Location = new System.Drawing.Point(33, 129);
 			this.ctrlSvgViewer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);

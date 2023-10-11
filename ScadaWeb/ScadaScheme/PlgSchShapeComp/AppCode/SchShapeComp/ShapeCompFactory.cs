@@ -10,8 +10,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 		{
 			if (NameEquals("SvgShape", typeof(SvgShape).FullName, typeName, nameIsShort))
 				return new SvgShape();
-			else if (NameEquals("Polygon", typeof(Polygon).FullName,typeName,nameIsShort))
-				return new Polygon();
 			else if(NameEquals("CustomSVG", typeof(CustomSVG).FullName,typeName,nameIsShort)) 
 				return new CustomSVG();
 			else if(NameEquals("BarGraph", typeof(BarGraph).FullName, typeName, nameIsShort))
