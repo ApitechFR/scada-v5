@@ -1867,7 +1867,7 @@ namespace Scada.Scheme.Editor
 
             
 
-            propertyGrid.SelectedObject = new AppCode.CustomTypeDescriptor(customTypeDescriptor, newProperties);
+            propertyGrid.SelectedObject = new CustomTypeDescriptor(customTypeDescriptor, newProperties);
         }
         private void propertyGrid_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
         {

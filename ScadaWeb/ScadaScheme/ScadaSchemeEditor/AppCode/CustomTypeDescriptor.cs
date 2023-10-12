@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
-namespace Scada.Scheme.Editor.AppCode
+namespace Scada.Scheme.Editor
 {
     public class CustomTypeDescriptor : ICustomTypeDescriptor
     {
