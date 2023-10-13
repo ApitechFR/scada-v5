@@ -7,7 +7,7 @@ using ListBox = System.Windows.Forms.ListBox;
 
 namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
-	public class SvgShapeSelectEditor : UITypeEditor
+	public class BasicShapeSelectEditor : UITypeEditor
 	{
 
 		/// <param name="context"></param>
@@ -28,9 +28,9 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			if (editorService != null)
 			{
 				ListBox listBox = new ListBox();
-				string[] svgShapes = { "Polygon", "Triangle", "Rectangle", "Circle", "Line", "Polyline" };
+				string[] shapes = { "Circle",  "Line", "Rectangle" };
 
-				foreach (string shape in svgShapes)
+				foreach (string shape in shapes)
 				{
 					listBox.Items.Add(shape);
 				}
@@ -49,7 +49,6 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 			return value;
 		}
-
 
 	}
 }

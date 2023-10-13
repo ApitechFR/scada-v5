@@ -110,8 +110,8 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Resources\svg.png" />
-    <None Include="Resources\polygon.png" />
     <None Include="Resources\barre.png" />
+    <None Include="Resources\shape.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -122,9 +122,7 @@
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\AdvancedCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\BarGraphCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\ColorCondition.cs" />
-    <Compile Include="AppCode\SchShapeComp\Polygon.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\CustomSVGCondition.cs" />
-    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\PolygonCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Forms\FrmCustomShape.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -135,12 +133,11 @@
     <Compile Include="AppCode\SchShapeComp\PopupSize.cs" />
     <Compile Include="AppCode\SchShapeComp\PopupSizeConverter.cs" />
     <Compile Include="AppCode\SchShapeComp\PopupWidth.cs" />
-    <Compile Include="AppCode\SchShapeComp\PropertyGrid\NumberSelectEditor.cs" />
-    <Compile Include="AppCode\SchShapeComp\PropertyGrid\SvgShapeSelectEditor.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\BasicShapeSelectEditor.cs" />
     <Compile Include="AppCode\SchShapeComp\ShapeCompFactory.cs" />
     <Compile Include="AppCode\SchShapeComp\ShapeCompLibSpec.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\SVGEditor.cs" />
-    <Compile Include="AppCode\SchShapeComp\SvgShape.cs" />
+    <Compile Include="AppCode\SchShapeComp\BasicShape.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

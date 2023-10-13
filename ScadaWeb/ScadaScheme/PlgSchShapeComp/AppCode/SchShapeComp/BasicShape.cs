@@ -12,21 +12,21 @@ using Scada.Data.Entities;
 namespace Scada.Web.Plugins.SchShapeComp
 {
 	[Serializable]
-	public class SvgShape : BaseComponent, IDynamicComponent
+	public class BasicShape : BaseComponent, IDynamicComponent
 	{
-		public SvgShape()
+		public BasicShape()
 		{
 			serBinder = PlgUtils.SerializationBinder;
 			ShapeType = "Circle";
-			BackColor = "black";
+			BackColor = "Black";
+			BorderColor = "Black";
+			BorderWidth = 1;
 			Action = Actions.None;
 			Conditions = new List<AdvancedCondition>();
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "NA (0)";
 			CtrlCnlNumCustom = "NA (0)";
-			Width = 100;
-			Height = 130;
 		}
 
 		[DisplayName("Conditions"), Category(Categories.Behavior)]
@@ -38,24 +38,17 @@ namespace Scada.Web.Plugins.SchShapeComp
 
 		[DisplayName("Shape Type"), Category(Categories.Appearance)]
 		[Description("The type of SVG shape.")]
-		[CM.Editor(typeof(SvgShapeSelectEditor), typeof(UITypeEditor))]
+		[CM.Editor(typeof(BasicShapeSelectEditor), typeof(UITypeEditor))]
 		[CM.DefaultValue("Circle")]
 		public string ShapeType { get; set; }
 
-		[DisplayName("Width"), Category(Categories.Appearance)]
-		[Description("The Width of SVG shape.")]
-		[CM.DefaultValue(100)]
-		public int Width { get; set; }
-
+		
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
 		[Description("The rotation angle of the SVG shape in degrees.")]
 		[CM.DefaultValue(0)]
 		public int Rotation { get; set; }
 
-		[DisplayName("Height"), Category(Categories.Appearance)]
-		[Description("The Height of SVG shape.")]
-		[CM.DefaultValue(130)]
-		public int Height { get; set; }
+		
 
 		/// <summary>
 		/// Get or set the input channel number
@@ -109,8 +102,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 			Rotation = xmlNode.GetChildAsInt("Rotation");
 			InCnlNum = xmlNode.GetChildAsInt("InCnlNum");
 			CtrlCnlNum = xmlNode.GetChildAsInt("CtrlCnlNum");
-			Width = xmlNode.GetChildAsInt("Width");
-			Height = xmlNode.GetChildAsInt("Height");
 			InCnlNumCustom = xmlNode.GetChildAsString("InCnlNumCustom");
 			CtrlCnlNumCustom = xmlNode.GetChildAsString("CtrlCnlNumCustom");
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
@@ -142,8 +133,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 			xmlElem.AppendElem("ShapeType", ShapeType);
 			xmlElem.AppendElem("InCnlNum", InCnlNum);
 			xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
-			xmlElem.AppendElem("Width", Width);
-			xmlElem.AppendElem("Height", Height);
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
 			xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
 			xmlElem.AppendElem("Action", Action.ToString());
@@ -151,7 +140,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 
 		public override BaseComponent Clone()
 		{
-			SvgShape cloneComponent = (SvgShape)base.Clone();
+			BasicShape cloneComponent = (BasicShape)base.Clone();
 
 			foreach (AdvancedCondition condition in cloneComponent.Conditions)
 			{

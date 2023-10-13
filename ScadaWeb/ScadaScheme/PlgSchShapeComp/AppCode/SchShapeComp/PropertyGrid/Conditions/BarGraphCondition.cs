@@ -26,11 +26,11 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			Level = BarLevel.None;
 		}
 
-		[DisplayName("Fill Color"), Category(Categories.Appearance)]
+		[DisplayName("Bar Fill Color"), Category(Categories.Appearance)]
 		[CM.Editor(typeof(ColorEditor), typeof(UITypeEditor))]
 		public string FillColor { get; set; }
 
-		[DisplayName("Bar Level"), Category(Categories.Appearance)]
+		[DisplayName("Bar Fill Level"), Category(Categories.Appearance)]
 		public BarLevel Level { get; set; }
 
 		public override void LoadFromXml(XmlNode xmlNode)

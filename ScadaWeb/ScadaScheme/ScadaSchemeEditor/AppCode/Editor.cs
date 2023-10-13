@@ -28,10 +28,12 @@ using Scada.Scheme.Model.DataTypes;
 using Scada.Web;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Xml;
 using Utils;
 
 namespace Scada.Scheme.Editor
@@ -58,6 +60,16 @@ namespace Scada.Scheme.Editor
         /// Имя файла схемы по умолчанию
         /// </summary>
         public const string DefSchemeFileName = "NewScheme.sch";
+        /// <summary>
+        /// Default file name of symbols
+        /// </summary>
+        public const string DefSymbolFileName = "NewSymbol.sch";
+        /// <summary>
+        /// path of symbol
+        /// </summary>
+        public string SymbolPath;
+
+        public string SymbolDir;
 
         private readonly CompManager compManager;  // менеджер компонентов
         private readonly Log log;                  // журнал приложения
@@ -238,28 +250,46 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла
         /// </summary>
-        private bool InitScheme(string fileName, out string errMsg)
+        private bool InitScheme(string fileName, out string errMsg, bool isSymbol=false)
         {
             ClearChanges();
             ClearSelComponents();
             SchemeView = new SchemeView();
+            SchemeView.isSymbol = isSymbol;
+
             bool loadOK;
 
             if (string.IsNullOrEmpty(fileName))
             {
                 loadOK = true;
                 errMsg = "";
+                if (isSymbol)
+                {
+                    Symbol symbol = new Symbol();
+
+                    symbol.Name = "Symbol";
+                    symbol.ID = SchemeView.GetNextComponentID();
+                    SchemeView.Components[symbol.ID]=symbol;
+
+                    symbol.Location = new Point(0, 0);
+                    symbol.SchemeView = SchemeView;
+                    symbol.ItemChanged += Scheme_ItemChanged;
+
+                    symbol.OnItemChanged(SchemeChangeTypes.ComponentAdded, symbol);
+                    SchemeView.MainSymbol = symbol;
+                }
             }
             else
             {
                 lock (SchemeView.SyncRoot)
                 {
-                    loadOK = SchemeView.LoadFromFile(fileName, out errMsg);
+                    loadOK = SchemeView.LoadFromFile(fileName,SymbolDir, out errMsg);
                 }
 
                 if (!loadOK)
                     log.WriteError(errMsg);
             }
+
 
             FileName = fileName;
             Modified = false;
@@ -551,24 +581,44 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Создать новую схему
         /// </summary>
-        public void NewScheme()
+        public void NewScheme(bool isSymbol = false)
         {
-            InitScheme("", out string errMsg);
+            InitScheme("", out string errMsg,isSymbol);
         }
 
         /// <summary>
         /// Загрузить схему из файла
         /// </summary>
-        public bool LoadSchemeFromFile(string fileName, out string errMsg)
+        public bool LoadSchemeFromFile(string fileName, out string errMsg,bool isSymbol=false)
         {
-            return InitScheme(fileName, out errMsg);
+            return InitScheme(fileName, out errMsg,isSymbol);
         }
 
         /// <summary>
         /// Записать схему в файл
         /// </summary>
-        public bool SaveSchemeToFile(string fileName, out string errMsg)
+        public bool SaveSchemeToFile(string fileName, out string errMsg, bool asSymbol = false)
         {
+            if ((asSymbol||SchemeView.isSymbol) && SchemeView.MainSymbol==null)
+            {
+                Symbol symbol = new Symbol();
+
+                symbol.ID = SchemeView.GetNextComponentID();
+                symbol.Location = new Point(0, 0);
+                symbol.SchemeView = SchemeView;
+                symbol.ItemChanged += Scheme_ItemChanged;
+                SchemeView.Components[symbol.ID] = symbol;
+                symbol.OnItemChanged(SchemeChangeTypes.ComponentAdded, symbol);
+
+                SchemeView.MainSymbol = symbol;
+                SchemeView.isSymbol = true;
+                foreach (BaseComponent comp in SchemeView.Components.Values.Where(x => x.GroupId == -1))
+                {
+                    comp.GroupId = symbol.ID;
+                    comp.OnItemChanged(SchemeChangeTypes.ComponentChanged,comp);
+                }
+            }
+
             FileName = fileName;
 
             if (SchemeView == null)
@@ -582,7 +632,7 @@ namespace Scada.Scheme.Editor
 
                 lock (SchemeView.SyncRoot)
                 {
-                    saveOK = SchemeView.SaveToFile(fileName, out errMsg);
+                    saveOK = SchemeView.SaveToFile(fileName, out errMsg, asSymbol);
                 }
 
                 if (saveOK)
@@ -678,8 +728,13 @@ namespace Scada.Scheme.Editor
                         "Type of the creating component is not defined.");
                 }
 
-                // создание компонента
+
                 BaseComponent component = compManager.CreateComponent(NewComponentTypeName);
+
+                XmlDocument xmlDoc = new XmlDocument();
+                
+                if (SymbolPath != null)
+                    xmlDoc.Load(SymbolPath);
 
                 if (component == null)
                 {
@@ -687,6 +742,17 @@ namespace Scada.Scheme.Editor
                 }
                 else
                 {
+                    if (NewComponentTypeName.Contains("Symbol"))
+                    {
+                        
+                        XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
+
+                        if (mainSymbolNode != null)
+                        {
+                            component.LoadFromXml(mainSymbolNode);
+                        }
+                    }
+                    this.History.BeginPoint();
                     component.ID = SchemeView.GetNextComponentID();
                     component.Location = new Point(x, y);
                     component.SchemeView = SchemeView;
@@ -697,18 +763,33 @@ namespace Scada.Scheme.Editor
                     {
                         SchemeView.Components[component.ID] = component;
                     }
+                    if (SchemeView.isSymbol)
+                    {
+                        component.GroupId = SchemeView.MainSymbol.ID;
+                    }
 
                     SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
-
                     // выбор добавленного компонента
                     lock (selComponents)
                     {
                         selComponents.Clear();
                         selComponents.Add(component);
+                    
+                        XmlNode SymbolComponents = xmlDoc.SelectSingleNode(".//Components");
+                        if (SymbolComponents != null)
+                        {
+                            foreach(XmlNode nodeSymbolComponent in SymbolComponents)
+                            {
+                                BaseComponent symbolComponent = CreateComponentOfSymbol(x, y, nodeSymbolComponent);
+                                symbolComponent.GroupId = component.ID;
+                            }
+                        }  
                     }
 
                     OnSelectionChanged();
+                    this.History.EndPoint();
                     PointerMode = PointerMode.Select;
+                    SymbolPath = null;
                     return true;
                 }
             }
@@ -725,6 +806,51 @@ namespace Scada.Scheme.Editor
                     "Ошибка при создании компонента схемы" :
                     "Error creating scheme component");
                 return false;
+            }
+        }
+
+        public BaseComponent CreateComponentOfSymbol(int x, int y, XmlNode node)
+        {
+            string[] name = node.Name.Split(':');
+            string componentTypeName = "";
+            switch (name[0])
+            {
+                case "basic":
+                    componentTypeName = "Scada.Web.Plugins.SchBasicComp." + name[1];
+                    break;
+                case "shape":
+                    componentTypeName = "Scada.Web.Plugins.SchShapeComp." + name[1];
+                    break;
+                default:
+                    componentTypeName = "Scada.Scheme.Model." + name[0];
+                    break;
+            }
+
+            BaseComponent component = compManager.CreateComponent(componentTypeName);
+            if (component == null)
+            {
+                return null;
+            }
+            else
+            {
+                this.History.BeginPoint();
+                component.LoadFromXml(node);
+                component.ID = SchemeView.GetNextComponentID();
+                component.Location = new Point(x + component.Location.X, y + component.Location.Y);
+                component.SchemeView = SchemeView;
+                component.ItemChanged += Scheme_ItemChanged;
+
+                lock (SchemeView.SyncRoot)
+                {
+                    SchemeView.Components[component.ID] = component;
+                }
+                if (SchemeView.isSymbol)
+                {
+                    component.GroupId = SchemeView.MainSymbol.ID;
+                }
+
+                component.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
+                return component;
             }
         }
 
@@ -865,44 +991,6 @@ namespace Scada.Scheme.Editor
             }
         }
 
-        /// <summary>
-        /// Returns every BaseComponents in the group
-        /// </summary>
-        public List<BaseComponent> getGroupedComponents(int groupID)
-        {
-            List<BaseComponent> groupedComponents = new List<BaseComponent>();
-            if (groupID == -1) return groupedComponents;
-            foreach (BaseComponent component in SchemeView.Components.Values)
-            {
-                if (component.GroupId == groupID) { groupedComponents.Add(component); }
-            }
-
-            foreach (BaseComponent componentGroup in SchemeView.Components.Values.Where(x => x.GroupId == groupID).DefaultIfEmpty().ToList())
-            {
-                if (componentGroup == null) break;
-                groupedComponents.AddRange(getGroupedComponents(componentGroup.ID));
-            }
-
-            return groupedComponents;
-
-        }
-
-        public BaseComponent getHihghestGroup(BaseComponent comp)
-        {
-            int groupID = comp.GroupId;
-            if (groupID == -1)
-            {
-                return comp;
-            }
-
-            BaseComponent group = SchemeView.Components.Values.Where(x => x.ID == groupID).FirstOrDefault();
-            if (group == null) return comp;
-            while (group.GroupId != -1)
-            {
-                group = getHihghestGroup(group);
-            }
-            return group;
-        }
 
         /// <summary>
         /// Отменить выбор компонента схемы
@@ -965,8 +1053,8 @@ namespace Scada.Scheme.Editor
             {
                 case SelectAction.Select:
                     SchemeView.Components.TryGetValue(componentID, out BaseComponent component);
-                    BaseComponent group = getHihghestGroup(component);
-                    List<BaseComponent> groupedComponents = getGroupedComponents(group.ID);
+                    BaseComponent group =   SchemeView.getHihghestGroup(component);
+                    List<BaseComponent> groupedComponents = SchemeView.getGroupedComponents(group.ID);
                     if (groupedComponents.Count != 0)
                     {
                         DeselectAll();
@@ -1143,8 +1231,8 @@ namespace Scada.Scheme.Editor
                 groupId = -1;
                 return false;
             }
-            groupId = getHihghestGroup(components[0]).ID;
-            List<BaseComponent> groupList = getGroupedComponents(groupId);
+            groupId = SchemeView.getHihghestGroup(components[0]).ID;
+            List<BaseComponent> groupList = SchemeView.getGroupedComponents(groupId);
             if (components.Length != groupList.Count + 1)
             {
                 groupId = -1;
