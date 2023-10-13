@@ -84,6 +84,7 @@ scada.scheme.updateColors = function (divComp, cnlDataExt, isHovered, props) {
 	setBorderColor(divComp, borderColor, true, statusColor);
 }
 
+
 /**************** Custom SVG *********************/
 scada.scheme.CustomSVGRenderer = function () {
 	scada.scheme.ComponentRenderer.call(this);
@@ -126,9 +127,9 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 	var divComp = component.dom;
 	var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
 
-	applyRotation(divComp, props);
 
 	if (!props.Conditions || cnlDataExt.Stat <= 0) { return; }
+	applyRotation(divComp, props);
 
 	var cnlVal = cnlDataExt.Val;
 
@@ -201,180 +202,39 @@ scada.scheme.BasicShapeRenderer.prototype.createDom = function (
 	component.dom = divComp;
 };
 
+scada.scheme.BasicShapeRenderer.prototype.updateData = function (
+	component,
+	renderContext,
+) {
+	var props = component.props;
+
+	if (props.InCnlNum <= 0) {
+		return;
+	}
+
+	var divComp = component.dom;
+	var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
 
 
+	if (!props.Conditions || cnlDataExt.Stat <= 0) { return; }
 
+	var cnlVal = cnlDataExt.Val;
+	applyRotation(divComp, props);
 
-//scada.scheme.BasicShapeRenderer.prototype.createSvgElement = function (shapeType, props) {
-//	var svgElement;
-//	var svgNamespace = "http://www.w3.org/2000/svg";
+	for (var cond of props.Conditions) {
+		if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
+			// Set CSS properties based on Condition
+			scada.scheme.updateStyles(divComp, cond);
+			scada.scheme.handleBlinking(divComp, cond.Blinking);
+			break;
+		}
+	}
 
-//	switch (shapeType) {
-//		case "Polygon":
-//			svgElement = document.createElementNS(svgNamespace, "polygon");
-//			svgElement.setAttribute("points", "0,0 50,0 50,50 0,50");
-//			break;
-//		case "Triangle":
-//			svgElement = document.createElementNS(svgNamespace, "polygon");
-//			svgElement.setAttribute("points", "0,0 50,50 100,0");
-//			break;
-//		case "Rectangle":
-//			svgElement = document.createElementNS(svgNamespace, "rect");
-//			svgElement.setAttribute("width", "100");
-//			svgElement.setAttribute("height", "100");
-//			break;
-//		case "Circle":
-//			svgElement = document.createElementNS(svgNamespace, "circle");
-//			svgElement.setAttribute("cx", "50");
-//			svgElement.setAttribute("cy", "50");
-//			svgElement.setAttribute("r", "50");
-//			break;
-//		case "Line":
-//			svgElement = document.createElementNS(svgNamespace, "line");
-//			svgElement.setAttribute("x1", "0");
-//			svgElement.setAttribute("y1", "0");
-//			svgElement.setAttribute("x2", "100");
-//			svgElement.setAttribute("y2", "100");
-//			break;
-//		case "Polyline":
-//			svgElement = document.createElementNS(svgNamespace, "polyline");
-//			svgElement.setAttribute("points", "20,20 40,25 60,40 80,120 120,140 200,180");
-//			break;
-//		default:
-//			console.warn("Unrecognized shape type: " + shapeType);
-//			return null;
-//	}
+};
 
-//	if (["Polygon", "Triangle", "Rectangle", "Circle", "Polyline"].includes(shapeType)) {
-//		svgElement.setAttribute('fill', props.BackColor || 'none');
-//	}
-//	svgElement.setAttribute('stroke', props.BorderColor || 'black');
-//	svgElement.setAttribute('stroke-width', props.BorderWidth || '1');
-
-//	return svgElement;
-//};
-
-//scada.scheme.BasicShapeRenderer.prototype.createDom = function (
-//	component,
-//	renderContext,
-//) {
-//	var props = component.props;
-//	var shapeType = props.ShapeType;
-	
-//	var divComp = $("<div id='comp" + component.id + "'></div>");
-//	this.prepareComponent(divComp, component, false, true);
-	
-
-//	var svgElement = this.createSvgElement(shapeType, props);
-
-//	var svgNamespace = "http://www.w3.org/2000/svg";
-//	var svgContainer = document.createElementNS(svgNamespace, "svg");
-//	svgContainer.appendChild(svgElement);
-//	svgContainer.setAttribute('viewBox', '0 0 ' + props.Width + ' ' + props.Height);
-//	svgContainer.style.width = "100%";
-//	svgContainer.style.height = "100%";
-
-//	var divSvgComp = $("<div class='svgcomp'> </div>")
-//	divSvgComp.append(svgContainer);
-//	divComp.css({ "overflow": "hidden" });
-		
-//	divComp.append(divSvgComp);
-//	if (props.Rotation && props.Rotation > 0) {
-//		divComp.css({
-//			"transform": "rotate(" + props.Rotation + "deg)",
-//		})
-//	}
-
-//	component.dom = divComp;
-//};
-//scada.scheme.BasicShapeRenderer.prototype.updateData = function (
-//	component,
-//	renderContext,
-//) {
-//	var props = component.props;
-
-//	if (props.InCnlNum > 0) {
-//		var divComp = component.dom;
-//		var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
-
-//		// choose and set colors of the component
-//		var statusColor = cnlDataExt.Color;
-//		var isHovered = divComp.is(":hover");
-
-//		var backColor = this.chooseColor(
-//			isHovered,
-//			props.BackColor,
-//			props.BackColorOnHover,
-//		);
-//		var borderColor = this.chooseColor(
-//			isHovered,
-//			props.BorderColor,
-//			props.BorderColorOnHover,
-//		);
-
-		
-//		var svgElement = divComp.find("svg > *");
-//		svgElement.attr("fill", backColor);
-//		svgElement.attr("stroke", borderColor);
-
-//		divComp.find(".svgcomp").css({
-//			"width": props.Width +"px",
-//			"height": props.Height + "px",
-//		})
-//		if (props.Rotation && props.Rotation > 0) {
-//			divComp.css({
-//				"transform": "rotate(" + props.Rotation + "deg)",
-//			})
-//		}
-//		this.setBackColor(divComp, backColor, true, statusColor);
-//		this.setBorderColor(divComp, borderColor, true, statusColor);
-
-//		if (props.Conditions && cnlDataExt.Stat > 0) {
-//			var cnlVal = cnlDataExt.Val;
-
-//			for (var cond of props.Conditions) {
-//				if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
-//					// Set CSS properties based on Condition
-//					if (cond.Color) {
-//						divComp.css("color", cond.Color);
-//					}
-//					if (cond.BackgroundColor) {
-//						divComp.css("background-color", cond.BackgroundColor);
-//					}
-//					if (cond.TextContent) {
-						
-//						scada.scheme.addInfoTooltipToDiv(divComp[0], cond.TextContent);
-//					}
-//					if (cond.Rotation) {
-//						divComp.css(
-//							"transform", "rotate(" + props.Rotation + "deg)",
-//						)
-//					}
-
-//					divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
-//					divComp.css("width", cond.Width);
-//					divComp.css("height", cond.Height);
-
-//					// Handle Blinking
-//					if (cond.Blinking == 1) {
-//						divComp.addClass("slow-blink");
-//					} else if (cond.Blinking == 2) {
-//						divComp.addClass("fast-blink");
-//					} else {
-//						divComp.removeClass("slow-blink fast-blink");
-//					}
-
-//					break;
-//				}
-//			}
-//		}
-//	}
-//};
-
-
-/** BarGraph */
-
-
+/**
+ *  BarGraph
+ * */
 scada.scheme.BarGraphRenderer = function () {
 	scada.scheme.ComponentRenderer.call(this);
 };
@@ -484,8 +344,6 @@ scada.scheme.BarGraphRenderer.prototype.updateData = function (component, render
 	}
 
 };
-
-
 
 /********** Renderer Map **********/
 

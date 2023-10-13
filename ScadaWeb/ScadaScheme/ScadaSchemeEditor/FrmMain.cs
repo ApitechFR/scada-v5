@@ -1541,8 +1541,6 @@ namespace Scada.Scheme.Editor
                 highestSelectedGroupId = -1;
             }
 
-
-
             editor.History.BeginPoint();
 
             //Ungroups
@@ -1679,8 +1677,6 @@ namespace Scada.Scheme.Editor
                 editor.SymbolPath = findSymboleInAvailableList(lvCompTypes.SelectedItems[0].Text);
                 if (File.Exists(editor.SymbolPath))
                 {
-
-
                     XmlDocument xmlDoc = new XmlDocument();
 
                     try
@@ -1864,8 +1860,6 @@ namespace Scada.Scheme.Editor
                     newProperties.Add(customPropertyDescriptor);
                 }
             }
-
-            
 
             propertyGrid.SelectedObject = new CustomTypeDescriptor(customTypeDescriptor, newProperties);
         }
