@@ -93,6 +93,38 @@ scada.scheme.updateColors = function (divComp, cnlDataExt, isHovered, props) {
 	setBorderColor(divComp, borderColor, true, statusColor);
 };
 
+scada.scheme.updateComponentData = function (component, renderContext) {
+	var props = component.props;
+
+	if (props.InCnlNum <= 0) {
+		return;
+	}
+
+	var divComp = component.dom;
+	var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
+
+	if (!props.Conditions || cnlDataExt.Stat <= 0) {
+		return;
+	}
+
+	var cnlVal = cnlDataExt.Val;
+	
+	for (var cond of props.Conditions) {
+		if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
+			
+			scada.scheme.updateStyles(divComp, cond);
+			scada.scheme.handleBlinking(divComp, cond.Blinking);
+			if (cond.Rotation !== -1 && cond.Rotation !== props.Rotation) {
+
+				scada.scheme.applyRotation(divComp, cond);
+			}
+			break;
+		}
+	}
+	
+}
+
+
 /**************** Custom SVG *********************/
 scada.scheme.CustomSVGRenderer = function () {
 	scada.scheme.ComponentRenderer.call(this);
@@ -130,31 +162,8 @@ scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 	component,
 	renderContext,
 ) {
-	var props = component.props;
-
-	if (props.InCnlNum <= 0) {
-		return;
-	}
-
-	var divComp = component.dom;
-	var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
-
-	if (!props.Conditions || cnlDataExt.Stat <= 0) {
-		return;
-	}
-	applyRotation(divComp, props);
-
-	var cnlVal = cnlDataExt.Val;
-
-	for (var cond of props.Conditions) {
-		if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
-			// Set CSS properties based on Condition
-			scada.scheme.updateStyles(divComp, cond);
-
-			scada.scheme.handleBlinking(divComp, cond.Blinking);
-			break;
-		}
-	}
+	scada.scheme.applyRotation(component.dom, component.props);
+	scada.scheme.updateComponentData(component, renderContext);
 };
 
 /**
@@ -215,30 +224,8 @@ scada.scheme.BasicShapeRenderer.prototype.updateData = function (
 	component,
 	renderContext,
 ) {
-	var props = component.props;
-
-	if (props.InCnlNum <= 0) {
-		return;
-	}
-
-	var divComp = component.dom;
-	var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
-
-	if (!props.Conditions || cnlDataExt.Stat <= 0) {
-		return;
-	}
-
-	var cnlVal = cnlDataExt.Val;
-	applyRotation(divComp, props);
-
-	for (var cond of props.Conditions) {
-		if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
-			// Set CSS properties based on Condition
-			scada.scheme.updateStyles(divComp, cond);
-			scada.scheme.handleBlinking(divComp, cond.Blinking);
-			break;
-		}
-	}
+	scada.scheme.applyRotation(component.dom, component.props);
+	scada.scheme.updateComponentData(component, renderContext);
 };
 
 /**
