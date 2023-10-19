@@ -25,6 +25,9 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			IsVisible = true;
 			Width = 0;
 			Height = 0;
+			Rotation = -1;
+			
+			
 			Blinking = BlinkingSpeed.None;
 		}
 
@@ -40,6 +43,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
 		[Description("The rotation angle of the shape in degrees.")]
+		[CM.DefaultValue(-1)]
 		public int Rotation { get; set; }
 
 		[DisplayName("Width"), Category(Categories.Appearance)]
