@@ -1,45 +1,78 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Schema;
+using System.Diagnostics;
+using System.Text;
+using System.IO;
+using System;
+using Svg;
 
 namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
-
 	public partial class FrmCustomShape : Form
 	{
+		//internationnalization vars
+		private const string ErrorReadingFile = "An error occurred while reading the file: {0}";
+		private const string ErrorDeletingTempFile = "Error deleting temporary file: {0}";
+		private const string ExternalEditorOpenWarning = "An external editor is still open. Are you sure you want to exit without finishing editing?";
+		private const string CloseEditorWarning = "By clicking OK, your editor will be closed. Make sure you have saved all your changes. Do you want to continue?";
+
+
 		public string ShapeType { get; set; }
 		public bool Saved { get; private set; }
+		private readonly string tempFilePath = Path.Combine(Path.GetTempPath(), $"tempSVG.svg");
+		private bool IsExternalEditorOpen { get; set; } = false;
+		private Process externalEditorProcess;
+		private FileSystemWatcher fileWatcher;
+		private string svgText;
+
 
 		public FrmCustomShape()
 		{
+
 			InitializeComponent();
+			UpdateButtonStates();
+
+
 		}
 
+		
 		public FrmCustomShape(string existingShapeType) : this()
 		{
 			ShapeType = existingShapeType;
-			richTextBox1.Text = ShapeType;
+			if (!string.IsNullOrWhiteSpace(ShapeType))
+			{
+				svgText = ShapeType;
+				byte[] svgBytes = Encoding.UTF8.GetBytes(svgText);
+				ctrlSvgViewer1.ShowImage(svgBytes);
+			}
 			Saved = false;
+			UpdateButtonStates();
 		}
 
+
+		private void ShowError(string format, Exception ex)
+		{
+			MessageBox.Show(string.Format(format, ex.Message));
+		}
+
+		private void UpdateButtonStates()
+		{
+			bool hasContent = !string.IsNullOrEmpty(svgText);
+			btnEditExternally.Enabled = hasContent;
+		}
+		
 		private void BtnSave_Click(object sender, EventArgs e)
 		{
-			string svg = richTextBox1.Text;
-			if (ValidateAndHighlightErrors(svg))
-			{
-				MessageBox.Show("The SVG code contains errors. Please correct them before saving.");
-			}
-			else
-			{
-				ShapeType = svg;
-				Saved = true;
-				this.DialogResult = DialogResult.OK;
-				this.Close();
-			}
+			CloseExternalEditor();
+
+			ShapeType = svgText; 
+			Saved = true;
+			this.DialogResult = DialogResult.OK;
+			this.Close();
 		}
+
+
+		
 
 		private void BtnImport_Click(object sender, EventArgs e)
 		{
@@ -49,79 +82,170 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 				if (openFileDialog.ShowDialog() == DialogResult.OK)
 				{
 					txtFilePath.Text = openFileDialog.FileName;
+					ReadSvgFromFile(openFileDialog.FileName);
+					UpdateButtonStates();
+				}
+			}
+		}
+		private void ReadSvgFromFile(string filePath)
+		{
+			try
+			{
+				svgText = File.ReadAllText(filePath);
+				byte[] svgBytes = Encoding.UTF8.GetBytes(svgText);
+				ctrlSvgViewer1.ShowImage(svgBytes);	
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error while reading the SVG file : " + ex.Message);
+			}
+		}
+
+
+		private void BtnEditExternally_Click(object sender, EventArgs e)
+		{
+			if (IsExternalEditorOpen)
+			{
+				BtnDoneEditing_Click(sender, e);
+				return;
+			}
+
+			try
+			{
+				File.WriteAllText(tempFilePath, svgText);
+
+				externalEditorProcess = Process.Start(tempFilePath);
+				WatchFileChanges();
+				IsExternalEditorOpen = true;
+				((Button)sender).Text = "Done";
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"Failed to open the SVG in the external editor: {ex.Message}");
+				Console.WriteLine(ex.Message);
+			}
+		}
+
+		private void WatchFileChanges()
+		{
+			if (fileWatcher == null)
+			{
+				fileWatcher = new FileSystemWatcher
+				{
+					Path = Path.GetDirectoryName(tempFilePath),
+					Filter = Path.GetFileName(tempFilePath),
+					NotifyFilter = NotifyFilters.LastWrite
+				};
+
+				fileWatcher.Changed += OnFileChanged;
+				fileWatcher.EnableRaisingEvents = true;
+			}
+		}
+
+		private void OnFileChanged(object sender, FileSystemEventArgs e)
+		{
+			if (e.ChangeType == WatcherChangeTypes.Changed)
+			{
+				Invoke(new Action(() => {
+					ReadSvgFromFile(tempFilePath);
+					UpdateButtonStates();
+				}));
+			}
+		}
+
+		protected override void OnClosed(EventArgs e)
+		{
+			base.OnClosed(e);
+			CleanupTemporaryFiles();
+
+			if (fileWatcher != null)
+			{
+				fileWatcher.Changed -= OnFileChanged;  
+				fileWatcher.Dispose();
+				fileWatcher = null;
+			}
+		}
+		
+		private void BtnDoneEditing_Click(object sender, EventArgs e)
+		{
+			CloseExternalEditor();
+
+			if (!IsExternalEditorOpen)
+			{
+				ReadSvgFromFile(tempFilePath);
+				btnEditExternally.Text = "Edit";
+			}
+		}
+
+		private void CloseExternalEditor()
+		{
+			if (IsExternalEditorOpen && externalEditorProcess != null && !externalEditorProcess.HasExited)
+			{
+				DialogResult result = MessageBox.Show(CloseEditorWarning,
+													  "Closing the Editor",
+													  MessageBoxButtons.OKCancel,
+													  MessageBoxIcon.Warning);
+
+				if (result == DialogResult.OK)
+				{
 					try
 					{
-						string svgCode = File.ReadAllText(openFileDialog.FileName);
-						richTextBox1.Text = svgCode;
+						externalEditorProcess.Kill();
+						externalEditorProcess.WaitForExit();
+						IsExternalEditorOpen = false;
+						btnEditExternally.Text = "Edit";
 					}
-					catch
+					catch (Exception ex)
 					{
-						MessageBox.Show("An error occurred while reading the file.");
+						ShowError("An error occurred while closing the external editor: {0}", ex);
 					}
 				}
 			}
 		}
-
-		private bool ValidateAndHighlightErrors(string svgCode)
+		protected override void OnClosing(CancelEventArgs e)
 		{
-			bool hasErrors = false;
-			XmlReaderSettings settings = new XmlReaderSettings
+			if (IsExternalEditorOpen && externalEditorProcess != null && !externalEditorProcess.HasExited)
 			{
-				ConformanceLevel = ConformanceLevel.Document,
-				ValidationType = ValidationType.Schema
-			};
+				DialogResult result = MessageBox.Show(ExternalEditorOpenWarning,
+													  "Éditeur externe ouvert",
+													  MessageBoxButtons.OKCancel,
+													  MessageBoxIcon.Warning);
 
-			settings.ValidationEventHandler += (object sender, ValidationEventArgs args) =>
-			{
-				if (args.Severity == XmlSeverityType.Error)
+				if (result == DialogResult.Cancel)
 				{
-					int errorIndex = svgCode.IndexOf(args.Message, StringComparison.InvariantCulture);
-					if (errorIndex >= 0)
-					{
-						HighlightError(richTextBox1, errorIndex, args.Message.Length);
-						richTextBox1.Refresh();
-						hasErrors = true;
-					}
-				}
-			};
-
-			using (StringReader stringReader = new StringReader(svgCode))
-			{
-				using (XmlReader reader = XmlReader.Create(stringReader, settings))
-				{
-					try
-					{
-						while (reader.Read()) { /* Just read */ }
-					}
-					catch (XmlException)
-					{
-						hasErrors = true;
-					}
+					e.Cancel = true; 
+					return;
 				}
 			}
-
-			return hasErrors;
+			base.OnClosing(e);
 		}
 
-		private void HighlightError(RichTextBox richTextBox, int startIndex, int length)
+		private void CleanupTemporaryFiles()
 		{
-			int selectionStartOriginal = richTextBox.SelectionStart;
-			int selectionLengthOriginal = richTextBox.SelectionLength;
-			Color selectionColorOriginal = richTextBox.SelectionBackColor;
-
-			richTextBox.SelectionStart = startIndex;
-			richTextBox.SelectionLength = length;
-			richTextBox.SelectionBackColor = Color.Red;
-
-			richTextBox.SelectionStart = selectionStartOriginal;
-			richTextBox.SelectionLength = selectionLengthOriginal;
-			richTextBox.SelectionBackColor = selectionColorOriginal;
+			try
+			{
+				if (File.Exists(tempFilePath))
+				{
+					File.Delete(tempFilePath);
+				}
+			}
+			catch (Exception ex)
+			{
+				ShowError(ErrorDeletingTempFile, ex);
+			}
 		}
 
-		private void RichTextBox1_TextChanged(object sender, EventArgs e)
+		protected override void Dispose(bool disposing)
 		{
-			ValidateAndHighlightErrors(richTextBox1.Text);
+			if (disposing)
+			{
+				CleanupTemporaryFiles();
+			}
+			base.Dispose(disposing);
 		}
+
 
 	}
+
 }
+

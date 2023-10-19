@@ -11,14 +11,14 @@
 		/// Clean up any resources being used.
 		/// </summary>
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing && (components != null))
-			{
-				components.Dispose();
-			}
-			base.Dispose(disposing);
-		}
+		//protected override void Dispose(bool disposing)
+		//{
+		//	if (disposing && (components != null))
+		//	{
+		//		components.Dispose();
+		//	}
+		//	base.Dispose(disposing);
+		//}
 
 		#region Windows Form Designer generated code
 
@@ -34,7 +34,8 @@
 			this.btnSave = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
-			this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+			this.btnEditExternally = new System.Windows.Forms.Button();
+			this.ctrlSvgViewer1 = new Scada.Scheme.Model.PropertyGrid.CtrlSvgViewer();
 			this.SuspendLayout();
 			// 
 			// txtFilePath
@@ -76,7 +77,7 @@
 			// btnSave
 			// 
 			this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnSave.Location = new System.Drawing.Point(252, 372);
+			this.btnSave.Location = new System.Drawing.Point(256, 372);
 			this.btnSave.Margin = new System.Windows.Forms.Padding(4);
 			this.btnSave.Name = "btnSave";
 			this.btnSave.Size = new System.Drawing.Size(100, 28);
@@ -104,28 +105,41 @@
 			this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.label2.Location = new System.Drawing.Point(30, 105);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(93, 20);
+			this.label2.Size = new System.Drawing.Size(112, 20);
 			this.label2.TabIndex = 7;
-			this.label2.Text = "SVG Code:";
+			this.label2.Text = "Aperçu SVG :";
 			// 
-			// richTextBox1
+			// btnEditExternally
 			// 
-			this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+			this.btnEditExternally.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.btnEditExternally.Location = new System.Drawing.Point(143, 373);
+			this.btnEditExternally.Margin = new System.Windows.Forms.Padding(4);
+			this.btnEditExternally.Name = "btnEditExternally";
+			this.btnEditExternally.Size = new System.Drawing.Size(100, 28);
+			this.btnEditExternally.TabIndex = 9;
+			this.btnEditExternally.Text = "Edit";
+			this.btnEditExternally.UseVisualStyleBackColor = true;
+			this.btnEditExternally.Click += new System.EventHandler(this.BtnEditExternally_Click);
+			// 
+			// ctrlSvgViewer1
+			// 
+			this.ctrlSvgViewer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.richTextBox1.Location = new System.Drawing.Point(34, 128);
-			this.richTextBox1.Name = "richTextBox1";
-			this.richTextBox1.Size = new System.Drawing.Size(402, 224);
-			this.richTextBox1.TabIndex = 8;
-			this.richTextBox1.Text = "";
-			this.richTextBox1.TextChanged += RichTextBox1_TextChanged;
-
+			this.ctrlSvgViewer1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.ctrlSvgViewer1.Location = new System.Drawing.Point(33, 129);
+			this.ctrlSvgViewer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.ctrlSvgViewer1.Name = "ctrlSvgViewer1";
+			this.ctrlSvgViewer1.Size = new System.Drawing.Size(430, 225);
+			this.ctrlSvgViewer1.TabIndex = 11;
 			// 
 			// FrmCustomShape
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(483, 413);
-			this.Controls.Add(this.richTextBox1);
+			this.Controls.Add(this.ctrlSvgViewer1);
+			this.Controls.Add(this.btnEditExternally);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.btnCancel);
@@ -151,6 +165,7 @@
 		private System.Windows.Forms.Button btnSave;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.RichTextBox richTextBox1;
+		private System.Windows.Forms.Button btnEditExternally;
+		private Scheme.Model.PropertyGrid.CtrlSvgViewer ctrlSvgViewer1;
 	}
 }

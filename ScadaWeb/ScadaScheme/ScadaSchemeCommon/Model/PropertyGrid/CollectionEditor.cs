@@ -29,8 +29,10 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing.Design;
+using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using Utils;
 
 namespace Scada.Scheme.Model.PropertyGrid
 {
@@ -40,21 +42,56 @@ namespace Scada.Scheme.Model.PropertyGrid
     /// </summary>
     public class CollectionEditor : UITypeEditor
     {
-        public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
-        {
-            if (context?.Instance is BaseComponent component &&
-                provider?.GetService(typeof(IWindowsFormsEditorService)) is IWindowsFormsEditorService editorService &&
-                value is IList list && value.GetType() is Type valueType && valueType.IsGenericType)
-            {
-                Type itemType = valueType.GetGenericArguments()[0];
-                if (editorService.ShowDialog(new FrmCollectionDialog(list, itemType, component)) == DialogResult.OK)
-                    component.OnItemChanged(SchemeChangeTypes.ComponentChanged, component);
-            }
 
-            return value;
-        }
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+		{
+			object _instance = GetInstanceFromContext(context);
 
-        public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
+			if (_instance is BaseComponent component &&
+				provider?.GetService(typeof(IWindowsFormsEditorService)) is IWindowsFormsEditorService editorService &&
+				value is IList list && value.GetType() is Type valueType && valueType.IsGenericType)
+			{
+				Type itemType = valueType.GetGenericArguments()[0];
+				if (editorService.ShowDialog(new FrmCollectionDialog(list, itemType, component)) == DialogResult.OK)
+					component.OnItemChanged(SchemeChangeTypes.ComponentChanged, component);
+			}
+
+			return value;
+		}
+
+		private object GetInstanceFromContext(ITypeDescriptorContext context)
+		{
+			if (context?.Instance == null)
+				return null;
+
+			try
+			{
+				Type type = context.Instance.GetType();
+				FieldInfo baseTypeDescriptorField = type.GetField("baseTypeDescriptor", BindingFlags.NonPublic | BindingFlags.Instance);
+
+				if (baseTypeDescriptorField == null)
+					return null;
+
+				object baseTypeDescriptor = baseTypeDescriptorField.GetValue(context.Instance);
+				if (baseTypeDescriptor == null)
+					return null;
+
+				Type baseType = baseTypeDescriptor.GetType();
+				FieldInfo fieldInfo = baseType.GetField("_instance", BindingFlags.NonPublic | BindingFlags.Instance);
+
+				if (fieldInfo == null)
+					return null;
+
+				return fieldInfo.GetValue(baseTypeDescriptor);
+			}
+			catch (Exception ex)
+			{
+				
+				return null;
+			}
+		}
+
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
         {
             return UITypeEditorEditStyle.Modal;
         }
