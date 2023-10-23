@@ -1729,26 +1729,6 @@ namespace Scada.Scheme.Editor
             if (cbSchComp.SelectedItem is BaseComponent component)
             {
                 editor.SelectComponent(component.ID);
-                if (component.GroupId != -1)
-                {
-                    TreeNode SymbolNode = findNode(treeView1.Nodes, n =>
-                        {
-                            BaseComponent bc = (BaseComponent)n.Tag;
-                            return (bc.ID == component.GroupId && bc.GetType() == typeof(Symbol));
-                        }
-                    );
-                    if(SymbolNode != null)
-                    {
-                        toolStripButton1.Enabled = true;
-                        toolStripButton1.ToolTipText = "Link to a symbol property";
-                    }
-                    else
-                    {
-                        // todo : set to false
-                        toolStripButton1.Enabled = true;
-                        toolStripButton1.ToolTipText = "The component has to be a symbol child";
-                    }
-                }
                 updateAliasParametersDisplay();
             }
             else
@@ -1871,22 +1851,28 @@ namespace Scada.Scheme.Editor
             }
             string selectedPropertyName = e.NewSelection.PropertyDescriptor.Name;
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
-            if(selectedComponent == null)
-            {
-                toolStripButton1.Enabled = false;
-                toolStripButton1.ToolTipText = "Select a component property to link an alias";
-                return;
-            }
-            if (e.NewSelection.PropertyDescriptor.IsReadOnly && !selectedComponent.AliasesDictionnary.Keys.Contains(selectedPropertyName))
-            {
 
-                toolStripButton1.Enabled = false;
-                toolStripButton1.ToolTipText = "This property cannot be modified";
-            }
-            else
+
+            toolStripButton1.Enabled = false;
+            toolStripButton1.ToolTipText = "Cannot link an alias during scheme edition";
+            if (editor.SchemeView.MainSymbol != null)
             {
-                toolStripButton1.Enabled = true;
-                toolStripButton1.ToolTipText = "Link to a symbol property";
+                if(selectedComponent == null)
+                {
+                    toolStripButton1.Enabled = false;
+                    toolStripButton1.ToolTipText = "Select a component property to link an alias";
+                    return;
+                }
+                if (e.NewSelection.PropertyDescriptor.IsReadOnly && !selectedComponent.AliasesDictionnary.Keys.Contains(selectedPropertyName))
+                {
+                    toolStripButton1.Enabled = false;
+                    toolStripButton1.ToolTipText = "This property cannot be modified";
+                }
+                else
+                {
+                    toolStripButton1.Enabled = true;
+                    toolStripButton1.ToolTipText = "Link to a symbol alias";
+                }
             }
         }
         private void toolStripButton1_Click(object sender, EventArgs e)

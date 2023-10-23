@@ -527,7 +527,7 @@ namespace Scada.Scheme.Editor
 			this.toolStripButton1.Name = "toolStripButton1";
 			this.toolStripButton1.Size = new System.Drawing.Size(29, 87);
 			this.toolStripButton1.Text = "toolStripButton1";
-			this.toolStripButton1.ToolTipText = "Link to a symbol property";
+			this.toolStripButton1.ToolTipText = "Link to a symbol alias";
 			this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
 			// 
 			// ComponentsTree
