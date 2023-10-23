@@ -1729,25 +1729,6 @@ namespace Scada.Scheme.Editor
             if (cbSchComp.SelectedItem is BaseComponent component)
             {
                 editor.SelectComponent(component.ID);
-                //if (component.GroupId != -1)
-                //{
-                //    TreeNode SymbolNode = findNode(treeView1.Nodes, n =>
-                //        {
-                //            BaseComponent bc = (BaseComponent)n.Tag;
-                //            return (bc.ID == component.GroupId && bc.GetType() == typeof(Symbol));
-                //        }
-                //    );
-                //    if(SymbolNode != null)
-                //    {
-                //        toolStripButton1.Enabled = true;
-                //        toolStripButton1.ToolTipText = "Link to a symbol alias";
-                //    }
-                //    else
-                //    {
-                //        toolStripButton1.Enabled = false;
-                //        toolStripButton1.ToolTipText = "The component has to be a symbol child";
-                //    }
-                //}
                 updateAliasParametersDisplay();
             }
             else
