@@ -778,9 +778,25 @@ namespace Scada.Scheme.Editor
                         XmlNode SymbolComponents = xmlDoc.SelectSingleNode(".//Components");
                         if (SymbolComponents != null)
                         {
-                            foreach(XmlNode nodeSymbolComponent in SymbolComponents)
+                            int minX = -1;
+                            int minY = -1;
+                            foreach (XmlNode nodeSymbolComponent in SymbolComponents)
                             {
-                                BaseComponent symbolComponent = CreateComponentOfSymbol(x, y, nodeSymbolComponent);
+                                Point compPoint = Point.GetChildAsPoint(nodeSymbolComponent, "Location");
+                                int compX = compPoint.X;
+                                int compY = compPoint.Y;
+                                if (compX < minX || minX == -1)
+                                {
+                                    minX = compX;
+                                }
+                                if (compY < minY || minY == -1)
+                                {
+                                    minY = compY;
+                                }
+                            }
+                            foreach (XmlNode nodeSymbolComponent in SymbolComponents)
+                            {
+                                BaseComponent symbolComponent = CreateComponentOfSymbol(x-minX, y-minY, nodeSymbolComponent);
                                 symbolComponent.GroupId = component.ID;
                             }
                         }  
