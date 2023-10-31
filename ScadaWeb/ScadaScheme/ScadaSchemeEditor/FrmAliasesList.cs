@@ -30,6 +30,7 @@ namespace Scada.Scheme.Editor
             button3.Enabled = false;
             button5.Enabled = false;
             FillListBox();
+            Text = "Aliases for " + s.Name;
         }
 
         private void FillListBox()
