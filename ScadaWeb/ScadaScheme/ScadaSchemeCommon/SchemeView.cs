@@ -784,7 +784,7 @@ namespace Scada.Scheme
         /// <summary>
         /// Сохранить схему в файле.
         /// </summary>
-        public bool SaveToFile(string fileName ,out string errMsg, bool asSymbol = false)
+        public bool SaveToFile(string fileName ,out string errMsg)//, bool asSymbol = false)
         {
             try
             {
@@ -794,7 +794,7 @@ namespace Scada.Scheme
 
                 // запись заголовка представления
                 XmlElement rootElem = xmlDoc.CreateElement("SchemeView");
-                if (asSymbol||isSymbol)
+                if (isSymbol)
                     rootElem = xmlDoc.CreateElement("SchemeSymbol");
 
                 rootElem.SetAttribute("title", SchemeDoc.Title);
@@ -822,7 +822,7 @@ namespace Scada.Scheme
                 foreach (BaseComponent component in Components.Values)
                 {
                     //change
-                    if ((getHihghestGroup(component) is Symbol sym && sym.ID != component.ID) && (isSymbol || asSymbol) && component.ID == MainSymbol.ID)
+                    if ((getHihghestGroup(component) is Symbol sym && sym.ID != component.ID) && (isSymbol ) && component.ID == MainSymbol.ID)
                     { continue; }
 
                     if (component is UnknownComponent)
@@ -845,7 +845,7 @@ namespace Scada.Scheme
                                 xmlDoc.CreateElement(compType.Name) /*стандартный компонент*/ :
                                 xmlDoc.CreateElement(compLibSpec.XmlPrefix, compType.Name, compLibSpec.XmlNs);
 
-                        if ((isSymbol || asSymbol) && component.ID == MainSymbol.ID)
+                        if ((isSymbol ) && component.ID == MainSymbol.ID)
                         {
                             componentElem = xmlDoc.CreateElement("MainSymbol");
                         }
@@ -862,10 +862,10 @@ namespace Scada.Scheme
                             {
                                 symbolID = symbol.SymbolId;
 
-                                if ((isSymbol || asSymbol) && component.ID == MainSymbol.ID)//change
+                                if ((isSymbol ) && component.ID == MainSymbol.ID)//change
                                     componentsElem.AppendChild(componentElem);
 
-                                if ((isSymbol || asSymbol) && symbol.ID == MainSymbol.ID)
+                                if ((isSymbol ) && symbol.ID == MainSymbol.ID)
                                 {
                                     groupsElem.AppendChild(componentElem);
                                     rootElem.AppendChild(componentElem);
