@@ -553,6 +553,8 @@ namespace Scada.Scheme.Editor
 
             toolStripButton2.Enabled = editor.SchemeView.isSymbol;
             RefreshAvailableSymbols();
+
+            toolStripStatusLabel1.Text = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Editing symbol" : "Editing scheme") : "";
         }
 
         /// <summary>
