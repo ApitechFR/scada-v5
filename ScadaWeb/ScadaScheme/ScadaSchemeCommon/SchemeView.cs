@@ -243,7 +243,6 @@ namespace Scada.Scheme
                 XmlNodeList symbolNodes = xmlDoc.SelectNodes("/SchemeView/Symbols/Symbol");
                 List<XmlNode> lstNode = new List<XmlNode>();
 
-                //todo, comparaison ici 
                 List<string> listComponentScheme = new List<string>();
                 listComponentScheme = findComponentsOfScheme(rootElem);
                 List<string> symbolPattern = new List<string>();
@@ -261,7 +260,7 @@ namespace Scada.Scheme
                             XmlNode idNode = clonedSymbol.SelectSingleNode("ID");
                             if (idNode != null)
                             {
-                                idNode.InnerText = idNode.InnerText + "000" + count; 
+                                idNode.InnerText = $"{findMaxID(rootElem) + count}"; 
                             }
                             XmlElement newClonedSymbolElement = xmlDoc.CreateElement("Symbol");
                             newClonedSymbolElement.InnerXml = clonedSymbol.InnerXml;
@@ -449,6 +448,27 @@ namespace Scada.Scheme
             }
 
             return listComponents;
+        }
+
+        private int findMaxID(XmlElement root)
+        {
+            int maxID = 0;
+
+            XmlNodeList idNodes = root.SelectNodes("//ID");
+
+            foreach (XmlNode node in idNodes)
+            {
+                int currentID;
+                if (int.TryParse(node.InnerText, out currentID))
+                {
+                    if (currentID > maxID)
+                    {
+                        maxID = currentID;
+                    }
+                }
+            }
+
+            return maxID;
         }
 
         private int countPatternOccurrences(List<string> source, List<string> pattern)
