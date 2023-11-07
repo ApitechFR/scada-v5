@@ -551,10 +551,10 @@ namespace Scada.Scheme.Editor
             if (!loadOK)
                 ScadaUiUtils.ShowError(errMsg);
 
-            toolStripButton2.Enabled = editor.SchemeView.isSymbol;
             RefreshAvailableSymbols();
             if(editor.SchemeView != null)
             {
+                toolStripButton2.Enabled = editor.SchemeView.isSymbol;
                 toolStripStatusLabel1.Text = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Editing symbol" : "Editing scheme") : "";
                 toolStripButton3.ToolTipText = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Convert into scheme" : "Convert into symbol") : "";
             }
@@ -1925,12 +1925,17 @@ namespace Scada.Scheme.Editor
             string selectedPropertyName = e.NewSelection.PropertyDescriptor.Name;
             BaseComponent selectedComponent = cbSchComp.SelectedItem as BaseComponent;
 
-
             toolStripButton1.Enabled = false;
             toolStripButton1.ToolTipText = "Cannot link an alias during scheme edition";
             if (editor.SchemeView.MainSymbol != null)
             {
-                if(selectedComponent == null)
+                if (selectedComponent.ID == editor.SchemeView.MainSymbol.ID)
+                {
+                    toolStripButton1.Enabled = false;
+                    toolStripButton1.ToolTipText = "Cannot link own alias";
+                    return;
+                }
+                if (selectedComponent == null)
                 {
                     toolStripButton1.Enabled = false;
                     toolStripButton1.ToolTipText = "Select a component property to link an alias";
@@ -2038,13 +2043,6 @@ namespace Scada.Scheme.Editor
             SaveScheme(true);
         }
 
-        private void newSymbolToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // создание новой схемы
-            if (ConfirmCloseScheme())
-                InitScheme(isSymbol:true);
-        }
-
 		private void handleUpdateAlias(object sender, OnUpdateAliasEventArgs e)
         {
             //update values in components that use aliases
@@ -2139,11 +2137,6 @@ namespace Scada.Scheme.Editor
             return "";
         }
 
-        private void btnFileNew_ButtonClick(object sender, EventArgs e)
-        {
-
-        }
-
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
             if(editor.SchemeView == null)
@@ -2158,6 +2151,7 @@ namespace Scada.Scheme.Editor
             {
                 convertSchemeToSymbol();
             }
+            toolStripButton2.Enabled = editor.SchemeView.isSymbol;
             toolStripStatusLabel1.Text = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Editing symbol" : "Editing scheme") : "";
             toolStripButton3.ToolTipText = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Convert into scheme" : "Convert into symbol") : "";
         }
@@ -2200,16 +2194,18 @@ namespace Scada.Scheme.Editor
             {
                 if (c.GroupId == -1)
                 {
-                    //remove component from the scheme
-                    //editor.SchemeView.Components.Remove(c.ID);
-                    //editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentDeleted, c);
                     c.GroupId = mainSymbol.ID;
-                    //add component to the scheme
-                    //editor.SchemeView.Components.Add(c.ID, c);
                     editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
                 }
             }
             return;
+        }
+
+        private void btnFileNew_Click(object sender, EventArgs e)
+        {
+            // создание новой схемы
+            if (ConfirmCloseScheme())
+                InitScheme();
         }
     }
 }
