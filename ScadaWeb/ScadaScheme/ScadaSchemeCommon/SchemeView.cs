@@ -243,12 +243,44 @@ namespace Scada.Scheme
                 XmlNodeList symbolNodes = xmlDoc.SelectNodes("/SchemeView/Symbols/Symbol");
                 List<XmlNode> lstNode = new List<XmlNode>();
 
+                //todo, comparaison ici 
+                List<string> listComponentScheme = new List<string>();
+                listComponentScheme = findComponentsOfScheme(rootElem);
+                List<string> symbolPattern = new List<string>();
+
                 foreach (XmlNode symbolNode in symbolNodes)
                 {
-                    XmlElement newSymbolElement = xmlDoc.CreateElement("Symbol");
-                    newSymbolElement.InnerXml = symbolNode.InnerXml;
-                    componentsNode.PrependChild(newSymbolElement);
-                    lstNode.Add(symbolNode);
+                    symbolPattern = findComponentsOfSymbol(symbolNode);
+                    if (countPatternOccurrences(listComponentScheme, symbolPattern) > 1)
+                    {
+                        int count = 1;
+                        while (countPatternOccurrences(listComponentScheme, symbolPattern) - count >= 1)
+                        {
+                            XmlNode clonedSymbol = symbolNode.CloneNode(deep: true);
+                            //ID modification
+                            XmlNode idNode = clonedSymbol.SelectSingleNode("ID");
+                            if (idNode != null)
+                            {
+                                idNode.InnerText = idNode.InnerText + "000" + count; 
+                            }
+                            XmlElement newClonedSymbolElement = xmlDoc.CreateElement("Symbol");
+                            newClonedSymbolElement.InnerXml = clonedSymbol.InnerXml;
+                            componentsNode.PrependChild(newClonedSymbolElement);
+                            lstNode.Add(symbolNode);
+                            count++;
+                        }
+                        XmlElement newSymbolElement = xmlDoc.CreateElement("Symbol");
+                        newSymbolElement.InnerXml = symbolNode.InnerXml;
+                        componentsNode.PrependChild(newSymbolElement);
+                        lstNode.Add(symbolNode);
+                    }
+                    else
+                    {
+                        XmlElement newSymbolElement = xmlDoc.CreateElement("Symbol");
+                        newSymbolElement.InnerXml = symbolNode.InnerXml;
+                        componentsNode.PrependChild(newSymbolElement);
+                        lstNode.Add(symbolNode);
+                    }
                 }
 
                 foreach (XmlNode compNode in componentsNode.ChildNodes)
@@ -326,7 +358,10 @@ namespace Scada.Scheme
                 //if (symbolNode != null)
                 //    symbolNode.ParentNode.RemoveChild(symbolNode);
                 foreach (XmlNode n in lstNode)
-                    n.ParentNode.RemoveChild(n);
+                {
+                    if(n.ParentNode != null)
+                        n.ParentNode.RemoveChild(n);
+                }
             }
 
 
@@ -371,6 +406,65 @@ namespace Scada.Scheme
                 }
             }
         }
+        private List<string> findComponentsOfScheme(XmlElement root)
+        {
+            List<string> listComponents = new List<string>();
+
+            XmlNode componentsNode = root.SelectSingleNode("//Components");
+
+            if (componentsNode != null)
+            {
+                XmlNodeList componentNodes = componentsNode.ChildNodes;
+
+                foreach (XmlNode componentNode in componentNodes)
+                {
+                    if (componentNode is XmlElement && componentNode.Name != "Symbol")
+                    {
+                        XmlElement element = (XmlElement)componentNode;
+                        listComponents.Add(componentNode.Name);
+                    }
+                }
+            }
+
+            return listComponents;
+        }
+
+        private List<string> findComponentsOfSymbol(XmlNode symbolNode)
+        {
+            List<string> listComponents = new List<string>();
+
+            XmlNode componentsNode = symbolNode.SelectSingleNode("./Components");
+
+            if (componentsNode != null)
+            {
+                XmlNodeList componentNodes = componentsNode.ChildNodes;
+
+                foreach (XmlNode componentNode in componentNodes)
+                {
+                    if (componentNode is XmlElement)
+                    {
+                        listComponents.Add(componentNode.Name);
+                    }
+                }
+            }
+
+            return listComponents;
+        }
+
+        private int countPatternOccurrences(List<string> source, List<string> pattern)
+        {
+            int count = 0;
+
+            for (int i = 0; i <= source.Count - pattern.Count; i++)
+            {
+                if (Enumerable.SequenceEqual(source.Skip(i).Take(pattern.Count), pattern))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
         
         private void LoadSymbol(string symbolPath, XmlElement rootElem, Symbol symbol)
         {
@@ -393,9 +487,8 @@ namespace Scada.Scheme
                     XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
 
                     symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
-
                     LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
-                    
+
                 }
                 else
                 {
