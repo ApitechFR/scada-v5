@@ -553,8 +553,11 @@ namespace Scada.Scheme.Editor
 
             toolStripButton2.Enabled = editor.SchemeView.isSymbol;
             RefreshAvailableSymbols();
-
-            toolStripStatusLabel1.Text = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Editing symbol" : "Editing scheme") : "";
+            if(editor.SchemeView != null)
+            {
+                toolStripStatusLabel1.Text = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Editing symbol" : "Editing scheme") : "";
+                toolStripButton3.ToolTipText = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Convert into scheme" : "Convert into symbol") : "";
+            }
         }
 
         /// <summary>
@@ -990,7 +993,7 @@ namespace Scada.Scheme.Editor
         private void addComponentToTree(BaseComponent component)
         {
             TreeNode tn = null;
-            bool isGroup = component.GetType() == new ComponentGroup().GetType();
+            bool isGroup = component is ComponentGroup || component.GetType().IsSubclassOf(typeof(ComponentGroup));
             tn = new TreeNode(component.ToString());
 
             tn.Tag = component;
@@ -1580,13 +1583,8 @@ namespace Scada.Scheme.Editor
         {
             BaseComponent[] selection = editor.GetSelectedComponents();
             int highestSelectedGroupId = getHighestGroupID(selection,out bool countCheck);
-
-
             bool containsComponentGroup = selection.Where(x => x is ComponentGroup).Count()>0;
-
-
             bool allSelectedAreTheSameGroup = true;
-
 
             foreach (BaseComponent comp in selection)
             {
@@ -2144,6 +2142,74 @@ namespace Scada.Scheme.Editor
         private void btnFileNew_ButtonClick(object sender, EventArgs e)
         {
 
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            if(editor.SchemeView == null)
+            {
+                return;
+            }
+            if (editor.SchemeView.isSymbol)
+            {
+                convertSymbolToScheme();
+            }
+            else
+            {
+                convertSchemeToSymbol();
+            }
+            toolStripStatusLabel1.Text = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Editing symbol" : "Editing scheme") : "";
+            toolStripButton3.ToolTipText = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Convert into scheme" : "Convert into symbol") : "";
+        }
+        private void convertSymbolToScheme()
+        {
+            editor.SchemeView.isSymbol = false;
+            //remove main symbol from all related components
+            foreach (BaseComponent c in editor.SchemeView.Components.Values)
+            {
+                if (c.GroupId == editor.SchemeView.MainSymbol.ID)
+                {
+                    c.GroupId = -1;
+                    c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+                }
+            }
+            //remove main symbol from the scheme
+            editor.SchemeView.Components.Remove(editor.SchemeView.MainSymbol.ID);
+            editor.SchemeView.MainSymbol.OnItemChanged(SchemeChangeTypes.ComponentDeleted, editor.SchemeView.MainSymbol);
+            editor.SchemeView.MainSymbol = null;
+            return;
+        }
+        private void convertSchemeToSymbol()
+        {
+            editor.SchemeView.isSymbol = true;
+
+            //create main symbol
+            Symbol mainSymbol = new Symbol();
+            mainSymbol.ID = editor.SchemeView.GetNextComponentID();
+            mainSymbol.SchemeView = editor.SchemeView;
+            mainSymbol.ItemChanged += Scheme_ItemChanged;
+            mainSymbol.ZIndex = 0;
+            mainSymbol.Location = new Point(0, 0);
+            mainSymbol.Name = "MainSymbol";
+            editor.SchemeView.MainSymbol = mainSymbol;
+            editor.SchemeView.Components.Add(mainSymbol.ID, mainSymbol);
+            editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, mainSymbol);
+
+            //add main symbol to all related components
+            foreach (BaseComponent c in editor.SchemeView.Components.Values.Where(c=>c.ID != mainSymbol.ID))
+            {
+                if (c.GroupId == -1)
+                {
+                    //remove component from the scheme
+                    //editor.SchemeView.Components.Remove(c.ID);
+                    //editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentDeleted, c);
+                    c.GroupId = mainSymbol.ID;
+                    //add component to the scheme
+                    //editor.SchemeView.Components.Add(c.ID, c);
+                    editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+                }
+            }
+            return;
         }
     }
 }
