@@ -532,9 +532,6 @@ namespace Scada.Scheme.Editor
                 loadOK = true;
                 errMsg = "";
                 editor.NewScheme(isSymbol);
-                miSaveSymbol.Visible = isSymbol;
-
-
             }
             else
             {
@@ -1916,6 +1913,7 @@ namespace Scada.Scheme.Editor
 
             propertyGrid.SelectedObject = new CustomTypeDescriptor(customTypeDescriptor, newProperties);
         }
+        
         private void propertyGrid_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
         {
             if(e.NewSelection == null || e.NewSelection.PropertyDescriptor == null)
@@ -1929,16 +1927,16 @@ namespace Scada.Scheme.Editor
             toolStripButton1.ToolTipText = "Cannot link an alias during scheme edition";
             if (editor.SchemeView.MainSymbol != null)
             {
-                if (selectedComponent.ID == editor.SchemeView.MainSymbol.ID)
-                {
-                    toolStripButton1.Enabled = false;
-                    toolStripButton1.ToolTipText = "Cannot link own alias";
-                    return;
-                }
                 if (selectedComponent == null)
                 {
                     toolStripButton1.Enabled = false;
                     toolStripButton1.ToolTipText = "Select a component property to link an alias";
+                    return;
+                }
+                if (selectedComponent.ID == editor.SchemeView.MainSymbol.ID)
+                {
+                    toolStripButton1.Enabled = false;
+                    toolStripButton1.ToolTipText = "Cannot link own alias";
                     return;
                 }
                 if (e.NewSelection.PropertyDescriptor.IsReadOnly && !selectedComponent.AliasesDictionnary.Keys.Contains(selectedPropertyName))
@@ -2031,16 +2029,6 @@ namespace Scada.Scheme.Editor
                 propertyGrid_PropertyValueChanged(propertyGrid, new PropertyValueChangedEventArgs(selectedProperty, oldProperty));
                 return;
             }
-        }
-
-        private void miSaveSymbol_ButtonClick(object sender, EventArgs e)
-        {
-            SaveScheme(false);
-        }
-
-        private void miSaveSymbolAs_Click(object sender, EventArgs e)
-        {
-            SaveScheme(true);
         }
 
 		private void handleUpdateAlias(object sender, OnUpdateAliasEventArgs e)
@@ -2154,6 +2142,16 @@ namespace Scada.Scheme.Editor
             toolStripButton2.Enabled = editor.SchemeView.isSymbol;
             toolStripStatusLabel1.Text = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Editing symbol" : "Editing scheme") : "";
             toolStripButton3.ToolTipText = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Convert into scheme" : "Convert into symbol") : "";
+            
+            int newCbIndex = cbSchComp.SelectedItem == null ? 0 : cbSchComp.SelectedIndex;
+
+            if(tabControl.SelectedIndex == 1)
+            {
+                //force information refresh
+                cbSchComp.SelectedItem = null;
+                cbSchComp.SelectedItem = cbSchComp.Items[newCbIndex];
+            }
+            
         }
         private void convertSymbolToScheme()
         {

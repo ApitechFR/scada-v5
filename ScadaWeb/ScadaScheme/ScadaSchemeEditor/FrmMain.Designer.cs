@@ -32,19 +32,18 @@ namespace Scada.Scheme.Editor
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Standard", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem("Pointer", "(none)");
             System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem("Static Text", "(none)");
             System.Windows.Forms.ListViewItem listViewItem3 = new System.Windows.Forms.ListViewItem("Dynamic Text", "(none)");
             System.Windows.Forms.ListViewItem listViewItem4 = new System.Windows.Forms.ListViewItem("Static Picture", "(none)");
             System.Windows.Forms.ListViewItem listViewItem5 = new System.Windows.Forms.ListViewItem("Dynamic Picture", "(none)");
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.toolStrip = new System.Windows.Forms.ToolStrip();
+            this.btnFileNew = new System.Windows.Forms.ToolStripButton();
             this.btnFileOpen = new System.Windows.Forms.ToolStripButton();
             this.btnFileSave = new System.Windows.Forms.ToolStripSplitButton();
             this.miFileSaveAs2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.miSaveSymbol = new System.Windows.Forms.ToolStripSplitButton();
-            this.miSaveSymbolAs = new System.Windows.Forms.ToolStripMenuItem();
             this.btnFileOpenBrowser = new System.Windows.Forms.ToolStripButton();
             this.sep1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnEditCut = new System.Windows.Forms.ToolStripButton();
@@ -75,6 +74,7 @@ namespace Scada.Scheme.Editor
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.ComponentsTree = new System.Windows.Forms.TabPage();
+            this.treeView1 = new Scada.Scheme.Editor.TreeViewMultipleSelection();
             this.ofdScheme = new System.Windows.Forms.OpenFileDialog();
             this.sfdScheme = new System.Windows.Forms.SaveFileDialog();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
@@ -101,8 +101,6 @@ namespace Scada.Scheme.Editor
             this.miToolsOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.miHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.miHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
-            this.treeView1 = new Scada.Scheme.Editor.TreeViewMultipleSelection();
-            this.btnFileNew = new System.Windows.Forms.ToolStripButton();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -128,7 +126,6 @@ namespace Scada.Scheme.Editor
             this.btnFileNew,
             this.btnFileOpen,
             this.btnFileSave,
-            this.miSaveSymbol,
             this.btnFileOpenBrowser,
             this.sep1,
             this.btnEditCut,
@@ -148,6 +145,16 @@ namespace Scada.Scheme.Editor
             this.toolStrip.Size = new System.Drawing.Size(465, 27);
             this.toolStrip.TabIndex = 0;
             this.toolStrip.MouseEnter += new System.EventHandler(this.FrmMain_MouseEnter);
+            // 
+            // btnFileNew
+            // 
+            this.btnFileNew.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnFileNew.Image = ((System.Drawing.Image)(resources.GetObject("btnFileNew.Image")));
+            this.btnFileNew.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnFileNew.Name = "btnFileNew";
+            this.btnFileNew.Size = new System.Drawing.Size(24, 24);
+            this.btnFileNew.ToolTipText = "New scheme (Ctrl+N)";
+            this.btnFileNew.Click += new System.EventHandler(this.btnFileNew_Click);
             // 
             // btnFileOpen
             // 
@@ -175,29 +182,9 @@ namespace Scada.Scheme.Editor
             // 
             this.miFileSaveAs2.Image = ((System.Drawing.Image)(resources.GetObject("miFileSaveAs2.Image")));
             this.miFileSaveAs2.Name = "miFileSaveAs2";
-            this.miFileSaveAs2.Size = new System.Drawing.Size(184, 26);
+            this.miFileSaveAs2.Size = new System.Drawing.Size(123, 22);
             this.miFileSaveAs2.Text = "Save As...";
             this.miFileSaveAs2.Click += new System.EventHandler(this.miFileSaveAs_Click);
-            // 
-            // miSaveSymbol
-            // 
-            this.miSaveSymbol.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.miSaveSymbol.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.miSaveSymbolAs});
-            this.miSaveSymbol.Image = global::Scada.Scheme.Editor.Properties.Resources.component;
-            this.miSaveSymbol.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.miSaveSymbol.Name = "miSaveSymbol";
-            this.miSaveSymbol.Size = new System.Drawing.Size(36, 24);
-            this.miSaveSymbol.Text = "Save Symbol";
-            this.miSaveSymbol.ButtonClick += new System.EventHandler(this.miSaveSymbol_ButtonClick);
-            // 
-            // miSaveSymbolAs
-            // 
-            this.miSaveSymbolAs.Image = global::Scada.Scheme.Editor.Properties.Resources.component;
-            this.miSaveSymbolAs.Name = "miSaveSymbolAs";
-            this.miSaveSymbolAs.Size = new System.Drawing.Size(184, 26);
-            this.miSaveSymbolAs.Text = "Save Symbol As...";
-            this.miSaveSymbolAs.Click += new System.EventHandler(this.miSaveSymbolAs_Click);
             // 
             // btnFileOpenBrowser
             // 
@@ -538,6 +525,18 @@ namespace Scada.Scheme.Editor
             this.ComponentsTree.Text = "View";
             this.ComponentsTree.UseVisualStyleBackColor = true;
             // 
+            // treeView1
+            // 
+            this.treeView1.BackColor = System.Drawing.Color.White;
+            this.treeView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.treeView1.Location = new System.Drawing.Point(0, 0);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.SelectedNodes = ((System.Collections.ArrayList)(resources.GetObject("treeView1.SelectedNodes")));
+            this.treeView1.Size = new System.Drawing.Size(325, 413);
+            this.treeView1.Sorted = true;
+            this.treeView1.TabIndex = 0;
+            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_onNodeSelection);
+            // 
             // ofdScheme
             // 
             this.ofdScheme.DefaultExt = "*.sch";
@@ -759,28 +758,6 @@ namespace Scada.Scheme.Editor
             this.miHelpAbout.Text = "About";
             this.miHelpAbout.Click += new System.EventHandler(this.miHelpAbout_Click);
             // 
-            // treeView1
-            // 
-            this.treeView1.BackColor = System.Drawing.Color.White;
-            this.treeView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.treeView1.Location = new System.Drawing.Point(0, 0);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.SelectedNodes = ((System.Collections.ArrayList)(resources.GetObject("treeView1.SelectedNodes")));
-            this.treeView1.Size = new System.Drawing.Size(325, 413);
-            this.treeView1.Sorted = true;
-            this.treeView1.TabIndex = 0;
-            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_onNodeSelection);
-            // 
-            // btnFileNew
-            // 
-            this.btnFileNew.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnFileNew.Image = ((System.Drawing.Image)(resources.GetObject("btnFileNew.Image")));
-            this.btnFileNew.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnFileNew.Name = "btnFileNew";
-            this.btnFileNew.Size = new System.Drawing.Size(24, 24);
-            this.btnFileNew.ToolTipText = "New scheme (Ctrl+N)";
-            this.btnFileNew.Click += new System.EventHandler(this.btnFileNew_Click);
-            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -891,8 +868,6 @@ namespace Scada.Scheme.Editor
         private SplitContainer splitContainer2;
         private SplitContainer splitContainer1;
         private ToolStripButton toolStripButton1;
-        private ToolStripSplitButton miSaveSymbol;
-        private ToolStripMenuItem miSaveSymbolAs;
         private ToolStripButton toolStripButton2;
         private ToolStripStatusLabel toolStripStatusLabel1;
         private ToolStripButton toolStripButton3;
