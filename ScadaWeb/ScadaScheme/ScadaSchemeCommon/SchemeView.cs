@@ -100,6 +100,8 @@ namespace Scada.Scheme
 
         public Symbol MainSymbol { get; set; }
 
+        private List<string> UpdatedSymbolId = new List<string>();
+
         /// <summary>
         /// Adds the input channels to the view.
         /// </summary>
@@ -404,6 +406,9 @@ namespace Scada.Scheme
                         images[image.Name] = image;
                 }
             }
+
+            //clear list
+            UpdatedSymbolId.Clear();
         }
         private List<string> findComponentsOfScheme(XmlElement root)
         {
@@ -490,7 +495,7 @@ namespace Scada.Scheme
         {
             string symbolIndexPath = symbolPath + "\\index.xml";
 
-            if (!IsSymbolUpToDate(symbol, symbolIndexPath))
+            if (!IsSymbolUpToDate(symbol, symbolIndexPath) && !UpdatedSymbolId.Contains(symbol.SymbolId))
             {
                 DialogResult popup = MessageBox.Show
                     (
@@ -514,6 +519,8 @@ namespace Scada.Scheme
                 {
                     LoadFromCurrentFile(rootElem, symbol);
                 }
+
+                UpdatedSymbolId.Add(symbol.SymbolId);
             }
             else
             {
