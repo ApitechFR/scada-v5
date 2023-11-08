@@ -317,11 +317,16 @@ namespace Scada.Scheme
                             }
                         }
                     }
-
-                    Components[component.ID] = component;
+                    if (!Components.ContainsKey(component.ID))
+                        Components[component.ID] = component;
+                    else 
+                    { 
+                        component.ID = maxComponentID + 1;
+                        Components[component.ID] = component;
+                    }
                     if (component.ID > maxComponentID)
                         maxComponentID = component.ID;
-                    Components[component.ID] = component;
+                    
 
 
                     if (component is Symbol symbol)
