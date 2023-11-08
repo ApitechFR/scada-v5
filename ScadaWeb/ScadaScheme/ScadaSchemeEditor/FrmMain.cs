@@ -41,9 +41,10 @@ using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using System.Xml;
 using Utils;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Forms.Button;
 using ListViewItem = System.Windows.Forms.ListViewItem;
+using CM = System.ComponentModel;
+using File = System.IO.File;
 
 namespace Scada.Scheme.Editor
 {
@@ -1882,22 +1883,13 @@ namespace Scada.Scheme.Editor
             Symbol parentSymbol = editor.SchemeView.MainSymbol;
             GridItem selectedProperty = propertyGrid.SelectedGridItem;
 
-
             string selectedPropertyName = selectedProperty.PropertyDescriptor.Name;
             bool isCnlProperty = (selectedPropertyName == "InCnlNumCustom" || selectedPropertyName == "CtrlCnlNumCustom");
-            //if(selectedPropertyName == "InCnlNumCustom")
-            //{
-            //    selectedPropertyName = "InCnlNum";
-            //    isCnlProperty = true;
-            //}
-            //else if(selectedPropertyName == "CtrlCnlNumCustom")
-            //{
-            //    selectedPropertyName = "CtrlCnlNum";
-            //    isCnlProperty = true;
-            //}
 
+            bool isColor = selectedProperty.PropertyDescriptor.Attributes.OfType<CM.EditorAttribute>().Any(attribute => attribute.EditorTypeName == typeof(Model.PropertyGrid.ColorEditor).AssemblyQualifiedName);
+            string selectedPropertyTypeName = isColor ? "Color" : selectedProperty.PropertyDescriptor.PropertyType.Name;
             List<Alias> availableAliases = new List<Alias>();
-            availableAliases = parentSymbol.AliasList.Where(a => isCnlProperty ? a.isCnlLinked : (!a.isCnlLinked && a.AliasTypeName   == selectedProperty.PropertyDescriptor.PropertyType.Name)).ToList();
+            availableAliases = parentSymbol.AliasList.Where(a => isCnlProperty ? a.isCnlLinked : (!a.isCnlLinked && a.AliasTypeName   == selectedPropertyTypeName)).ToList();
             int defaultSelectionIndex = -1;
             if (selectedComponent.AliasesDictionnary.ContainsKey(selectedPropertyName))
             {
