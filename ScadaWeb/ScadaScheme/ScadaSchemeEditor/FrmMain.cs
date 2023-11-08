@@ -707,6 +707,7 @@ namespace Scada.Scheme.Editor
                         {
                             addComponentToTree(component);
                             BaseComponent group = editor.SchemeView.getHihghestGroup(component);
+                            
                             if (group is Symbol symbol && group.ID != component.ID)
                             {
                                 if(editor.SchemeView.isSymbol && symbol.ID == editor.SchemeView.MainSymbol.ID) 
@@ -2146,6 +2147,7 @@ namespace Scada.Scheme.Editor
                     c.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
                 }
             }
+
             //remove main symbol from the scheme
             editor.SchemeView.Components.Remove(editor.SchemeView.MainSymbol.ID);
             editor.SchemeView.MainSymbol.OnItemChanged(SchemeChangeTypes.ComponentDeleted, editor.SchemeView.MainSymbol);
@@ -2168,16 +2170,26 @@ namespace Scada.Scheme.Editor
             editor.SchemeView.MainSymbol = mainSymbol;
             editor.SchemeView.Components.Add(mainSymbol.ID, mainSymbol);
             editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentAdded, mainSymbol);
-
-            //add main symbol to all related components
-            foreach (BaseComponent c in editor.SchemeView.Components.Values.Where(c=>c.ID != mainSymbol.ID))
+            List<BaseComponent> componentsToChange = editor.SchemeView.Components.Values.Where(c => c is Symbol && c.ID != mainSymbol.ID).ToList();
+            foreach (BaseComponent c in componentsToChange)
             {
-                if (c.GroupId == -1)
+                List<BaseComponent> childrenToChange = editor.SchemeView.Components.Values.Where(x => x.GroupId == c.ID).ToList();
+
+                foreach (BaseComponent child in childrenToChange)
                 {
-                    c.GroupId = mainSymbol.ID;
-                    editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+                    child.GroupId = (c.GroupId != -1) ? c.GroupId : -1;
+                    child.AliasesDictionnary = new Dictionary<string, Alias>();
+                    child.OnItemChanged(SchemeChangeTypes.ComponentChanged, child);
                 }
+                editor.SchemeView.Components.Remove(c.ID);
+                editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentDeleted, c);
             }
+            foreach (BaseComponent c in editor.SchemeView.Components.Values.Where(c=>c.GroupId == -1 && c.ID != mainSymbol.ID))
+            {
+                c.GroupId = mainSymbol.ID;
+                editor.SchemeView.SchemeDoc.OnItemChanged(SchemeChangeTypes.ComponentChanged, c);
+            }
+            FillSchemeComponents();
             return;
         }
 
