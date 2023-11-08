@@ -100,7 +100,7 @@ namespace Scada.Scheme
 
         public Symbol MainSymbol { get; set; }
 
-        private List<string> UpdatedSymbolId = new List<string>();
+        private Dictionary<string,bool> UpdatedSymbolId = new Dictionary<string, bool>();
 
         /// <summary>
         /// Adds the input channels to the view.
@@ -263,6 +263,7 @@ namespace Scada.Scheme
                             if (idNode != null)
                             {
                                 idNode.InnerText = $"{findMaxID(rootElem) + count}"; 
+                                //idNode.InnerText = "100";
                             }
                             XmlElement newClonedSymbolElement = xmlDoc.CreateElement("Symbol");
                             newClonedSymbolElement.InnerXml = clonedSymbol.InnerXml;
@@ -495,32 +496,51 @@ namespace Scada.Scheme
         {
             string symbolIndexPath = symbolPath + "\\index.xml";
 
-            if (!IsSymbolUpToDate(symbol, symbolIndexPath) && !UpdatedSymbolId.Contains(symbol.SymbolId))
+            if (!IsSymbolUpToDate(symbol, symbolIndexPath))
             {
-                DialogResult popup = MessageBox.Show
-                    (
-                    $"There is a more recent version of the following symbol: \n" +
-                    $"'{symbol.Name}'\n" +
-                    $" Would you like to update it?",
-                    "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
-                    );
-
-                if (popup == DialogResult.Yes)
+                if (!UpdatedSymbolId.ContainsKey(symbol.SymbolId))
                 {
-                    XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(symbolIndexPath);
-                    XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
+                    DialogResult popup = MessageBox.Show
+                        (
+                        $"There is a more recent version of the following symbol: \n" +
+                        $"'{symbol.Name}'\n" +
+                        $" Would you like to update it?",
+                        "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+                        );
 
-                    symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
-                    LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
+                    if (popup == DialogResult.Yes)
+                    {
+                        XmlDocument xmlDoc = new XmlDocument();
+                        xmlDoc.Load(symbolIndexPath);
+                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
 
+                        symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
+                        LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
+                        UpdatedSymbolId.Add(symbol.SymbolId, true);
+                    }
+                    else
+                    {
+                        LoadFromCurrentFile(rootElem, symbol);
+                        UpdatedSymbolId.Add(symbol.SymbolId, false);
+                    }
                 }
                 else
                 {
-                    LoadFromCurrentFile(rootElem, symbol);
-                }
+                    if(UpdatedSymbolId.ContainsKey(symbol.SymbolId) && UpdatedSymbolId[symbol.SymbolId])
+                    {
+                        XmlDocument xmlDoc = new XmlDocument();
+                        xmlDoc.Load(symbolIndexPath);
+                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
 
-                UpdatedSymbolId.Add(symbol.SymbolId);
+                        symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
+                        LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
+                        UpdatedSymbolId.Add(symbol.SymbolId, true);
+                    }
+                    else if(UpdatedSymbolId.ContainsKey(symbol.SymbolId) && !UpdatedSymbolId[symbol.SymbolId])
+                    {
+                        LoadFromCurrentFile(rootElem, symbol);
+                    }
+                }
             }
             else
             {
