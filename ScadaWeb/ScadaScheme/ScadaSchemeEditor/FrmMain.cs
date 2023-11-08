@@ -70,6 +70,7 @@ namespace Scada.Scheme.Editor
         private FormStateDTO formStateDTO;  // состояние формы для передачи
         private bool noTreeviewSelectionEffect;
         private Dictionary<string, string> availableSymbols;
+        private bool existingSymbolWasConverted;
 
 
         /// <summary>
@@ -88,6 +89,7 @@ namespace Scada.Scheme.Editor
             schCompChanging = false;
             formStateDTO = null;
             noTreeviewSelectionEffect = false;
+            existingSymbolWasConverted = false;
 
             editor.ModifiedChanged += Editor_ModifiedChanged;
             editor.PointerModeChanged += Editor_PointerModeChanged;
@@ -194,41 +196,17 @@ namespace Scada.Scheme.Editor
             lvCompTypes.Groups.Add(symbolsViewGroup);
         }
 
-        private string getProjectRootPath()
-        {
-            if(editor.FileName == null || editor.FileName == "")
-            {
-                return null;
-            }
-            string xmlPath = Path.GetDirectoryName(editor.FileName);
-            //while folder does not contain a file with extension ".rsproj", we go up one level
-            while (!Directory.GetFiles(xmlPath, "*.rsproj").Any())
-            {
-                xmlPath = Path.GetDirectoryName(xmlPath);
-                if (xmlPath == null)
-                {
-                    break;
-                }
-            }
-            return xmlPath;
-        }
         private string getSymbolIndexFilePath()
         {
-            //Get the project root path
-            string rootPath = getProjectRootPath();
+            //we create folder for index if not exists
+            string symbolsFolderPath = Editor.getSymbolsDir(editor.FileName);
 
-            //we consider we are outside a project if rootPath is null, and are not able to find the index file
-            if (rootPath == null)
+            if(symbolsFolderPath == null)
             {
                 return null;
             }
-
-            //we create folder for index if not exists
-            string viewsFolderPath = Path.Combine(rootPath, "Views", "Symbols");
-            Directory.CreateDirectory(viewsFolderPath);
-
             //create index file if not exists
-            string indexPath = Path.Combine(viewsFolderPath, "index.xml");
+            string indexPath = Path.Combine(symbolsFolderPath, "index.xml");
             if (!File.Exists(indexPath))
             {
                 File.Create(indexPath).Close();
@@ -522,7 +500,7 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла.
         /// </summary>
-        private void InitScheme(string fileName = "", bool isSymbol = false)
+        private void InitScheme(string fileName = "")
         {
             bool loadOK;
             string errMsg;
@@ -531,11 +509,11 @@ namespace Scada.Scheme.Editor
             {
                 loadOK = true;
                 errMsg = "";
-                editor.NewScheme(isSymbol);
+                editor.NewScheme();
             }
             else
             {
-                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg,isSymbol);
+                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg);
             }
 
             appData.AssignViewStamp(editor.SchemeView);
@@ -563,46 +541,44 @@ namespace Scada.Scheme.Editor
         /// 
         private bool SaveScheme(bool saveAs)
         {
-            string projectPath = getProjectRootPath();
+            string projectPath = Editor.getProjectRootPath(editor.FileName);
 
             //define file name and location according to the context
-            if (string.IsNullOrEmpty(editor.FileName))
+            if (saveAs || string.IsNullOrEmpty(editor.FileName))
             {
                 saveAs = true;
-                if (editor.SchemeView.isSymbol)
+                if (string.IsNullOrEmpty(editor.FileName))
                 {
-                    sfdScheme.FileName = editor.SchemeView.MainSymbol.Name + ".sch";
-                    if(projectPath != null)
-                    {
-                        sfdScheme.InitialDirectory = Path.Combine(getProjectRootPath(), "Views", "Symbols");
-                    }
+                    sfdScheme.FileName = editor.SchemeView.isSymbol ? (editor.SchemeView.MainSymbol.Name == "MainSymbol" ? Editor.DefSymbolFileName : editor.SchemeView.MainSymbol.Name + ".sch") : Editor.DefSchemeFileName;
                 }
                 else
                 {
-                    sfdScheme.FileName = Editor.DefSchemeFileName;
+                    string[] strings = editor.FileName.Split('\\');
+                    sfdScheme.FileName = strings[strings.Length - 1];
+                    sfdScheme.InitialDirectory = Path.GetDirectoryName(editor.FileName);
+                }
+                if (projectPath != null)
+                {
+                    sfdScheme.InitialDirectory = editor.SchemeView.isSymbol ? Path.Combine(Editor.getProjectRootPath(editor.FileName), "Views", "Symbols") : Path.Combine(Editor.getProjectRootPath(editor.FileName), "Views");
                 }
             }
             else
             {
                 sfdScheme.FileName = editor.FileName;
-                if (editor.SchemeView.isSymbol && projectPath != null)
+                if (existingSymbolWasConverted && projectPath != null)
                 {
-                    sfdScheme.InitialDirectory = Path.Combine(getProjectRootPath(), "Views", "Symbols");
+                    DeleteSymbol(editor.FileName);
+                    existingSymbolWasConverted = false;
                 }
             }
-
-            //update editor's filename
-            if (sfdScheme.ShowDialog() != DialogResult.OK)
+            
+            if (saveAs && sfdScheme.ShowDialog() != DialogResult.OK)
             {
                 return false;
             }
 
-
-
             bool result = false;
             bool refrPropGrid = propertyGrid.SelectedObject is SchemeDocument document && document.Version != SchemeUtils.SchemeVersion;
-
-
 
             if (!string.IsNullOrEmpty(sfdScheme.FileName))
             {
@@ -2142,7 +2118,7 @@ namespace Scada.Scheme.Editor
             toolStripButton2.Enabled = editor.SchemeView.isSymbol;
             toolStripStatusLabel1.Text = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Editing symbol" : "Editing scheme") : "";
             toolStripButton3.ToolTipText = editor.SchemeView != null ? (editor.SchemeView.isSymbol ? "Convert into scheme" : "Convert into symbol") : "";
-            
+
             int newCbIndex = cbSchComp.SelectedItem == null ? 0 : cbSchComp.SelectedIndex;
 
             if(tabControl.SelectedIndex == 1)
@@ -2151,10 +2127,15 @@ namespace Scada.Scheme.Editor
                 cbSchComp.SelectedItem = null;
                 cbSchComp.SelectedItem = cbSchComp.Items[newCbIndex];
             }
-            
+            Text = editor.Title;
+            RefreshAvailableSymbols();
         }
         private void convertSymbolToScheme()
         {
+            if (editor.FileName != "")
+            {
+                existingSymbolWasConverted = true;
+            }
             editor.SchemeView.isSymbol = false;
             //remove main symbol from all related components
             foreach (BaseComponent c in editor.SchemeView.Components.Values)
@@ -2173,6 +2154,7 @@ namespace Scada.Scheme.Editor
         }
         private void convertSchemeToSymbol()
         {
+            existingSymbolWasConverted = false;
             editor.SchemeView.isSymbol = true;
 
             //create main symbol

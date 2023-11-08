@@ -405,6 +405,7 @@ namespace Scada.Scheme.Editor
             this.lvCompTypes.UseCompatibleStateImageBehavior = false;
             this.lvCompTypes.View = System.Windows.Forms.View.Details;
             this.lvCompTypes.SelectedIndexChanged += new System.EventHandler(this.lvCompTypes_SelectedIndexChanged);
+            this.lvCompTypes.MouseClick += new MouseEventHandler(this.lvCompTypes_MouseClick);
             // 
             // colCompName
             // 
