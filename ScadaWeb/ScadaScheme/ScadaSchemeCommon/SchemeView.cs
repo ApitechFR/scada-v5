@@ -534,7 +534,6 @@ namespace Scada.Scheme
 
                         symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
                         LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
-                        UpdatedSymbolId.Add(symbol.SymbolId, true);
                     }
                     else if(UpdatedSymbolId.ContainsKey(symbol.SymbolId) && !UpdatedSymbolId[symbol.SymbolId])
                     {
