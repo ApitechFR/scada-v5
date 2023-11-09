@@ -405,7 +405,7 @@ namespace Scada.Scheme.Editor
             this.lvCompTypes.UseCompatibleStateImageBehavior = false;
             this.lvCompTypes.View = System.Windows.Forms.View.Details;
             this.lvCompTypes.SelectedIndexChanged += new System.EventHandler(this.lvCompTypes_SelectedIndexChanged);
-            this.lvCompTypes.MouseClick += new MouseEventHandler(this.lvCompTypes_MouseClick);
+            this.lvCompTypes.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvCompTypes_MouseClick);
             // 
             // colCompName
             // 
@@ -550,6 +550,7 @@ namespace Scada.Scheme.Editor
             // 
             // menuStrip
             // 
+            this.menuStrip.AutoSize = false;
             this.menuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miFile,

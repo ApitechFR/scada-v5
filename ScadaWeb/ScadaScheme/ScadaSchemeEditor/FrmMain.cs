@@ -71,6 +71,7 @@ namespace Scada.Scheme.Editor
         private bool noTreeviewSelectionEffect;
         private Dictionary<string, string> availableSymbols;
         private bool existingSymbolWasConverted;
+        private bool existingSchemeWasConverted;
 
 
         /// <summary>
@@ -138,7 +139,7 @@ namespace Scada.Scheme.Editor
 
                     if (File.Exists(path))
                     {
-                        symbolsDictionary[name] = path;
+                        symbolsDictionary[path] = name;
                     }
                     else
                     {
@@ -191,7 +192,7 @@ namespace Scada.Scheme.Editor
             ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
             foreach (var s in availableSymbols)
             {
-                lvCompTypes.Items.Add(new ListViewItem(s.Key, "component.png", symbolsViewGroup) { IndentCount = 1 });
+                lvCompTypes.Items.Add(new ListViewItem(s.Value, "component.png", symbolsViewGroup) { IndentCount = 1 });
             }
             lvCompTypes.Groups.Add(symbolsViewGroup);
         }
@@ -544,7 +545,7 @@ namespace Scada.Scheme.Editor
             string projectPath = Editor.getProjectRootPath(editor.FileName);
 
             //define file name and location according to the context
-            if (saveAs || string.IsNullOrEmpty(editor.FileName))
+            if (saveAs || string.IsNullOrEmpty(editor.FileName) || existingSchemeWasConverted || existingSymbolWasConverted)
             {
                 saveAs = true;
                 if (string.IsNullOrEmpty(editor.FileName))
@@ -565,18 +566,29 @@ namespace Scada.Scheme.Editor
             else
             {
                 sfdScheme.FileName = editor.FileName;
-                if (existingSymbolWasConverted && projectPath != null)
-                {
-                    DeleteSymbol(editor.FileName);
-                    existingSymbolWasConverted = false;
-                }
             }
-            
+
             if (saveAs && sfdScheme.ShowDialog() != DialogResult.OK)
             {
+                existingSymbolWasConverted = false;
+                existingSchemeWasConverted = false;
                 return false;
             }
 
+            if (existingSymbolWasConverted && projectPath != null && MessageBox.Show("Do you want to delete the existing symbol ?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                DeleteSymbol(editor.FileName);
+            }
+            if (existingSchemeWasConverted && projectPath != null && MessageBox.Show("Do you want to delete the existing scheme ?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                if (System.IO.File.Exists(editor.FileName))
+                {
+                    System.IO.File.Delete(editor.FileName);
+                }
+            }
+            existingSymbolWasConverted = false;
+            existingSchemeWasConverted = false;
+            
             bool result = false;
             bool refrPropGrid = propertyGrid.SelectedObject is SchemeDocument document && document.Version != SchemeUtils.SchemeVersion;
 
@@ -597,6 +609,10 @@ namespace Scada.Scheme.Editor
                     else
                     {
                         result = true;
+                    }
+                    if (saveAs)
+                    {
+                        InitScheme(sfdScheme.FileName);
                     }
                 }
                 else
@@ -637,6 +653,7 @@ namespace Scada.Scheme.Editor
                 if (entryToUpdate != null)
                 {
                     entryToUpdate.Attributes["lastModificationDate"].Value = DateTime.Now.ToString();
+                    entryToUpdate.Attributes["name"].Value = currentSymbol.Name != "" ? currentSymbol.Name : Path.GetFileNameWithoutExtension(symbolFileName);
                 }
                 else
                 {
@@ -2104,7 +2121,7 @@ namespace Scada.Scheme.Editor
         {
             foreach(KeyValuePair<string, string> kvp in availableSymbols)
             {
-                if (name == kvp.Key) return kvp.Value;
+                if (name == kvp.Value) return kvp.Key;
             }
             return "";
         }
@@ -2144,6 +2161,7 @@ namespace Scada.Scheme.Editor
             {
                 existingSymbolWasConverted = true;
             }
+            existingSchemeWasConverted = false;
             editor.SchemeView.isSymbol = false;
             //remove main symbol from all related components
             foreach (BaseComponent c in editor.SchemeView.Components.Values)
@@ -2165,6 +2183,10 @@ namespace Scada.Scheme.Editor
         }
         private void convertSchemeToSymbol()
         {
+            if (editor.FileName != "")
+            {
+                existingSchemeWasConverted = true;
+            }
             existingSymbolWasConverted = false;
             editor.SchemeView.isSymbol = true;
 
