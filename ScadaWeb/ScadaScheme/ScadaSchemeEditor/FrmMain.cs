@@ -1059,8 +1059,6 @@ namespace Scada.Scheme.Editor
 
         public void treeView1_onNodeSelection(object sender, TreeViewEventArgs e)
         {
-            bool isDisabled = false;
-
             List<BaseComponent> compToSelect = new List<BaseComponent>();
             lock ((treeView1).SelectedNodes)
             {
@@ -1084,35 +1082,34 @@ namespace Scada.Scheme.Editor
                     }
                 }
                 editor.DeselectAll();
+                bool disableDeleteBtn = false;
                 foreach (BaseComponent comp in compToSelect)
                 {
                     if (comp is ComponentGroup)
                     {
                         //case symbol in schema
-                        if(editor.SchemeView.MainSymbol == null)
+                        if(editor.SchemeView.MainSymbol == null || comp.ID != editor.SchemeView.MainSymbol.ID)
                         {
                             foreach (BaseComponent child in editor.SchemeView.getGroupedComponents(comp.ID))
                             {
                                 noTreeviewSelectionEffect = true;
-
                                 editor.SelectComponent(child.ID, true);
                             }
                         }
-                        else if (comp.ID != editor.SchemeView.MainSymbol.ID)
-                        {
-                            foreach (BaseComponent child in editor.SchemeView.getGroupedComponents(comp.ID))
-                            {
-                                this.noTreeviewSelectionEffect = true;
-
-                                editor.SelectComponent(child.ID, true);
-                            }
-                        }
+                        disableDeleteBtn = disableDeleteBtn || (editor.SchemeView.isSymbol && comp.ID == editor.SchemeView.MainSymbol.ID);
                     }
-                    this.noTreeviewSelectionEffect = true;
-
+                    noTreeviewSelectionEffect = true;
                     editor.SelectComponent(comp.ID, true);
-
-                    if (isDisabled) btnEditDelete.Enabled = false;
+                    if (disableDeleteBtn)
+                    {
+                        btnEditDelete.Enabled = false;
+                        btnEditDelete.ToolTipText = "You cannot delete main symbol";
+                    }
+                    else
+                    {
+                        btnEditDelete.Enabled = true;
+                        btnEditDelete.ToolTipText = "Delete selected components (Del)";
+                    }
                 }
             }
         }
@@ -1776,6 +1773,16 @@ namespace Scada.Scheme.Editor
             if (cbSchComp.SelectedItem is BaseComponent component)
             {
                 editor.SelectComponent(component.ID);
+                if (!editor.SchemeView.isSymbol || component.ID != editor.SchemeView.MainSymbol.ID)
+                {
+                    btnEditDelete.Enabled = true;
+                    btnEditDelete.ToolTipText = "Delete selected components (Del)";
+                }
+                else
+                {
+                    btnEditDelete.Enabled = false;
+                    btnEditDelete.ToolTipText = "You cannot delete main symbol";
+                }
                 updateAliasParametersDisplay();
             }
             else
@@ -2152,6 +2159,8 @@ namespace Scada.Scheme.Editor
             editor.SchemeView.Components.Remove(editor.SchemeView.MainSymbol.ID);
             editor.SchemeView.MainSymbol.OnItemChanged(SchemeChangeTypes.ComponentDeleted, editor.SchemeView.MainSymbol);
             editor.SchemeView.MainSymbol = null;
+
+            btnEditDelete.ToolTipText = "Delete selected components (Del)";
             return;
         }
         private void convertSchemeToSymbol()
