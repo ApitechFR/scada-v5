@@ -8,7 +8,6 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
 	public class SVGEditor : UITypeEditor
 	{
-		private static bool isCustomShapeFormOpen = false;
 		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
 		{
 			return UITypeEditorEditStyle.Modal;
@@ -19,31 +18,29 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 			if (editorService != null)
 			{
-				if (isCustomShapeFormOpen)
+				
+				Form mainForm = Application.OpenForms[0]; 
+				if (mainForm != null)
 				{
-					MessageBox.Show("The Custom Shape editor is already open.");
-					return value;
+					mainForm.WindowState = FormWindowState.Minimized;
 				}
+
 				string currentSvg = value as string;
+				FrmCustomShape frmCustomShape = currentSvg is string ? new FrmCustomShape(currentSvg) : new FrmCustomShape();
 
-				FrmCustomShape frmCustomShape = new FrmCustomShape(currentSvg);
+				DialogResult dialogResult = frmCustomShape.ShowDialog();
 
-				frmCustomShape.ShapeSaved += (svgData) =>
+				if (mainForm != null)
 				{
+					mainForm.WindowState = FormWindowState.Normal;
+				}
 
-					value = svgData;
-					context.PropertyDescriptor.SetValue(context.Instance, svgData);
-				};
-				frmCustomShape.FormClosed += (sender, e) =>
+				if (dialogResult == DialogResult.OK)
 				{
-					isCustomShapeFormOpen = false;
-				};
-
-				isCustomShapeFormOpen = true;
-
-				frmCustomShape.Show();
-				return value;
+					return frmCustomShape.ShapeType;
+				}
 			}
+
 			return value;
 		}
 

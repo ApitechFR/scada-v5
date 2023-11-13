@@ -15,8 +15,6 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		private const string ErrorDeletingTempFile = "Error deleting temporary file: {0}";
 		private const string ExternalEditorOpenWarning = "An external editor is still open. Are you sure you want to exit without finishing editing?";
 		private const string CloseEditorWarning = "By clicking OK, your editor will be closed. Make sure you have saved all your changes. Do you want to continue?";
-		private const string CloseEditorWarningTitle = "Closing the Editor";
-		private const string CloseEditorWarningMessage = "By clicking OK, your editor will be closed. Make sure you have saved all your changes. Do you want to continue?";
 		private const string FailedToOpenSVG = "Failed to open the SVG in the external editor: {0}";
 		private const string ErrorClosingExternalEditor = "An error occurred while closing the external editor: {0}";
 		
@@ -66,15 +64,16 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			bool hasContent = !string.IsNullOrEmpty(svgText);
 			btnEditExternally.Enabled = hasContent;
 		}
-		
+
 		private void BtnSave_Click(object sender, EventArgs e)
 		{
 			CloseExternalEditor();
 
 			ShapeType = svgText; 
 			Saved = true;
-			this.DialogResult = DialogResult.OK;
 			OnShapeSaved(ShapeType);
+
+			this.DialogResult = DialogResult.OK;
 			this.Close();
 		}
 
@@ -274,6 +273,8 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			if (disposing)
 			{
 				CleanupTemporaryFiles();
+				externalEditorProcess?.Dispose();
+				fileWatcher?.Dispose();
 			}
 			base.Dispose(disposing);
 		}
