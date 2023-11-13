@@ -103,10 +103,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.DefaultValue(Actions.None)]
 		public Actions Action { get; set; }
 
-		#region Attributes
-		[CM.Browsable(false)]
-		#endregion
-		public new string BackColor { get; set; }
 
 		#region Attributes
 		[CM.Browsable(false)]
