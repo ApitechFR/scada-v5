@@ -8,42 +8,44 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
 	public class SVGEditor : UITypeEditor
 	{
+		private static bool isCustomShapeFormOpen = false;
 		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
 		{
 			return UITypeEditorEditStyle.Modal;
 		}
-
 		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
 		{
 			IWindowsFormsEditorService editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
 
 			if (editorService != null)
 			{
-				// Pass the current SVG to FrmCustomShape
+				if (isCustomShapeFormOpen)
+				{
+					MessageBox.Show("The Custom Shape editor is already open.");
+					return value;
+				}
 				string currentSvg = value as string;
-				FrmCustomShape frmCustomShape;
-				if (currentSvg is string)
-				{
-					frmCustomShape = new FrmCustomShape(currentSvg);
-				}
-				else
-				{
-					frmCustomShape = new FrmCustomShape();
-				}
 
+				FrmCustomShape frmCustomShape = new FrmCustomShape(currentSvg);
 
-				DialogResult dialogResult = frmCustomShape.ShowDialog();
-
-				if (dialogResult == DialogResult.OK)
+				frmCustomShape.ShapeSaved += (svgData) =>
 				{
-					// Get the SVG from FrmCustomShape
-					return frmCustomShape.ShapeType;
-				}
+
+					value = svgData;
+					context.PropertyDescriptor.SetValue(context.Instance, svgData);
+				};
+				frmCustomShape.FormClosed += (sender, e) =>
+				{
+					isCustomShapeFormOpen = false;
+				};
+
+				isCustomShapeFormOpen = true;
+
+				frmCustomShape.Show();
+				return value;
 			}
-
 			return value;
 		}
+
 	}
-
-
 }
