@@ -68,13 +68,42 @@ scada.scheme.updateStyles = function (divComp, cond) {
 	if (cond.Height) divComp.css("height", cond.Height);
 };
 
-scada.scheme.applyRotation = function (divComp, props) {
-	if (props.Rotation && props.Rotation > 0) {
-		divComp.css({
-			transform: "rotate(" + props.Rotation + "deg)",
-		});
+//scada.scheme.applyRotation = function (divComp, props) {
+//	if (props.Rotation && props.Rotation > 0) {
+//		divComp.css({
+//			transform: "rotate(" + props.Rotation + "deg)",
+//		});
+//	}
+//};
+//scada.scheme.applyRotation = function (divComp, props) {
+//	if (props.Rotation && props.Rotation > 0) {
+//		var parentDiv = divComp.parent();
+//		parentDiv.css({
+//			transform: "rotate(" + props.Rotation + "deg)",
+//		});
+//		console.log(parentDiv);
+//		var parentDivsec = divComp.closest('.comp-wrapper');
+//		console.log(parentDivsec);
+
+//	}
+//};
+scada.scheme.applyRotation = function (divcomp, props) {
+	if (props.rotation && props.rotation > 0) {
+		// utilisez .closest pour obtenir le premier ancêtre qui correspond au sélecteur
+		var parentdiv = divcomp.closest('.comp-wrapper');
+
+		// vérifiez si l'élément a été trouvé
+		if (parentdiv.length > 0) {
+			parentdiv.css({
+				transform: "rotate(" + props.rotation + "deg)"
+			});
+		} else {
+			console.error("the parent element with class 'comp-wrapper' was not found.");
+		}
 	}
 };
+
+
 scada.scheme.updateColors = function (divComp, cnlDataExt, isHovered, props) {
 	var statusColor = cnlDataExt.Color;
 
@@ -99,31 +128,30 @@ scada.scheme.updateComponentData = function (component, renderContext) {
 	if (props.InCnlNum <= 0) {
 		return;
 	}
+	
 
 	var divComp = component.dom;
 	var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
+	//set backcolor
+	this.setBackColor(divComp, props.BackColor);
 
 	if (!props.Conditions || cnlDataExt.Stat <= 0) {
 		return;
 	}
 
 	var cnlVal = cnlDataExt.Val;
-	
+
 	for (var cond of props.Conditions) {
 		if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
-			
 			scada.scheme.updateStyles(divComp, cond);
 			scada.scheme.handleBlinking(divComp, cond.Blinking);
 			if (cond.Rotation !== -1 && cond.Rotation !== props.Rotation) {
-
 				scada.scheme.applyRotation(divComp, cond);
 			}
 			break;
 		}
 	}
-	
-}
-
+};
 
 /**************** Custom SVG *********************/
 scada.scheme.CustomSVGRenderer = function () {
@@ -143,15 +171,18 @@ scada.scheme.CustomSVGRenderer.prototype.createDom = function (
 	var divComp = $("<div id='comp" + component.id + "'></div>");
 	this.prepareComponent(divComp, component, false, true);
 	scada.scheme.applyRotation(divComp, props);
+	//set backcolor
+	this.setBackColor(divComp, props.BackColor);
 
+	console.log(component)
 	if (props.SvgCode) {
 		props.SvgCode = props.SvgCode.replace(
 			/<svg[^>]*?(\s+width\s*=\s*["'][^"']*["'])/g,
-			"<svg",
+			"<svg ",
 		);
 		props.SvgCode = props.SvgCode.replace(
 			/<svg[^>]*?(\s+height\s*=\s*["'][^"']*["'])/g,
-			"<svg",
+			"<svg height='100%' width='100%'  preserveAspectRatio='none'",
 		);
 	}
 	divComp.append(props.SvgCode);
