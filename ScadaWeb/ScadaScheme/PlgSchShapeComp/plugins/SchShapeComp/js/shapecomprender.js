@@ -68,39 +68,59 @@ scada.scheme.updateStyles = function (divComp, cond) {
 	if (cond.Height) divComp.css("height", cond.Height);
 };
 
-//scada.scheme.applyRotation = function (divComp, props) {
-//	if (props.Rotation && props.Rotation > 0) {
-//		divComp.css({
-//			transform: "rotate(" + props.Rotation + "deg)",
-//		});
-//	}
-//};
-//scada.scheme.applyRotation = function (divComp, props) {
-//	if (props.Rotation && props.Rotation > 0) {
-//		var parentDiv = divComp.parent();
-//		parentDiv.css({
-//			transform: "rotate(" + props.Rotation + "deg)",
-//		});
-//		console.log(parentDiv);
-//		var parentDivsec = divComp.closest('.comp-wrapper');
-//		console.log(parentDivsec);
 
-//	}
-//};
-scada.scheme.applyRotation = function (divcomp, props) {
-	if (props.rotation && props.rotation > 0) {
-		// utilisez .closest pour obtenir le premier ancêtre qui correspond au sélecteur
-		var parentdiv = divcomp.closest('.comp-wrapper');
+scada.scheme.setRotate = function (divComp, props) {
 
-		// vérifiez si l'élément a été trouvé
-		if (parentdiv.length > 0) {
-			parentdiv.css({
-				transform: "rotate(" + props.rotation + "deg)"
-			});
+	setTimeout(function () {
+		var compWrapper = divComp.closest('.comp-wrapper');
+		if (compWrapper.length > 0) {
+			var existingTransform = compWrapper.css('transform');
+			var rotationTransform = 'rotate(' + props.Rotation + 'deg)';
+
+			console.log(rotationTransform);
+
+			if (props.Rotation === 0) {
+				compWrapper.css('transform', '');
+				console.log("Transform removed from comp-wrapper of " + divComp.attr('id'));
+			} else {
+				if (existingTransform && existingTransform !== 'none') {
+					compWrapper.css('transform', existingTransform + ' ' + rotationTransform);
+				} else {
+					compWrapper.css('transform', rotationTransform);
+				}
+				console.log("Rotation applied to comp-wrapper of " + divComp.attr('id'));
+			}
 		} else {
-			console.error("the parent element with class 'comp-wrapper' was not found.");
+			console.error("comp-wrapper not found for " + divComp.attr('id'));
 		}
-	}
+	}, 0);
+}
+
+scada.scheme.applyRotation = function (divCompId, props) {
+	console.log("Running applyRotation");
+	console.log(props.Rotation);
+	var compDiv = $('#comp' + divCompId);
+	console.log(compDiv);
+	$(document).ready(function () {
+		console.log("Document ready!!!");
+		
+		
+			var parentDiv = compDiv.closest('.comp-wrapper');
+			console.log(parentDiv);
+			if (parentDiv.length > 0) {
+				var existingTransform = parentDiv.css('transform');
+				var rotationTransform = 'rotate(' + props.rotation + 'deg)';
+
+				if (existingTransform && existingTransform !== 'none') {
+					parentDiv.css('transform', existingTransform + ' ' + rotationTransform);
+				} else {
+					parentDiv.css('transform', rotationTransform);
+				}
+			} else {
+				console.error("The parent element with class 'comp-wrapper' was not found.");
+			}
+		
+	});
 };
 
 
@@ -146,7 +166,7 @@ scada.scheme.updateComponentData = function (component, renderContext) {
 			scada.scheme.updateStyles(divComp, cond);
 			scada.scheme.handleBlinking(divComp, cond.Blinking);
 			if (cond.Rotation !== -1 && cond.Rotation !== props.Rotation) {
-				scada.scheme.applyRotation(divComp, cond);
+				scada.scheme.setRotate(divComp, cond);
 			}
 			break;
 		}
@@ -163,6 +183,8 @@ scada.scheme.CustomSVGRenderer.prototype = Object.create(
 );
 scada.scheme.CustomSVGRenderer.constructor = scada.scheme.CustomSVGRenderer;
 
+
+
 scada.scheme.CustomSVGRenderer.prototype.createDom = function (
 	component,
 	renderContext,
@@ -170,11 +192,10 @@ scada.scheme.CustomSVGRenderer.prototype.createDom = function (
 	var props = component.props;
 	var divComp = $("<div id='comp" + component.id + "'></div>");
 	this.prepareComponent(divComp, component, false, true);
-	scada.scheme.applyRotation(divComp, props);
+	
 	//set backcolor
 	this.setBackColor(divComp, props.BackColor);
-
-	console.log(component)
+	
 	if (props.SvgCode) {
 		props.SvgCode = props.SvgCode.replace(
 			/<svg[^>]*?(\s+width\s*=\s*["'][^"']*["'])/g,
@@ -187,14 +208,17 @@ scada.scheme.CustomSVGRenderer.prototype.createDom = function (
 	}
 	divComp.append(props.SvgCode);
 	component.dom = divComp;
+	
+	scada.scheme.setRotate(divComp, props);
+	
 };
 
 scada.scheme.CustomSVGRenderer.prototype.updateData = function (
 	component,
 	renderContext,
 ) {
-	scada.scheme.applyRotation(component.dom, component.props);
 	scada.scheme.updateComponentData(component, renderContext);
+	scada.scheme.setRotate(component.dom, component.props);
 };
 
 /**
@@ -246,17 +270,17 @@ scada.scheme.BasicShapeRenderer.prototype.createDom = function (
 		}
 	}
 
-	scada.scheme.applyRotation(divComp, props);
 
 	component.dom = divComp;
+	scada.scheme.setRotate(divComp, props);
 };
 
 scada.scheme.BasicShapeRenderer.prototype.updateData = function (
 	component,
 	renderContext,
 ) {
-	scada.scheme.applyRotation(component.dom, component.props);
 	scada.scheme.updateComponentData(component, renderContext);
+	scada.scheme.setRotate(component.dom, component.props);
 };
 
 /**
