@@ -68,13 +68,11 @@ scada.scheme.updateStyles = function (divComp, cond) {
 	if (cond.Height) divComp.css("height", cond.Height);
 };
 
-
 scada.scheme.setRotate = function (divComp, props) {
 
 	setTimeout(function () {
 		var compWrapper = divComp.closest('.comp-wrapper');
 		if (compWrapper.length > 0) {
-			var existingTransform = compWrapper.css('transform');
 			var rotationTransform = 'rotate(' + props.Rotation + 'deg)';
 
 			console.log(rotationTransform);
@@ -83,13 +81,8 @@ scada.scheme.setRotate = function (divComp, props) {
 				compWrapper.css('transform', '');
 				console.log("Transform removed from comp-wrapper of " + divComp.attr('id'));
 			} else {
-				if (existingTransform && existingTransform !== 'none') {
-					//compWrapper.css('transform', existingTransform + ' ' + rotationTransform);
-					compWrapper.css('transform', + rotationTransform);
-				} else {
-					compWrapper.css('transform', rotationTransform);
-				}
-				console.log("Rotation applied to comp-wrapper of " + divComp.attr('id'));
+				compWrapper.css('transform', rotationTransform);
+				console.log("Rotation updated for comp-wrapper of " + divComp.attr('id'));
 			}
 		} else {
 			console.error("comp-wrapper not found for " + divComp.attr('id'));
