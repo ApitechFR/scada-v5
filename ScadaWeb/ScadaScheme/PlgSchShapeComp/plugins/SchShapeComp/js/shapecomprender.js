@@ -84,7 +84,8 @@ scada.scheme.setRotate = function (divComp, props) {
 				console.log("Transform removed from comp-wrapper of " + divComp.attr('id'));
 			} else {
 				if (existingTransform && existingTransform !== 'none') {
-					compWrapper.css('transform', existingTransform + ' ' + rotationTransform);
+					//compWrapper.css('transform', existingTransform + ' ' + rotationTransform);
+					compWrapper.css('transform', + rotationTransform);
 				} else {
 					compWrapper.css('transform', rotationTransform);
 				}
