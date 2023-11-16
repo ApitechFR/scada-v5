@@ -61,7 +61,7 @@ namespace Scada.Scheme.Editor
         /// </summary>
         public const string DefSchemeFileName = "NewScheme.sch";
         /// <summary>
-        /// Default file name of symbols
+        /// Default name of symbols
         /// </summary>
         public const string DefSymbolFileName = "NewSymbol.sch";
         /// <summary>
@@ -163,7 +163,7 @@ namespace Scada.Scheme.Editor
         {
             get
             {
-                return (string.IsNullOrEmpty(FileName) ? DefSchemeFileName : Path.GetFileName(FileName)) +
+                return (string.IsNullOrEmpty(FileName) ? (SchemeView.isSymbol ? DefSymbolFileName : DefSchemeFileName) : Path.GetFileName(FileName)) +
                    (Modified ? "*" : "") + " - " + AppPhrases.EditorTitle;
             }
         }
@@ -247,48 +247,62 @@ namespace Scada.Scheme.Editor
         }
 
 
+
+        public static string getProjectRootPath(string fileName)
+        {
+            if (fileName == null || fileName == "")
+            {
+                return null;
+            }
+            string xmlPath = Path.GetDirectoryName(fileName);
+            //while folder does not contain a file with extension ".rsproj", we go up one level
+            while (!Directory.GetFiles(xmlPath, "*.rsproj").Any())
+            {
+                xmlPath = Path.GetDirectoryName(xmlPath);
+                if (xmlPath == null)
+                {
+                    break;
+                }
+            }
+            return xmlPath;
+        }
+        public static string getSymbolsDir(string filename)
+        {
+            //Get the project root path
+            string rootPath = getProjectRootPath(filename);
+
+            //we consider we are outside a project if rootPath is null, and are not able to find the index file
+            if (rootPath == null)
+            {
+                return null;
+            }
+
+            //we create folder for index if not exists
+            string symbolsDir = Path.Combine(rootPath, "Views", "Symbols");
+            Directory.CreateDirectory(symbolsDir);
+
+            return symbolsDir;
+        }
+
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла
         /// </summary>
-        private bool InitScheme(string fileName, out string errMsg, bool isSymbol=false)
+        private bool InitScheme(string fileName, out string errMsg)//, bool isSymbol=false)
         {
             ClearChanges();
             ClearSelComponents();
             SchemeView = new SchemeView();
-            SchemeView.isSymbol = isSymbol;
+            SchemeView.isSymbol = false;
 
             bool loadOK;
 
-            if (string.IsNullOrEmpty(fileName))
-            {
-                loadOK = true;
-                errMsg = "";
-                if (isSymbol)
-                {
-                    Symbol symbol = new Symbol();
-
-                    symbol.Name = "Symbol";
-                    symbol.ID = SchemeView.GetNextComponentID();
-                    SchemeView.Components[symbol.ID]=symbol;
-
-                    symbol.Location = new Point(0, 0);
-                    symbol.SchemeView = SchemeView;
-                    symbol.ItemChanged += Scheme_ItemChanged;
-
-                    symbol.OnItemChanged(SchemeChangeTypes.ComponentAdded, symbol);
-                    SchemeView.MainSymbol = symbol;
-                }
-            }
-            else
-            {
                 lock (SchemeView.SyncRoot)
                 {
-                    loadOK = SchemeView.LoadFromFile(fileName,SymbolDir, out errMsg);
+                    loadOK = SchemeView.LoadFromFile(fileName, getSymbolsDir(fileName), out errMsg);
                 }
 
                 if (!loadOK)
                     log.WriteError(errMsg);
-            }
 
 
             FileName = fileName;
@@ -581,46 +595,24 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Создать новую схему
         /// </summary>
-        public void NewScheme(bool isSymbol = false)
+        public void NewScheme()
         {
-            InitScheme("", out string errMsg,isSymbol);
+            InitScheme("", out string errMsg);
         }
 
         /// <summary>
         /// Загрузить схему из файла
         /// </summary>
-        public bool LoadSchemeFromFile(string fileName, out string errMsg,bool isSymbol=false)
+        public bool LoadSchemeFromFile(string fileName, out string errMsg)
         {
-            return InitScheme(fileName, out errMsg,isSymbol);
+            return InitScheme(fileName, out errMsg);
         }
 
         /// <summary>
         /// Записать схему в файл
         /// </summary>
-        public bool SaveSchemeToFile(string fileName, out string errMsg, bool asSymbol = false)
+        public bool SaveSchemeToFile(string fileName, out string errMsg)//, bool asSymbol = false)
         {
-            if ((asSymbol||SchemeView.isSymbol) && SchemeView.MainSymbol==null)
-            {
-                Symbol symbol = new Symbol();
-
-                symbol.ID = SchemeView.GetNextComponentID();
-                symbol.Location = new Point(0, 0);
-                symbol.SchemeView = SchemeView;
-                symbol.ItemChanged += Scheme_ItemChanged;
-                SchemeView.Components[symbol.ID] = symbol;
-                symbol.OnItemChanged(SchemeChangeTypes.ComponentAdded, symbol);
-
-                SchemeView.MainSymbol = symbol;
-                SchemeView.isSymbol = true;
-                foreach (BaseComponent comp in SchemeView.Components.Values.Where(x => x.GroupId == -1))
-                {
-                    comp.GroupId = symbol.ID;
-                    comp.OnItemChanged(SchemeChangeTypes.ComponentChanged,comp);
-                }
-            }
-
-            FileName = fileName;
-
             if (SchemeView == null)
             {
                 errMsg = "";
@@ -632,11 +624,14 @@ namespace Scada.Scheme.Editor
 
                 lock (SchemeView.SyncRoot)
                 {
-                    saveOK = SchemeView.SaveToFile(fileName, out errMsg, asSymbol);
+                    saveOK = SchemeView.SaveToFile(fileName, out errMsg);//, asSymbol);
                 }
 
                 if (saveOK)
+                {
                     Modified = false;
+                    FileName = fileName;
+                }
                 else
                     log.WriteError(errMsg);
 
