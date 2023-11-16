@@ -27,7 +27,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 				string currentSvg = value as string;
 				FrmCustomShape frmCustomShape = currentSvg is string ? new FrmCustomShape(currentSvg) : new FrmCustomShape();
-
+				frmCustomShape.TopMost = true;
 				DialogResult dialogResult = frmCustomShape.ShowDialog();
 
 				if (mainForm != null)
