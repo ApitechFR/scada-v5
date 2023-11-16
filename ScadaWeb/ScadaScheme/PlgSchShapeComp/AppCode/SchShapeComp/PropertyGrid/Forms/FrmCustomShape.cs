@@ -48,6 +48,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			}
 			Saved = false;
 			UpdateButtonStates();
+			this.Resize += FrmCustomShape_Resize;
 		}
 
 
@@ -64,7 +65,16 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			bool hasContent = !string.IsNullOrEmpty(svgText);
 			btnEditExternally.Enabled = hasContent;
 		}
-
+		private void FrmCustomShape_Resize(object sender, EventArgs e)
+		{
+			if (this.WindowState != FormWindowState.Minimized)
+			{
+				byte[] svgBytes = Encoding.UTF8.GetBytes(svgText);
+				ctrlSvgViewer1.ShowImage(svgBytes);
+				ctrlSvgViewer1.Invalidate();
+				ctrlSvgViewer1.Refresh();
+			}
+		}
 		private void BtnSave_Click(object sender, EventArgs e)
 		{
 			CloseExternalEditor();
@@ -96,7 +106,9 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			{
 				svgText = File.ReadAllText(filePath);
 				byte[] svgBytes = Encoding.UTF8.GetBytes(svgText);
-				ctrlSvgViewer1.ShowImage(svgBytes);	
+				ctrlSvgViewer1.ShowImage(svgBytes);
+				ctrlSvgViewer1.Invalidate();
+				ctrlSvgViewer1.Refresh();
 			}
 			catch (Exception ex)
 			{
@@ -281,23 +293,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 		private void BtnCancel_Click(object sender, EventArgs e)
 		{
-			if (IsExternalEditorOpen)
-			{
-				try
-				{
-					if (externalEditorProcess != null && !externalEditorProcess.HasExited)
-					{
-						externalEditorProcess.Kill();
-						externalEditorProcess.WaitForExit();
-						externalEditorProcess.Exited -= ExternalEditorProcess_Exited;
-						IsExternalEditorOpen = false;
-					}
-				}
-				catch (Exception ex)
-				{
-					ShowError(ErrorClosingExternalEditor, ex);
-				}
-			}
+			CloseExternalEditor();
 
 			this.DialogResult = DialogResult.Cancel;
 			this.Close();
