@@ -138,6 +138,7 @@
     <Compile Include="AppCode\SchShapeComp\PopupSizeConverter.cs" />
     <Compile Include="AppCode\SchShapeComp\PopupWidth.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\BasicShapeSelectEditor.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\SVGTypeConverter.cs" />
     <Compile Include="AppCode\SchShapeComp\ShapeCompFactory.cs" />
     <Compile Include="AppCode\SchShapeComp\ShapeCompLibSpec.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\SVGEditor.cs" />
