@@ -257,14 +257,15 @@ namespace Scada.Scheme
                 foreach (XmlNode symbolNode in symbolNodes)
                 {
                     symbolPattern = findComponentsOfSymbol(symbolNode);
-                    
+                    //if pattern is present at least once in the scheme 
                     if(countPatterOcc(listComponentAndLocationOfScheme, symbolPattern) > 1)
                     {
-                        //List<Point> points = listComponentAndLocationOfScheme.Select(item => item.Position).ToList();
                         int count = 1;
                         int nb = symbolPattern.Count();
                         Point location = new Point();
+                        //the list named points will be filled by the location of the scheme's component who fit with pattern
                         PatterOcc(listComponentAndLocationOfScheme, symbolPattern);
+                        //if there is more than one pattern in the scheme we clone the symbol
                         while (countPatterOcc(listComponentAndLocationOfScheme, symbolPattern) - count >= 1)
                         {
                             XmlNode clonedSymbol = symbolNode.CloneNode(deep: true);
@@ -400,9 +401,6 @@ namespace Scada.Scheme
                     // определение макс. идентификатора компонентов
 
                 }
-
-                //if (symbolNode != null)
-                //    symbolNode.ParentNode.RemoveChild(symbolNode);
                 foreach (XmlNode n in lstNode)
                 {
                     if(n.ParentNode != null)
