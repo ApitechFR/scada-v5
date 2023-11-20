@@ -100,6 +100,12 @@ namespace Scada.Scheme
 
         public Symbol MainSymbol { get; set; }
 
+        private Dictionary<string,bool> UpdatedSymbolId = new Dictionary<string, bool>();
+
+        private Point locFirstComponent = new Point();
+
+        List<Point> points = new List<Point>();
+
         /// <summary>
         /// Adds the input channels to the view.
         /// </summary>
@@ -243,12 +249,80 @@ namespace Scada.Scheme
                 XmlNodeList symbolNodes = xmlDoc.SelectNodes("/SchemeView/Symbols/Symbol");
                 List<XmlNode> lstNode = new List<XmlNode>();
 
+                List<ObjetcComponentLocation> listComponentAndLocationOfScheme = new List<ObjetcComponentLocation>();
+                listComponentAndLocationOfScheme = findComponentsAndLocationOfScheme(rootElem);
+
+                List<string> symbolPattern = new List<string>();
+
                 foreach (XmlNode symbolNode in symbolNodes)
                 {
-                    XmlElement newSymbolElement = xmlDoc.CreateElement("Symbol");
-                    newSymbolElement.InnerXml = symbolNode.InnerXml;
-                    componentsNode.PrependChild(newSymbolElement);
-                    lstNode.Add(symbolNode);
+                    symbolPattern = findComponentsOfSymbol(symbolNode);
+                    //if pattern is present at least once in the scheme 
+                    if(countPatterOcc(listComponentAndLocationOfScheme, symbolPattern) > 1)
+                    {
+                        int count = 1;
+                        int nb = symbolPattern.Count();
+                        Point location = new Point();
+                        //the list named points will be filled by the location of the scheme's component who fit with pattern
+                        PatterOcc(listComponentAndLocationOfScheme, symbolPattern);
+                        //if there is more than one pattern in the scheme we clone the symbol
+                        while (countPatterOcc(listComponentAndLocationOfScheme, symbolPattern) - count >= 1)
+                        {
+                            XmlNode clonedSymbol = symbolNode.CloneNode(deep: true);
+                            //ID modification
+                            XmlNode idNode = clonedSymbol.SelectSingleNode("ID");
+                            if (idNode != null)
+                            {
+                                idNode.InnerText = $"{findMaxID(rootElem) + count}";
+                            }
+                            //location
+                            location = GetMinimumPoint(points, nb);
+                            XmlNode locationNode = clonedSymbol.SelectSingleNode("Location");
+                            if (locationNode != null)
+                            {
+                                XmlNode XNode = locationNode.SelectSingleNode("X");
+                                XmlNode YNode = locationNode.SelectSingleNode("Y");
+                                if(XNode != null && YNode != null)
+                                {
+                                    XNode.InnerText = location.X.ToString();
+                                    YNode.InnerText = location.Y.ToString(); ;
+                                }
+                            }
+                            XmlElement newClonedSymbolElement = xmlDoc.CreateElement("Symbol");
+                            newClonedSymbolElement.InnerXml = clonedSymbol.InnerXml;
+                            componentsNode.PrependChild(newClonedSymbolElement);
+                            lstNode.Add(symbolNode);
+                            count++;
+                            if(!(nb<=0) || !(nb > listComponentAndLocationOfScheme.Count()))
+                            {
+                                points.RemoveRange(0, nb);
+                            }
+                        }
+                        //location
+                        location = GetMinimumPoint(points, nb);
+                        XmlNode lastLocationNode = symbolNode.SelectSingleNode("Location");
+                        if (lastLocationNode != null)
+                        {
+                            XmlNode XNode = lastLocationNode.SelectSingleNode("X");
+                            XmlNode YNode = lastLocationNode.SelectSingleNode("Y");
+                            if (XNode != null && YNode != null)
+                            {
+                                XNode.InnerText = location.X.ToString();
+                                YNode.InnerText = location.Y.ToString(); ;
+                            }
+                        }
+                        XmlElement newSymbolElement = xmlDoc.CreateElement("Symbol");
+                        newSymbolElement.InnerXml = symbolNode.InnerXml;
+                        componentsNode.PrependChild(newSymbolElement);
+                        lstNode.Add(symbolNode);
+                    }
+                    else
+                    {
+                        XmlElement newSymbolElement = xmlDoc.CreateElement("Symbol");
+                        newSymbolElement.InnerXml = symbolNode.InnerXml;
+                        componentsNode.PrependChild(newSymbolElement);
+                        lstNode.Add(symbolNode);
+                    }
                 }
 
                 foreach (XmlNode compNode in componentsNode.ChildNodes)
@@ -283,11 +357,16 @@ namespace Scada.Scheme
                             }
                         }
                     }
-
-                    Components[component.ID] = component;
+                    if (!Components.ContainsKey(component.ID))
+                        Components[component.ID] = component;
+                    else 
+                    { 
+                        component.ID = maxComponentID + 1;
+                        Components[component.ID] = component;
+                    }
                     if (component.ID > maxComponentID)
                         maxComponentID = component.ID;
-                    Components[component.ID] = component;
+                    
 
 
                     if (component is Symbol symbol)
@@ -322,11 +401,11 @@ namespace Scada.Scheme
                     // определение макс. идентификатора компонентов
 
                 }
-
-                //if (symbolNode != null)
-                //    symbolNode.ParentNode.RemoveChild(symbolNode);
                 foreach (XmlNode n in lstNode)
-                    n.ParentNode.RemoveChild(n);
+                {
+                    if(n.ParentNode != null)
+                        n.ParentNode.RemoveChild(n);
+                }
             }
 
 
@@ -370,36 +449,173 @@ namespace Scada.Scheme
                         images[image.Name] = image;
                 }
             }
+
+            //clear list
+            UpdatedSymbolId.Clear();
         }
-        
+        private Point GetMinimumPoint(List<Point> list, int nb)
+        {
+            if (list.Count < nb || nb <= 0)
+            {
+                return new Point(0, 0);
+            }
+
+            int minX = list.Take(nb).Min(p => p.X);
+            int minY = list.Take(nb).Min(p => p.Y);
+
+            return new Point(minX, minY);
+        }
+
+        private List<ObjetcComponentLocation> findComponentsAndLocationOfScheme(XmlElement root)
+        {
+            List<ObjetcComponentLocation> list = new List<ObjetcComponentLocation>();
+
+            XmlNode componentsNode = root.SelectSingleNode("//Components");
+
+            if(componentsNode != null)
+            {
+                XmlNodeList componentNodes = componentsNode.ChildNodes;
+
+                foreach(XmlNode componentNode in componentsNode){
+                    if (componentNode is XmlElement && componentNode.Name != "Symbol")
+                    {
+                        XmlElement element = (XmlElement)componentNode;
+                        //location
+                        XmlNode locationNode = element.SelectSingleNode("Location");
+                        if(locationNode != null)
+                        {
+                            int x = int.Parse(locationNode.SelectSingleNode("X").InnerText);
+                            int y = int.Parse(locationNode.SelectSingleNode("Y").InnerText);
+                            list.Add(new ObjetcComponentLocation(element.Name, new Point(x, y)));
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
+
+        private List<string> findComponentsOfSymbol(XmlNode symbolNode)
+        {
+            List<string> listComponents = new List<string>();
+
+            XmlNode componentsNode = symbolNode.SelectSingleNode("./Components");
+
+            if (componentsNode != null)
+            {
+                XmlNodeList componentNodes = componentsNode.ChildNodes;
+
+                foreach (XmlNode componentNode in componentNodes)
+                {
+                    if (componentNode is XmlElement)
+                    {
+                        listComponents.Add(componentNode.Name);
+                    }
+                }
+            }
+
+            return listComponents;
+        }
+
+        private int findMaxID(XmlElement root)
+        {
+            int maxID = 0;
+
+            XmlNodeList idNodes = root.SelectNodes("//ID");
+
+            foreach (XmlNode node in idNodes)
+            {
+                int currentID;
+                if (int.TryParse(node.InnerText, out currentID))
+                {
+                    if (currentID > maxID)
+                    {
+                        maxID = currentID;
+                    }
+                }
+            }
+
+            return maxID;
+        }
+
+        private int countPatterOcc(List<ObjetcComponentLocation> source, List<string> pattern) 
+        {
+            int count = 0;
+
+            for (int i = 0; i <= source.Count - pattern.Count; i++)
+            {
+                List<string> names = source.Skip(i).Take(pattern.Count).Select(item => item.Name).ToList();
+                if (Enumerable.SequenceEqual(names, pattern))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private void PatterOcc(List<ObjetcComponentLocation> source, List<string> pattern)
+        {
+            points.Clear();
+
+            for (int i = 0; i <= source.Count - pattern.Count; i++)
+            {
+                List<string> names = source.Skip(i).Take(pattern.Count).Select(item => item.Name).ToList();
+                if (Enumerable.SequenceEqual(names, pattern))
+                {
+                    for (int j = 0; j < pattern.Count; j++)
+                        points.Add(source[i + j].Position);
+                }
+            }
+        }
+
         private void LoadSymbol(string symbolPath, XmlElement rootElem, Symbol symbol)
         {
             string symbolIndexPath = symbolPath + "\\index.xml";
 
             if (!IsSymbolUpToDate(symbol, symbolIndexPath))
             {
-                DialogResult popup = MessageBox.Show
-                    (
-                    $"There is a more recent version of the following symbol: \n" +
-                    $"'{symbol.Name}'\n" +
-                    $" Would you like to update it?",
-                    "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
-                    );
-
-                if (popup == DialogResult.Yes)
+                if (!UpdatedSymbolId.ContainsKey(symbol.SymbolId))
                 {
-                    XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(symbolIndexPath);
-                    XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
+                    DialogResult popup = MessageBox.Show
+                        (
+                        $"There is a more recent version of the following symbol: \n" +
+                        $"'{symbol.Name}'\n" +
+                        $" Would you like to update it?",
+                        "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+                        );
 
-                    symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
+                    if (popup == DialogResult.Yes)
+                    {
+                        XmlDocument xmlDoc = new XmlDocument();
+                        xmlDoc.Load(symbolIndexPath);
+                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
 
-                    LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
-                    
+                        symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
+                        LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
+                        UpdatedSymbolId.Add(symbol.SymbolId, true);
+                    }
+                    else
+                    {
+                        LoadFromCurrentFile(rootElem, symbol);
+                        UpdatedSymbolId.Add(symbol.SymbolId, false);
+                    }
                 }
                 else
                 {
-                    LoadFromCurrentFile(rootElem, symbol);
+                    if(UpdatedSymbolId.ContainsKey(symbol.SymbolId) && UpdatedSymbolId[symbol.SymbolId])
+                    {
+                        XmlDocument xmlDoc = new XmlDocument();
+                        xmlDoc.Load(symbolIndexPath);
+                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
+
+                        symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
+                        LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
+                    }
+                    else if(UpdatedSymbolId.ContainsKey(symbol.SymbolId) && !UpdatedSymbolId[symbol.SymbolId])
+                    {
+                        LoadFromCurrentFile(rootElem, symbol);
+                    }
                 }
             }
             else
@@ -459,8 +675,52 @@ namespace Scada.Scheme
                 CompManager compManager = CompManager.GetInstance();
                 LoadErrors.AddRange(compManager.LoadErrors);
                 SortedDictionary<int, ComponentBinding> componentBindings = templateBindings?.ComponentBindings;
+                int count = 0;
 
-                foreach (XmlNode compNode in componentsNode.ChildNodes)
+                //change order 
+                List<XmlNode> list = new List<XmlNode>();
+                XmlNode n = componentsNode.ChildNodes[0];
+                Point p = new Point();
+
+                foreach (XmlNode node in componentsNode.ChildNodes)
+                {
+                    list.Add(node);
+
+                    BaseComponent component = compManager.CreateComponent(node, out string errMsg);
+
+                    if (component == null)
+                    {
+                        component = new UnknownComponent { XmlNode = node };
+                        if (errNodeNames.Add(node.Name))
+                            LoadErrors.Add(errMsg);
+                    }
+
+                    // загрузка компонента и добавление его в представление
+                    component.SchemeView = this;
+                    component.LoadFromXml(node);
+
+                    if (!(p.X == 0 && p.Y == 0))
+                    {
+                        if (component.Location.X <= p.X && component.Location.Y <= p.Y)
+                        {
+                            p = component.Location;
+                            n = node;
+                        }
+                    }
+                    else
+                    {
+                        p = component.Location;
+                        n = node;
+                    }
+                }
+
+                if (list.Contains(n))
+                {
+                    list.Remove(n);
+                    list.Insert(0, n);
+                }
+
+                foreach (XmlNode compNode in list)
                 {
                     // создание компонента
                     BaseComponent component = compManager.CreateComponent(compNode, out string errMsg);
@@ -475,9 +735,19 @@ namespace Scada.Scheme
                     // загрузка компонента и добавление его в представление
                     component.SchemeView = this;
                     component.LoadFromXml(compNode);
-                    Point location = new Point(component.Location.X + symbol.Location.X, component.Location.Y + symbol.Location.Y);
+                    Point location = new Point();
+                    if (count == 0) {
+                        location = new Point(symbol.Location.X, symbol.Location.Y);
+                        locFirstComponent = component.Location;
+                    }
+                    else
+                    {
+                        double distX = component.Location.X - locFirstComponent.X;
+                        double distY = component.Location.Y - locFirstComponent.Y;
+                        location = new Point((int)Math.Round(symbol.Location.X + distX), (int)Math.Round(symbol.Location.Y + distY));
+                    }
                     component.Location = location;
-
+                    count++;
                     component.updateAliasesDictionary(symbol);
                     symbolComps.Add(component);
 
@@ -656,11 +926,11 @@ namespace Scada.Scheme
                             // загрузка компонента и добавление его в представление
                             component.SchemeView = this;
                             component.LoadFromXml(compNode);
+                            if (component.Location.X + component.Location.Y <= 20) component.Location = new Point(0, 0);
                             Point location = new Point(component.Location.X + symbol.Location.X, component.Location.Y + symbol.Location.Y);
                             component.Location = location;
 
-
-                            foreach(Alias a in symbol.AliasList){
+                            foreach (Alias a in symbol.AliasList){
                                 var dictionnaryEntriesToModify = component.AliasesDictionnary.Where(entry => entry.Value.Name == a.Name).ToList();
 
                                 foreach (var entry in dictionnaryEntriesToModify)
@@ -754,6 +1024,7 @@ namespace Scada.Scheme
                     }
                 }
                 SetNewSymbolCompsIDs(components, symbol);
+
             }
         }
 
@@ -1020,6 +1291,18 @@ namespace Scada.Scheme
         public int GetNextComponentID()
         {
             return ++maxComponentID;
+        }
+    }
+
+    class ObjetcComponentLocation
+    {
+        public string Name { get; set; }
+        public Point Position { get; set; }
+
+        public ObjetcComponentLocation(string name, Point pos)
+        {
+            Name = name;
+            Position = pos;
         }
     }
 }
