@@ -79,6 +79,10 @@ namespace Scada.Scheme.Editor
 
             if (textBox1.Text == "" || textBox2.Text == "" || (!checkBox1.Checked && comboBox1.SelectedItem == null))
                 MessageBox.Show("Please, enter a name, a type and a value.");
+            else if(textBox1.Text.Contains("'"))
+            {
+                MessageBox.Show("Please, enter a name without apostrophe.");
+            }
             else
             {
                 currentAlias.Name = textBox1.Text;

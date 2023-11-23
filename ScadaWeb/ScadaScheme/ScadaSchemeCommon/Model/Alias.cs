@@ -71,6 +71,9 @@ namespace Scada.Scheme.Model
                 case "Boolean":
                     Value = xmlNode.GetChildAsBool("Value");
                     break;
+                case "Color":
+                    Value = xmlNode.GetChildAsBool("Value");
+                    break;
                 default:
                     Value = xmlNode.GetChildAsString("Value");
                     break;
