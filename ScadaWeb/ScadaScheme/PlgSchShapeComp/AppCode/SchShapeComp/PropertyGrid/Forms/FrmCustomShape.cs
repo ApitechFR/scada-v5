@@ -15,7 +15,11 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		private const string ErrorDeletingTempFile = "Error deleting temporary file: {0}";
 		private const string ExternalEditorOpenWarning = "An external editor is still open. Are you sure you want to exit without finishing editing?";
 		private const string CloseEditorWarning = "By clicking OK, your editor will be closed. Make sure you have saved all your changes. Do you want to continue?";
-
+		private const string FailedToOpenSVG = "Failed to open the SVG in the external editor: {0}";
+		private const string ErrorClosingExternalEditor = "An error occurred while closing the external editor: {0}";
+		
+		public delegate void ShapeSavedHandler(string svgData);
+		public event ShapeSavedHandler ShapeSaved;
 
 		public string ShapeType { get; set; }
 		public bool Saved { get; private set; }
@@ -28,11 +32,8 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 		public FrmCustomShape()
 		{
-
 			InitializeComponent();
 			UpdateButtonStates();
-
-
 		}
 
 		
@@ -47,6 +48,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			}
 			Saved = false;
 			UpdateButtonStates();
+			this.Resize += FrmCustomShape_Resize;
 		}
 
 
@@ -54,25 +56,36 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		{
 			MessageBox.Show(string.Format(format, ex.Message));
 		}
-
+		protected virtual void OnShapeSaved(string svgData)
+		{
+			ShapeSaved?.Invoke(svgData);
+		}
 		private void UpdateButtonStates()
 		{
 			bool hasContent = !string.IsNullOrEmpty(svgText);
 			btnEditExternally.Enabled = hasContent;
 		}
-		
+		private void FrmCustomShape_Resize(object sender, EventArgs e)
+		{
+			if (this.WindowState != FormWindowState.Minimized)
+			{
+				byte[] svgBytes = Encoding.UTF8.GetBytes(svgText);
+				ctrlSvgViewer1.ShowImage(svgBytes);
+				ctrlSvgViewer1.Invalidate();
+				ctrlSvgViewer1.Refresh();
+			}
+		}
 		private void BtnSave_Click(object sender, EventArgs e)
 		{
 			CloseExternalEditor();
 
 			ShapeType = svgText; 
 			Saved = true;
+			OnShapeSaved(ShapeType);
+
 			this.DialogResult = DialogResult.OK;
 			this.Close();
 		}
-
-
-		
 
 		private void BtnImport_Click(object sender, EventArgs e)
 		{
@@ -93,14 +106,15 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			{
 				svgText = File.ReadAllText(filePath);
 				byte[] svgBytes = Encoding.UTF8.GetBytes(svgText);
-				ctrlSvgViewer1.ShowImage(svgBytes);	
+				ctrlSvgViewer1.ShowImage(svgBytes);
+				ctrlSvgViewer1.Invalidate();
+				ctrlSvgViewer1.Refresh();
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("Error while reading the SVG file : " + ex.Message);
+				Console.WriteLine(ErrorReadingFile + ": " + ex.Message);
 			}
 		}
-
 
 		private void BtnEditExternally_Click(object sender, EventArgs e)
 		{
@@ -115,14 +129,42 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 				File.WriteAllText(tempFilePath, svgText);
 
 				externalEditorProcess = Process.Start(tempFilePath);
+				if (externalEditorProcess != null)
+				{
+					externalEditorProcess.EnableRaisingEvents = true;
+					externalEditorProcess.Exited += ExternalEditorProcess_Exited;
+				}
+
 				WatchFileChanges();
 				IsExternalEditorOpen = true;
 				((Button)sender).Text = "Done";
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show($"Failed to open the SVG in the external editor: {ex.Message}");
+				MessageBox.Show(string.Format(FailedToOpenSVG, ex.Message));
 				Console.WriteLine(ex.Message);
+			}
+		}
+
+		private void ExternalEditorProcess_Exited(object sender, EventArgs e)
+		{
+			if (InvokeRequired)
+			{
+				Invoke(new Action(() =>
+				{
+					CloseExternalEditor();
+					ReadSvgFromFile(tempFilePath);
+					btnEditExternally.Text = "Edit";
+					IsExternalEditorOpen = false;
+
+				}));
+			}
+			else
+			{
+				CloseExternalEditor();
+				ReadSvgFromFile(tempFilePath);
+				btnEditExternally.Text = "Edit";
+				IsExternalEditorOpen = false;
 			}
 		}
 
@@ -192,16 +234,19 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 					{
 						externalEditorProcess.Kill();
 						externalEditorProcess.WaitForExit();
+						externalEditorProcess.Exited -= ExternalEditorProcess_Exited;
 						IsExternalEditorOpen = false;
 						btnEditExternally.Text = "Edit";
 					}
 					catch (Exception ex)
 					{
-						ShowError("An error occurred while closing the external editor: {0}", ex);
+						ShowError(ErrorClosingExternalEditor, ex);
+						
 					}
 				}
 			}
 		}
+
 		protected override void OnClosing(CancelEventArgs e)
 		{
 			if (IsExternalEditorOpen && externalEditorProcess != null && !externalEditorProcess.HasExited)
@@ -240,10 +285,19 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			if (disposing)
 			{
 				CleanupTemporaryFiles();
+				externalEditorProcess?.Dispose();
+				fileWatcher?.Dispose();
 			}
 			base.Dispose(disposing);
 		}
 
+		private void BtnCancel_Click(object sender, EventArgs e)
+		{
+			CloseExternalEditor();
+
+			this.DialogResult = DialogResult.Cancel;
+			this.Close();
+		}
 
 	}
 
