@@ -106,6 +106,7 @@ namespace Scada.Scheme
 
         List<Point> points = new List<Point>();
 
+        List<Tuple<string, Point>> lstLocSymbol = new List<Tuple<string, Point>>();
         /// <summary>
         /// Adds the input channels to the view.
         /// </summary>
@@ -372,6 +373,7 @@ namespace Scada.Scheme
                     if (component is Symbol symbol)
                     {
                         LoadSymbol(Symbolpath, rootElem, symbol);
+                        component.Location = new Point(component.Location.X, component.Location.Y);
                     }
 
                     // добавление входных каналов представления
@@ -453,6 +455,7 @@ namespace Scada.Scheme
             //clear list
             UpdatedSymbolId.Clear();
         }
+
         private Point GetMinimumPoint(List<Point> list, int nb)
         {
             if (list.Count < nb || nb <= 0)
@@ -500,6 +503,7 @@ namespace Scada.Scheme
             List<string> listComponents = new List<string>();
 
             XmlNode componentsNode = symbolNode.SelectSingleNode("./Components");
+            string id = symbolNode.SelectSingleNode("SymbolId").InnerText;
 
             if (componentsNode != null)
             {
@@ -510,6 +514,11 @@ namespace Scada.Scheme
                     if (componentNode is XmlElement)
                     {
                         listComponents.Add(componentNode.Name);
+                        XmlNode n = componentNode.SelectSingleNode("./Location");
+                        Point p = new Point();
+                        p.X = int.Parse(n.SelectSingleNode("X").InnerText);
+                        p.Y = int.Parse(n.SelectSingleNode("Y").InnerText);
+                        lstLocSymbol.Add(new Tuple<string,Point>(id,p));
                     }
                 }
             }
@@ -681,7 +690,9 @@ namespace Scada.Scheme
                 List<XmlNode> list = new List<XmlNode>();
                 XmlNode n = componentsNode.ChildNodes[0];
                 Point p = new Point();
-
+                int indice = 0;
+                int c = 0;
+                List<Tuple<string, Point>> tuplesFilter = lstLocSymbol.Where(t => t.Item1 == symbol.SymbolId).ToList();
                 foreach (XmlNode node in componentsNode.ChildNodes)
                 {
                     list.Add(node);
@@ -705,13 +716,17 @@ namespace Scada.Scheme
                         {
                             p = component.Location;
                             n = node;
+                            indice = c;
                         }
                     }
                     else
                     {
                         p = component.Location;
                         n = node;
+                        indice = c;
                     }
+
+                    c++;
                 }
 
                 if (list.Contains(n))
@@ -737,14 +752,14 @@ namespace Scada.Scheme
                     component.LoadFromXml(compNode);
                     Point location = new Point();
                     if (count == 0) {
-                        location = new Point(symbol.Location.X, symbol.Location.Y);
+                        location = new Point(symbol.Location.X + tuplesFilter[indice].Item2.X, symbol.Location.Y + tuplesFilter[indice].Item2.Y);
                         locFirstComponent = component.Location;
                     }
                     else
                     {
                         double distX = component.Location.X - locFirstComponent.X;
                         double distY = component.Location.Y - locFirstComponent.Y;
-                        location = new Point((int)Math.Round(symbol.Location.X + distX), (int)Math.Round(symbol.Location.Y + distY));
+                        location = new Point((int)Math.Round(symbol.Location.X + distX + tuplesFilter[indice].Item2.X), (int)Math.Round(symbol.Location.Y + distY + tuplesFilter[indice].Item2.Y));
                     }
                     component.Location = location;
                     count++;
