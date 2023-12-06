@@ -9,6 +9,7 @@ using System.Drawing.Design;
 using System.Xml;
 using CM = System.ComponentModel;
 
+
 namespace Scada.Web.Plugins.SchShapeComp
 {
 	[Serializable]
@@ -30,9 +31,9 @@ namespace Scada.Web.Plugins.SchShapeComp
 		private string _svgCode;
 
 		[DisplayName("SVG File"), Category(Categories.Appearance)]
-		[Description("SVG file .")]
+		[Description("The SVG code representing the graphic to be displayed. If empty, no graphic is set.")]
 		[CM.Editor(typeof(SVGEditor), typeof(UITypeEditor))]
-		[CM.DefaultValue("")]
+		[CM.DefaultValue(""), CM.TypeConverter(typeof(SVGTypeConverter))]
 		public string SvgCode
 		{
 			get => _svgCode;
@@ -102,10 +103,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.DefaultValue(Actions.None)]
 		public Actions Action { get; set; }
 
-		#region Attributes
-		[CM.Browsable(false)]
-		#endregion
-		public new string BackColor { get; set; }
 
 		#region Attributes
 		[CM.Browsable(false)]
