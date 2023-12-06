@@ -106,7 +106,7 @@ namespace Scada.Scheme
 
         List<Point> points = new List<Point>();
 
-        List<Point> lstLocSymbol = new List<Point>();
+        List<Tuple<string, Point>> lstLocSymbol = new List<Tuple<string, Point>>();
         /// <summary>
         /// Adds the input channels to the view.
         /// </summary>
@@ -503,6 +503,7 @@ namespace Scada.Scheme
             List<string> listComponents = new List<string>();
 
             XmlNode componentsNode = symbolNode.SelectSingleNode("./Components");
+            string id = symbolNode.SelectSingleNode("SymbolId").InnerText;
 
             if (componentsNode != null)
             {
@@ -517,7 +518,7 @@ namespace Scada.Scheme
                         Point p = new Point();
                         p.X = int.Parse(n.SelectSingleNode("X").InnerText);
                         p.Y = int.Parse(n.SelectSingleNode("Y").InnerText);
-                        lstLocSymbol.Add(p);
+                        lstLocSymbol.Add(new Tuple<string,Point>(id,p));
                     }
                 }
             }
@@ -691,6 +692,7 @@ namespace Scada.Scheme
                 Point p = new Point();
                 int indice = 0;
                 int c = 0;
+                List<Tuple<string, Point>> tuplesFilter = lstLocSymbol.Where(t => t.Item1 == symbol.SymbolId).ToList();
                 foreach (XmlNode node in componentsNode.ChildNodes)
                 {
                     list.Add(node);
@@ -750,14 +752,14 @@ namespace Scada.Scheme
                     component.LoadFromXml(compNode);
                     Point location = new Point();
                     if (count == 0) {
-                        location = new Point(symbol.Location.X + lstLocSymbol[indice].X, symbol.Location.Y + lstLocSymbol[indice].Y);
+                        location = new Point(symbol.Location.X + tuplesFilter[indice].Item2.X, symbol.Location.Y + tuplesFilter[indice].Item2.Y);
                         locFirstComponent = component.Location;
                     }
                     else
                     {
                         double distX = component.Location.X - locFirstComponent.X;
                         double distY = component.Location.Y - locFirstComponent.Y;
-                        location = new Point((int)Math.Round(symbol.Location.X + distX + lstLocSymbol[indice].X), (int)Math.Round(symbol.Location.Y + distY + lstLocSymbol[indice].Y));
+                        location = new Point((int)Math.Round(symbol.Location.X + distX + tuplesFilter[indice].Item2.X), (int)Math.Round(symbol.Location.Y + distY + tuplesFilter[indice].Item2.Y));
                     }
                     component.Location = location;
                     count++;
@@ -823,7 +825,6 @@ namespace Scada.Scheme
                     // определение макс. идентификатора компонентов
                 
                 }
-                lstLocSymbol.Clear();
             }
 
 
