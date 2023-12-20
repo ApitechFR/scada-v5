@@ -197,9 +197,15 @@ scada.scheme.CustomSVGRenderer.prototype.createDom = function (
 		);
 		props.SvgCode = props.SvgCode.replace(
 			/<svg[^>]*?(\s+height\s*=\s*["'][^"']*["'])/g,
-			"<svg height='100%' width='100%'  preserveAspectRatio='none'",
+			"<svg",
 		);
+		props.SvgCode = props.SvgCode.replace(
+			/<svg/g,
+			"<svg height='100%' width='100%' preserveAspectRatio='none'"
+		);
+
 	}
+	
 	divComp.append(props.SvgCode);
 	component.dom = divComp;
 	
