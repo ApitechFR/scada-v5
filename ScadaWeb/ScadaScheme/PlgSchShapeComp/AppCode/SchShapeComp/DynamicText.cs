@@ -5,6 +5,8 @@ using System.Drawing.Design;
 using CM = System.ComponentModel;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
+using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
+using System.Collections.Generic;
 
 namespace Scada.Web.Plugins.SchShapeComp
 {
@@ -31,6 +33,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 			UnderlineOnHover = false;
 			Action = Actions.None;
 			ShowValue = ShowValueKinds.ShowWithUnit;
+			Conditions = new List<AdvancedCondition>();
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "(0) NA";
@@ -110,6 +113,13 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public int InCnlNum { get; set; }
 
 
+		[DisplayName("Conditions"), Category(Categories.Behavior)]
+		[Description("The conditions for SVG Shape output depending on the value of the input channel.")]
+		[CM.DefaultValue(null), CM.TypeConverter(typeof(CollectionConverter))]
+		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
+		public List<AdvancedCondition> Conditions { get; protected set; }
+
+
 		/// <summary>
 		/// Получить или установить номер входного канала
 		/// </summary>
@@ -143,6 +153,12 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public int CtrlCnlNum { get; set; }
 
 
+
+		[DisplayName("Rotation"), Category(Categories.Appearance)]
+		[Description("The rotation angle of the SVG shape in degrees.")]
+		[CM.DefaultValue(0)]
+		public int Rotation { get; set; }
+
 		/// <summary>
 		/// Загрузить конфигурацию компонента из XML-узла
 		/// </summary>
@@ -154,12 +170,28 @@ namespace Scada.Web.Plugins.SchShapeComp
 			BorderColorOnHover = xmlNode.GetChildAsString("BorderColorOnHover");
 			ForeColorOnHover = xmlNode.GetChildAsString("ForeColorOnHover");
 			UnderlineOnHover = xmlNode.GetChildAsBool("UnderlineOnHover");
+			Rotation = xmlNode.GetChildAsInt("Rotation");
 			Action = xmlNode.GetChildAsEnum<Actions>("Action");
 			ShowValue = xmlNode.GetChildAsEnum<ShowValueKinds>("ShowValue");
 			InCnlNum = xmlNode.GetChildAsInt("InCnlNum");
 			CtrlCnlNum = xmlNode.GetChildAsInt("CtrlCnlNum");
 			InCnlNumCustom = xmlNode.GetChildAsString("InCnlNumCustom");
 			CtrlCnlNumCustom = xmlNode.GetChildAsString("CtrlCnlNumCustom");
+
+			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
+
+			if (conditionsNode != null)
+			{
+				Conditions = new List<AdvancedCondition>();
+				XmlNodeList conditionNodes = conditionsNode.SelectNodes("Condition");
+				foreach (XmlNode conditionNode in conditionNodes)
+				{
+					AdvancedCondition condition = new AdvancedCondition { SchemeView = SchemeView };
+					condition.LoadFromXml(conditionNode);
+					Conditions.Add(condition);
+				}
+			}
+
 		}
 
 		/// <summary>
@@ -168,7 +200,13 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
-
+			XmlElement conditionsElem = xmlElem.AppendElem("Conditions");
+			foreach (AdvancedCondition condition in Conditions)
+			{
+				XmlElement conditionElem = conditionsElem.AppendElem("Condition");
+				condition.SaveToXml(conditionElem);
+			}
+			xmlElem.AppendElem("Rotation", Rotation);
 			xmlElem.AppendElem("BackColorOnHover", BackColorOnHover);
 			xmlElem.AppendElem("BorderColorOnHover", BorderColorOnHover);
 			xmlElem.AppendElem("ForeColorOnHover", ForeColorOnHover);
@@ -180,6 +218,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 			xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
 		}
+
+		
 	}
 
 }

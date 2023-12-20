@@ -190,34 +190,21 @@ scada.scheme.CustomSVGRenderer.prototype.createDom = function (
 	//set backcolor
 	this.setBackColor(divComp, props.BackColor);
 	
-	//if (props.SvgCode) {
-	//	props.SvgCode = props.SvgCode.replace(
-	//		/<svg[^>]*?(\s+width\s*=\s*["'][^"']*["'])/g,
-	//		"<svg ",
-	//	);
-	//	props.SvgCode = props.SvgCode.replace(
-	//		/<svg[^>]*?(\s+height\s*=\s*["'][^"']*["'])/g,
-	//		"<svg height='100%' width='100%'  preserveAspectRatio='none'",
-	//	);
-	//}
 	if (props.SvgCode) {
-		// Supprimer les attributs width et height existants
 		props.SvgCode = props.SvgCode.replace(
 			/<svg[^>]*?(\s+width\s*=\s*["'][^"']*["'])/g,
-			"<svg "
+			"<svg ",
 		);
 		props.SvgCode = props.SvgCode.replace(
 			/<svg[^>]*?(\s+height\s*=\s*["'][^"']*["'])/g,
-			"<svg "
+			"<svg height='100%' width='100%'  preserveAspectRatio='none'",
+			"<svg",
+		);
+		props.SvgCode = props.SvgCode.replace(
+			/<svg/g,
+			"<svg height='100%' width='100%' preserveAspectRatio='none'"
 		);
 
-		// Vérifier si viewBox existe et le mettre à jour
-		if (/viewBox="[^"]*"/.test(props.SvgCode)) {
-			props.SvgCode = props.SvgCode.replace(
-				/viewBox="[^"]*"/,
-				'viewBox="0 0 100 100"'
-			);
-		}
 	}
 	divComp.append(props.SvgCode);
 	component.dom = divComp;
@@ -453,6 +440,10 @@ scada.scheme.DynamicTextRenderer.prototype.createDom = function (component, rend
 	var spanText = component.dom.children();
 	var cnlNum = props.InCnlNum;
 
+
+	//apply rotation
+	scada.scheme.setRotate(spanComp, props);
+
 	if (props.ShowValue > ShowValueKinds.NOT_SHOW && !props.Text) {
 		spanText.text("[" + cnlNum + "]");
 	}
@@ -508,6 +499,12 @@ scada.scheme.DynamicTextRenderer.prototype.updateData = function (component, ren
 		this.setBackColor(spanComp, backColor, true, statusColor);
 		this.setBorderColor(spanComp, borderColor, true, statusColor);
 		this.setForeColor(spanComp, foreColor, true, statusColor);
+
+		//update component data
+		scada.scheme.updateComponentData(component, renderContext);
+
+		// apply rotation
+		scada.scheme.setRotate(spanComp, props);
 	}
 };
 
@@ -528,6 +525,8 @@ scada.scheme.DynamicPictureRenderer.prototype.createDom = function (component, r
 	var props = component.props;
 	var divComp = component.dom;
 
+	// apply rotation
+	scada.scheme.setRotate(divComp, props);
 
 	this.bindAction(divComp, component, renderContext);
 
@@ -591,6 +590,12 @@ scada.scheme.DynamicPictureRenderer.prototype.updateData = function (component, 
 
 		this.setBackColor(divComp, backColor, true, statusColor);
 		this.setBorderColor(divComp, borderColor, true, statusColor);
+
+		//update component data
+        scada.scheme.updateComponentData(component, renderContext);
+
+        // apply rotation
+        scada.scheme.setRotate(divComp, props);
 	}
 };
 

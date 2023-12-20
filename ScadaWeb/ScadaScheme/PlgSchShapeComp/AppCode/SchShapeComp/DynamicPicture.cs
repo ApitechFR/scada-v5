@@ -31,6 +31,10 @@ namespace Scada.Web.Plugins.SchShapeComp
 			CtrlCnlNumCustom = "(0) NA";
 		}
 
+		[DisplayName("Rotation"), Category(Categories.Appearance)]
+		[Description("The rotation angle of the SVG shape in degrees.")]
+		[CM.DefaultValue(0)]
+		public int Rotation { get; set; }
 
 		/// <summary>
 		/// Получить или установить цвет фона при наведении указателя мыши
@@ -138,6 +142,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 			BorderColorOnHover = xmlNode.GetChildAsString("BorderColorOnHover");
 			ImageOnHoverName = xmlNode.GetChildAsString("ImageOnHoverName");
 			Action = xmlNode.GetChildAsEnum<Actions>("Action");
+			Rotation = xmlNode.GetChildAsInt("Rotation");
 
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
 			if (conditionsNode != null)
@@ -164,6 +169,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
+			xmlElem.AppendElem("Rotation", Rotation);
 
 			xmlElem.AppendElem("BackColorOnHover", BackColorOnHover);
 			xmlElem.AppendElem("BorderColorOnHover", BorderColorOnHover);
@@ -182,20 +188,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 			xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
 		}
-
-		/// <summary>
-		/// Клонировать объект
-		/// </summary>
-		public override BaseComponent Clone()
-		{
-			DynamicPicture clonedComponent = (DynamicPicture)base.Clone();
-			
-			foreach (PictureConditions condition in clonedComponent.Conditions)
-			{
-				condition.SchemeView = SchemeView;
-			}
-
-			return clonedComponent;
-		}
+	
 	}
 }
