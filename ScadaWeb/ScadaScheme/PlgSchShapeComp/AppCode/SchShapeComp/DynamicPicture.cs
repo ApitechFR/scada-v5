@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
 using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
+using Scada.Web.SchShapeComp.PropertyGrid;
 
 namespace Scada.Web.Plugins.SchShapeComp
 {
@@ -23,7 +24,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 			BorderColorOnHover = "";
 			ImageOnHoverName = "";
 			Action = Actions.None;
-			Conditions = new List<PictureCondition>();
+			Conditions = new List<PictureConditions>();
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "(0) NA";
@@ -81,7 +82,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.DefaultValue(null), CM.TypeConverter(typeof(CollectionConverter))]
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
 		#endregion
-		public List<PictureCondition> Conditions { get; protected set; }
+		public List<PictureConditions> Conditions { get; protected set; }
 
 		/// <summary>
 		/// Получить или установить номер входного канала
@@ -141,11 +142,11 @@ namespace Scada.Web.Plugins.SchShapeComp
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
 			if (conditionsNode != null)
 			{
-				Conditions = new List<PictureCondition>();
+				Conditions = new List<PictureConditions>();
 				XmlNodeList conditionNodes = conditionsNode.SelectNodes("Condition");
 				foreach (XmlNode conditionNode in conditionNodes)
 				{
-					PictureCondition condition = new PictureCondition { SchemeView = SchemeView };
+					PictureConditions condition = new PictureConditions { SchemeView = SchemeView };
 					condition.LoadFromXml(conditionNode);
 					Conditions.Add(condition);
 				}
@@ -188,8 +189,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public override BaseComponent Clone()
 		{
 			DynamicPicture clonedComponent = (DynamicPicture)base.Clone();
-
-			foreach (Condition condition in clonedComponent.Conditions)
+			
+			foreach (PictureConditions condition in clonedComponent.Conditions)
 			{
 				condition.SchemeView = SchemeView;
 			}

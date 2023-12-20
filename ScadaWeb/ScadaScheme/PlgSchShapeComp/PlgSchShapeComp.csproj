@@ -127,6 +127,7 @@
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\BarGraphCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\ColorCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\CustomSVGCondition.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\PictureConditions.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Forms\FrmCustomShape.cs">
       <SubType>Form</SubType>
     </Compile>
