@@ -30,6 +30,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Design;
+using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
@@ -67,10 +68,12 @@ namespace Scada.Scheme.Model.PropertyGrid
 
         public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
         {
-            if (context?.Instance != null &&
-                provider?.GetService(typeof(IWindowsFormsEditorService)) is IWindowsFormsEditorService editorSvc)
+			object _instance = GetInstanceFromContext(context) ?? context?.Instance;
+
+            if (_instance != null &&
+                         provider?.GetService(typeof(IWindowsFormsEditorService)) is IWindowsFormsEditorService editorSvc)
             {
-                SchemeDocument schemeDoc = GetSchemeDoc(context.Instance);
+				SchemeDocument schemeDoc = GetSchemeDoc(_instance);
 
                 if (schemeDoc != null)
                 {
@@ -103,7 +106,40 @@ namespace Scada.Scheme.Model.PropertyGrid
             return value;
         }
 
-        public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
+		private object GetInstanceFromContext(ITypeDescriptorContext context)
+		{
+			if (context?.Instance == null)
+				return null;
+
+			try
+			{
+				Type type = context.Instance.GetType();
+				FieldInfo baseTypeDescriptorField = type.GetField("baseTypeDescriptor", BindingFlags.NonPublic | BindingFlags.Instance);
+
+				if (baseTypeDescriptorField == null)
+					return null;
+
+				object baseTypeDescriptor = baseTypeDescriptorField.GetValue(context.Instance);
+				if (baseTypeDescriptor == null)
+					return null;
+
+				Type baseType = baseTypeDescriptor.GetType();
+				FieldInfo fieldInfo = baseType.GetField("_instance", BindingFlags.NonPublic | BindingFlags.Instance);
+
+				if (fieldInfo == null)
+					return null;
+
+				return fieldInfo.GetValue(baseTypeDescriptor);
+			}
+			catch (Exception ex)
+			{
+				return ex;
+			}
+		}
+
+
+
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
         {
             return UITypeEditorEditStyle.Modal;
         }
