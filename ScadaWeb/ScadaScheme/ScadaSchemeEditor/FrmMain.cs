@@ -192,7 +192,7 @@ namespace Scada.Scheme.Editor
             ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
             foreach (var s in availableSymbols)
             {
-                lvCompTypes.Items.Add(new ListViewItem(s.Value, "component.png", symbolsViewGroup) { IndentCount = 1 });
+                lvCompTypes.Items.Add(new ListViewItem($"{s.Value}-{Path.GetFileName(s.Key)}", "component.png", symbolsViewGroup) { IndentCount = 1 });
             }
             lvCompTypes.Groups.Add(symbolsViewGroup);
         }
@@ -2119,9 +2119,10 @@ namespace Scada.Scheme.Editor
 
         private string findSymboleInAvailableList(string name)
         {
+            string[] nameAndFile = name.Split('-');
             foreach(KeyValuePair<string, string> kvp in availableSymbols)
             {
-                if (name == kvp.Value) return kvp.Key;
+                if (nameAndFile[0] == kvp.Value && nameAndFile[1] == Path.GetFileName(kvp.Key)) return kvp.Key;
             }
             return "";
         }
