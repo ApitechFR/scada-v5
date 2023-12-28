@@ -523,7 +523,11 @@ namespace Scada.Scheme.Editor
             SubscribeToSchemeChanges();
             editor.History.MakeCopy(editor.SchemeView);
             Text = editor.Title;
-
+            if (editor.SchemeView.updated)
+            {
+                editor.Modified = true;
+                editor.SchemeView.updated = false;
+            }
             if (!loadOK)
                 ScadaUiUtils.ShowError(errMsg);
 
