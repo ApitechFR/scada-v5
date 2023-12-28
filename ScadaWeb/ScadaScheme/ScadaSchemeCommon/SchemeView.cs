@@ -35,6 +35,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using System.Xml;
 using Utils;
@@ -107,6 +108,9 @@ namespace Scada.Scheme
         List<Point> points = new List<Point>();
 
         List<Tuple<string, Point>> lstLocSymbol = new List<Tuple<string, Point>>();
+
+        public bool updated = false;
+
         /// <summary>
         /// Adds the input channels to the view.
         /// </summary>
@@ -603,6 +607,7 @@ namespace Scada.Scheme
                         symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
                         LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
                         UpdatedSymbolId.Add(symbol.SymbolId, true);
+                        updated = true;
                     }
                     else
                     {
