@@ -192,7 +192,7 @@ namespace Scada.Scheme.Editor
             ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
             foreach (var s in availableSymbols)
             {
-                lvCompTypes.Items.Add(new ListViewItem(s.Value, "component.png", symbolsViewGroup) { IndentCount = 1 });
+                lvCompTypes.Items.Add(new ListViewItem($"{s.Value} ({Path.GetFileName(s.Key)})", "component.png", symbolsViewGroup) { IndentCount = 1 });
             }
             lvCompTypes.Groups.Add(symbolsViewGroup);
         }
@@ -253,7 +253,7 @@ namespace Scada.Scheme.Editor
             if (e.Button == MouseButtons.Right)
             {
                 ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
-                string symbolPath = availableSymbols[clickedItem.Text];
+                string symbolPath = availableSymbols.ElementAt(clickedItem.Index-(lvCompTypes.Items.Count-availableSymbols.Count)).Key;
                 if (clickedItem != null)
                 {
                     ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
@@ -1739,7 +1739,7 @@ namespace Scada.Scheme.Editor
             //Symboles
             if (lvCompTypes.SelectedItems.Count > 0 && lvCompTypes.SelectedItems[0].Group.Header == "Symbols")
             {
-                editor.SymbolPath = findSymboleInAvailableList(lvCompTypes.SelectedItems[0].Text);
+                editor.SymbolPath = availableSymbols.ElementAt(lvCompTypes.SelectedIndices[0]-(lvCompTypes.Items.Count - availableSymbols.Count)).Key;
                 if (File.Exists(editor.SymbolPath))
                 {
                     XmlDocument xmlDoc = new XmlDocument();
@@ -2119,15 +2119,6 @@ namespace Scada.Scheme.Editor
             var aliasCRUD = new FrmAliasesList(editor.SchemeView.isSymbol ? editor.SchemeView.MainSymbol : cbSchComp.SelectedItem as Symbol, editor.SchemeView.isSymbol);
             aliasCRUD.OnUpdateAlias += handleUpdateAlias;
             aliasCRUD.ShowDialog();
-        }
-
-        private string findSymboleInAvailableList(string name)
-        {
-            foreach(KeyValuePair<string, string> kvp in availableSymbols)
-            {
-                if (name == kvp.Value) return kvp.Key;
-            }
-            return "";
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)
