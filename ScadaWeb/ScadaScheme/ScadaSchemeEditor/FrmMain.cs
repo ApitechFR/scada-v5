@@ -1740,7 +1740,6 @@ namespace Scada.Scheme.Editor
             if (lvCompTypes.SelectedItems.Count > 0 && lvCompTypes.SelectedItems[0].Group.Header == "Symbols")
             {
                 editor.SymbolPath = availableSymbols.ElementAt(lvCompTypes.SelectedIndices[0]-(lvCompTypes.Items.Count - availableSymbols.Count)).Key;
-                //editor.SymbolPath = findSymboleInAvailableList(lvCompTypes.SelectedItems[0].Text);
                 if (File.Exists(editor.SymbolPath))
                 {
                     XmlDocument xmlDoc = new XmlDocument();
