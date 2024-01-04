@@ -30,6 +30,7 @@ using Scada.Web.Plugins;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Utils;
 
@@ -183,8 +184,18 @@ namespace Scada.Scheme
                     AttrTranslator attrTranslator = new AttrTranslator();
                     DirectoryInfo dirInfo = new DirectoryInfo(appDirs.BinDir);
                     FileInfo[] fileInfoArr = dirInfo.GetFiles(CompLibMask, SearchOption.TopDirectoryOnly);
+                    
+                    //check if shape components are present
+					bool hasShapeComp = fileInfoArr.Any(fileInfo => fileInfo.Name == "PlgSchShapeComp.dll");
 
-                    foreach (FileInfo fileInfo in fileInfoArr)
+                    //remove standard dynamic components if shape components are present
+					if (hasShapeComp)
+					{
+						StandardCompTypes.Remove(typeof(DynamicPicture).FullName);
+						StandardCompTypes.Remove(typeof(DynamicText).FullName);
+					}
+
+					foreach (FileInfo fileInfo in fileInfoArr)
                     {
                         string fileName = fileInfo.FullName;
                         PluginSpec pluginSpec = PluginSpec.CreateFromDll(fileName, out string errMsg);
