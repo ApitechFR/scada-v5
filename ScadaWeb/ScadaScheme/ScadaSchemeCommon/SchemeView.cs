@@ -648,7 +648,8 @@ namespace Scada.Scheme
 
             if (indexEntry == null) return true;
             DateTime fileDate = DateTime.Parse( indexEntry.Attributes["lastModificationDate"].Value);
-            return fileDate <= symbol.LastModificationDate;
+            if (fileDate == symbol.LastModificationDate) return true;
+            return fileDate < symbol.LastModificationDate;
         }
 
         private void LoadFromSymbolFile(string symbolPath, Symbol symbol)

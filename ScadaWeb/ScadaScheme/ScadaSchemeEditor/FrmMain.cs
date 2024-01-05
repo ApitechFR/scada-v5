@@ -656,7 +656,7 @@ namespace Scada.Scheme.Editor
 
                 if (entryToUpdate != null)
                 {
-                    entryToUpdate.Attributes["lastModificationDate"].Value = DateTime.Now.ToString();
+                    entryToUpdate.Attributes["lastModificationDate"].Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
                     entryToUpdate.Attributes["name"].Value = currentSymbol.Name != "" ? currentSymbol.Name : Path.GetFileNameWithoutExtension(symbolFileName);
                 }
                 else
@@ -669,7 +669,7 @@ namespace Scada.Scheme.Editor
                     newEntry.SetAttribute("name", currentSymbol.Name != "" ? currentSymbol.Name : Path.GetFileNameWithoutExtension(symbolFileName));
                     newEntry.SetAttribute("path", symbolFileName);
                     newEntry.SetAttribute("symbolId", currentSymbol.SymbolId);
-                    newEntry.SetAttribute("lastModificationDate", DateTime.Now.ToString());
+                    newEntry.SetAttribute("lastModificationDate", currentSymbol.LastModificationDate.ToString("dd/MM/yyyy HH:mm:ss"));
                     xmlDoc.DocumentElement.AppendChild(newEntry);
                 }
                 xmlDoc.Save(xmlPath);
