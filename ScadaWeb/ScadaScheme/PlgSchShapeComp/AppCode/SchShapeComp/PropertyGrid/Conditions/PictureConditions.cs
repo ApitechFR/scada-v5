@@ -11,7 +11,13 @@ namespace Scada.Web.SchShapeComp.PropertyGrid
 	[Serializable]
 	public class PictureConditions : ImageCondition
 	{
-
+		public PictureConditions()
+			: base()
+		{
+			IsVisible = true;
+			Rotation = -1;
+			Blinking = BlinkingSpeed.None;
+		}
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
 		[Description("The rotation angle of the shape in degrees.")]
@@ -21,9 +27,11 @@ namespace Scada.Web.SchShapeComp.PropertyGrid
 
 
 		[DisplayName("Blinking Speed"), Category(Categories.Appearance)]
+		[CM.DefaultValue(BlinkingSpeed.None)]
 		public BlinkingSpeed Blinking { get; set; }
 
 		[DisplayName("Visible"), Category(Categories.Appearance)]
+		[CM.DefaultValue(true)]
 		public bool IsVisible { get; set; }
 
 
