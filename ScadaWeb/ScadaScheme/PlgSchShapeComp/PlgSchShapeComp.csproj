@@ -112,9 +112,13 @@
     <None Include="Resources\svg.png" />
     <None Include="Resources\barre.png" />
     <None Include="Resources\shape.png" />
+    <None Include="Resources\comp_dp.png" />
+    <None Include="Resources\comp_dt.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppCode\SchShapeComp\DynamicPicture.cs" />
+    <Compile Include="AppCode\SchShapeComp\DynamicText.cs" />
     <Compile Include="AppCode\PlgSchShapeCompSpec.cs" />
     <Compile Include="AppCode\SchShapeComp\BarGraph.cs" />
     <Compile Include="AppCode\SchShapeComp\BoundProperties.cs" />
@@ -123,6 +127,7 @@
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\BarGraphCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\ColorCondition.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\CustomSVGCondition.cs" />
+    <Compile Include="AppCode\SchShapeComp\PropertyGrid\Conditions\PictureConditions.cs" />
     <Compile Include="AppCode\SchShapeComp\PropertyGrid\Forms\FrmCustomShape.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -8,7 +8,7 @@ namespace Scada.Web.Plugins
 {
 	public class PlgSchShapeCompSpec : PluginSpec, ISchemeComp
 	{
-		internal const string PlgVersion = "1.0.5.0";
+		internal const string PlgVersion = "1.0.6.2";
 
 
 		public override string Version =>  PlgVersion; 
@@ -34,6 +34,8 @@ namespace Scada.Web.Plugins
 				attrTranslator.TranslateAttrs(typeof(ColorCondition));
 				attrTranslator.TranslateAttrs(typeof(AdvancedCondition));
 				attrTranslator.TranslateAttrs(typeof(BarGraphCondition));
+				attrTranslator.TranslateAttrs(typeof(DynamicPicture));
+				attrTranslator.TranslateAttrs(typeof(DynamicText));
 				attrTranslator.TranslateAttrs(typeof(PopupSize));
             }
         }
