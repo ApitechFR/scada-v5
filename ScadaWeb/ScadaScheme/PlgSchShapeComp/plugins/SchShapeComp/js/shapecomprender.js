@@ -44,12 +44,12 @@ scada.scheme.addInfoTooltipToDiv = function (targetDiv, text) {
 scada.scheme.handleBlinking = function (divComp, blinking) {
 	divComp.removeClass("no-blink slow-blink fast-blink");
 	switch (blinking) {
-		case 0:
+		case "None":
 			break;
-		case 1:
+		case "Slow":
 			divComp.addClass("slow-blink");
 			break;
-		case 2:
+		case "Fast":
 			divComp.addClass("fast-blink");
 			break;
 	}
