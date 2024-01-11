@@ -20,7 +20,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		{
 			serBinder = PlgUtils.SerializationBinder;
 			Action = Actions.None;
-			Conditions = new List<CustomSVGCondition>();
+			Conditions = new List<AdvancedConditions>();
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "NA (0)";
@@ -48,7 +48,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[Description("The conditions for CustomSVG output depending on the value of the input channel.")]
 		[CM.DefaultValue(null), CM.TypeConverter(typeof(CollectionConverter))]
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
-		public List<CustomSVGCondition> Conditions { get; protected set; }
+		public List<AdvancedConditions> Conditions { get; protected set; }
 
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
@@ -125,11 +125,11 @@ namespace Scada.Web.Plugins.SchShapeComp
 
 			if (conditionsNode != null)
 			{
-				Conditions = new List<CustomSVGCondition>();
+				Conditions = new List<AdvancedConditions>();
 				XmlNodeList conditionNodes = conditionsNode.SelectNodes("Condition");
 				foreach (XmlNode conditionNode in conditionNodes)
 				{
-					CustomSVGCondition condition = new CustomSVGCondition { SchemeView = SchemeView };
+					AdvancedConditions condition = new AdvancedConditions { SchemeView = SchemeView };
 					condition.LoadFromXml(conditionNode);
 					Conditions.Add(condition);
 				}
@@ -149,7 +149,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 
 
 			XmlElement conditionsElem = xmlElem.AppendElem("Conditions");
-			foreach (CustomSVGCondition condition in Conditions)
+			foreach (AdvancedConditions condition in Conditions)
 			{
 				XmlElement conditionElem = conditionsElem.AppendElem("Condition");
 				condition.SaveToXml(conditionElem);
@@ -170,7 +170,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		{
 			CustomSVG cloneComponent = (CustomSVG)base.Clone();
 
-			foreach (CustomSVGCondition condition in cloneComponent.Conditions)
+			foreach (AdvancedConditions condition in cloneComponent.Conditions)
 			{
 				condition.SchemeView = schemeView;
 			}

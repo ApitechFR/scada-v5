@@ -3,7 +3,7 @@ using System.Xml;
 using CM = System.ComponentModel;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
-using static Scada.Web.Plugins.SchShapeComp.PropertyGrid.AdvancedCondition;
+using static Scada.Web.Plugins.SchShapeComp.PropertyGrid.AdvancedConditions;
 using Scada.Web.Plugins.SchShapeComp;
 
 namespace Scada.Web.SchShapeComp.PropertyGrid

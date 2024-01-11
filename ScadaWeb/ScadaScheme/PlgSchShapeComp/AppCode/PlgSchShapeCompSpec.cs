@@ -31,9 +31,8 @@ namespace Scada.Web.Plugins
                     
                 }
 				AttrTranslator attrTranslator = new AttrTranslator();
-				attrTranslator.TranslateAttrs(typeof(ColorCondition));
-				attrTranslator.TranslateAttrs(typeof(AdvancedCondition));
-				attrTranslator.TranslateAttrs(typeof(BarGraphCondition));
+				attrTranslator.TranslateAttrs(typeof(AdvancedConditions));
+				attrTranslator.TranslateAttrs(typeof(BarGraphConditions));
 				attrTranslator.TranslateAttrs(typeof(DynamicPicture));
 				attrTranslator.TranslateAttrs(typeof(DynamicText));
 				attrTranslator.TranslateAttrs(typeof(PopupSize));

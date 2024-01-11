@@ -33,7 +33,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 			UnderlineOnHover = false;
 			Action = Actions.None;
 			ShowValue = ShowValueKinds.ShowWithUnit;
-			Conditions = new List<AdvancedCondition>();
+			Conditions = new List<DynamicTextConditions>();
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "(0) NA";
@@ -117,7 +117,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[Description("The conditions for SVG Shape output depending on the value of the input channel.")]
 		[CM.DefaultValue(null), CM.TypeConverter(typeof(CollectionConverter))]
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
-		public List<AdvancedCondition> Conditions { get; protected set; }
+		public List<DynamicTextConditions> Conditions { get; protected set; }
 
 
 		/// <summary>
@@ -182,11 +182,11 @@ namespace Scada.Web.Plugins.SchShapeComp
 
 			if (conditionsNode != null)
 			{
-				Conditions = new List<AdvancedCondition>();
+				Conditions = new List<DynamicTextConditions>();
 				XmlNodeList conditionNodes = conditionsNode.SelectNodes("Condition");
 				foreach (XmlNode conditionNode in conditionNodes)
 				{
-					AdvancedCondition condition = new AdvancedCondition { SchemeView = SchemeView };
+					DynamicTextConditions condition = new DynamicTextConditions { SchemeView = SchemeView };
 					condition.LoadFromXml(conditionNode);
 					Conditions.Add(condition);
 				}
@@ -201,7 +201,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		{
 			base.SaveToXml(xmlElem);
 			XmlElement conditionsElem = xmlElem.AppendElem("Conditions");
-			foreach (AdvancedCondition condition in Conditions)
+			foreach (DynamicTextConditions condition in Conditions)
 			{
 				XmlElement conditionElem = conditionsElem.AppendElem("Condition");
 				condition.SaveToXml(conditionElem);

@@ -8,7 +8,7 @@ using CM = System.ComponentModel;
 namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
 	[Serializable]
-	public class AdvancedCondition : Condition
+	public class AdvancedConditions : Condition
 	{
 		public enum BlinkingSpeed
 		{
@@ -17,15 +17,11 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			Fast
 		}
 
-		public AdvancedCondition()
+		public AdvancedConditions()
 			: base()
 		{
 			BackgroundColor = "";
-			TextContent = "";
 			IsVisible = true;
-			Width = 0;
-			Height = 0;
-			
 			Blinking = BlinkingSpeed.None;
 		}
 
@@ -33,23 +29,14 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		[CM.Editor(typeof(ColorEditor), typeof(UITypeEditor))]
 		public string BackgroundColor { get; set; }
 
-		[DisplayName("Text Content"), Category(Categories.Appearance)]
-		public string TextContent { get; set; }
-
 		[DisplayName("Visible"), Category(Categories.Appearance)]
 		public bool IsVisible { get; set; }
 		
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
-		[Description("The rotation angle of the shape in degrees.")]
 		[CM.DefaultValue(null)]
 		public string Rotation { get; set; }
 
-		[DisplayName("Width"), Category(Categories.Appearance)]
-		public int Width { get; set; }
-
-		[DisplayName("Height"), Category(Categories.Appearance)]
-		public int Height { get; set; }
-
+		
 		[DisplayName("Blinking Speed"), Category(Categories.Appearance)]
 		public BlinkingSpeed Blinking { get; set; }
 
@@ -57,11 +44,8 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		{
 			base.LoadFromXml(xmlNode);
 			BackgroundColor = xmlNode.GetChildAsString("BackgroundColor");
-			TextContent = xmlNode.GetChildAsString("TextContent");
 			IsVisible = xmlNode.GetChildAsBool("IsVisible");
 			Rotation = xmlNode.GetChildAsString("Rotation");
-			Width = xmlNode.GetChildAsInt("Width");
-			Height = xmlNode.GetChildAsInt("Height");
 			Blinking = xmlNode.GetChildAsEnum<BlinkingSpeed>("Blinking");
 		}
 
@@ -70,10 +54,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			base.SaveToXml(xmlElem);
 			xmlElem.AppendElem("BackgroundColor", BackgroundColor);
 			xmlElem.AppendElem("Rotation", Rotation);
-			xmlElem.AppendElem("TextContent", TextContent);
 			xmlElem.AppendElem("IsVisible", IsVisible);
-			xmlElem.AppendElem("Width", Width);
-			xmlElem.AppendElem("Height", Height);
 			xmlElem.AppendElem("Blinking", Blinking);
 		}
 		
