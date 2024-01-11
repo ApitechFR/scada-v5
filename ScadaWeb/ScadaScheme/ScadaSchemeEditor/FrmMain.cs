@@ -599,7 +599,7 @@ namespace Scada.Scheme.Editor
             if (!string.IsNullOrEmpty(sfdScheme.FileName))
             {
                 // сохранение схемы
-                if (editor.SaveSchemeToFile(sfdScheme.FileName, out string errMsg))//, editor.SchemeView.isSymbol))
+                if (editor.SaveSchemeToFile(sfdScheme.FileName, out string errMsg))
                 {
                     if (editor.SchemeView.isSymbol)
                     {
