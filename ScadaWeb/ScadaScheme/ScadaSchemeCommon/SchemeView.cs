@@ -1075,7 +1075,7 @@ namespace Scada.Scheme
         /// <summary>
         /// Сохранить схему в файле.
         /// </summary>
-        public bool SaveToFile(string fileName ,out string errMsg)//, bool asSymbol = false)
+        public bool SaveToFile(string fileName ,out string errMsg)
         {
             try
             {
@@ -1145,6 +1145,7 @@ namespace Scada.Scheme
 
                         if(((getHihghestGroup(component) is Symbol symb && symb.ID != component.ID)) && !string.IsNullOrEmpty(symbolID)){
                             componentElem.AppendElem("LinkedSymbolID", symbolID);
+                            componentElem.AppendElem("RefInstanceSym", component.GroupId);
                         }
 
                         if (component is ComponentGroup)
@@ -1153,7 +1154,7 @@ namespace Scada.Scheme
                             {
                                 symbolID = symbol.SymbolId;
 
-                                if ((isSymbol ) && component.ID == MainSymbol.ID)//change
+                                if ((isSymbol ) && component.ID == MainSymbol.ID)
                                     componentsElem.AppendChild(componentElem);
 
                                 if ((isSymbol ) && symbol.ID == MainSymbol.ID)
