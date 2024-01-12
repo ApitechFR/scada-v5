@@ -146,7 +146,7 @@ namespace Scada.Scheme.Editor
             {
                 return modified;
             }
-            private set
+            set
             {
                 if (modified != value)
                 {
