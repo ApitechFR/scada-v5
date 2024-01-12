@@ -1,5 +1,6 @@
 ﻿using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
+using Scada.Web.SchShapeComp.PropertyGrid;
 using System;
 using System.Drawing.Design;
 using System.Xml;
@@ -31,12 +32,13 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 		[DisplayName("Visible"), Category(Categories.Appearance)]
 		public bool IsVisible { get; set; }
-		
-		[DisplayName("Rotation"), Category(Categories.Appearance)]
-		[CM.DefaultValue(null)]
-		public string Rotation { get; set; }
 
+
+		[DisplayName("Rotation"), Category(Categories.Appearance)]
+		public int? Rotation { get; set; }
 		
+
+
 		[DisplayName("Blinking Speed"), Category(Categories.Appearance)]
 		public BlinkingSpeed Blinking { get; set; }
 
@@ -45,10 +47,10 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			base.LoadFromXml(xmlNode);
 			BackgroundColor = xmlNode.GetChildAsString("BackgroundColor");
 			IsVisible = xmlNode.GetChildAsBool("IsVisible");
-			Rotation = xmlNode.GetChildAsString("Rotation");
+			Rotation = xmlNode.GetChildAsInt("Rotation");
 			Blinking = xmlNode.GetChildAsEnum<BlinkingSpeed>("Blinking");
 		}
-
+		
 		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
