@@ -263,15 +263,15 @@ namespace Scada.Scheme
                 {
                     symbolPattern = findComponentsOfSymbol(symbolNode);
                     //if pattern is present at least once in the scheme 
-                    if(countPatterOcc(listComponentAndLocationOfScheme, symbolPattern) > 1)
+                    if(countPatterOcc(listComponentAndLocationOfScheme, symbolNode) > 1)
                     {
                         int count = 1;
                         int nb = symbolPattern.Count();
                         Point location = new Point();
                         //the list named points will be filled by the location of the scheme's component who fit with pattern
-                        PatterOcc(listComponentAndLocationOfScheme, symbolPattern);
+                        PatterOcc(listComponentAndLocationOfScheme, symbolNode);
                         //if there is more than one pattern in the scheme we clone the symbol
-                        while (countPatterOcc(listComponentAndLocationOfScheme, symbolPattern) - count >= 1)
+                        while (countPatterOcc(listComponentAndLocationOfScheme, symbolNode) - count >= 1)
                         {
                             XmlNode clonedSymbol = symbolNode.CloneNode(deep: true);
                             //ID modification
@@ -489,11 +489,18 @@ namespace Scada.Scheme
                         XmlElement element = (XmlElement)componentNode;
                         //location
                         XmlNode locationNode = element.SelectSingleNode("Location");
-                        if(locationNode != null)
+                        //symbolID
+                        XmlNode linkedSymbIdNode = element.SelectSingleNode("LinkedSymbolID");
+                        //refInstanceSym
+                        XmlNode refInstanceSymNode = element.SelectSingleNode("RefInstanceSym");
+
+                        if (locationNode != null && linkedSymbIdNode != null && refInstanceSymNode!=null)
                         {
                             int x = int.Parse(locationNode.SelectSingleNode("X").InnerText);
                             int y = int.Parse(locationNode.SelectSingleNode("Y").InnerText);
-                            list.Add(new ObjetcComponentLocation(element.Name, new Point(x, y)));
+
+                            list.Add(new ObjetcComponentLocation(element.Name, new Point(x, y), linkedSymbIdNode.InnerText, int.Parse(refInstanceSymNode.InnerText)));
+
                         }
                     }
                 }
@@ -522,11 +529,10 @@ namespace Scada.Scheme
                         Point p = new Point();
                         p.X = int.Parse(n.SelectSingleNode("X").InnerText);
                         p.Y = int.Parse(n.SelectSingleNode("Y").InnerText);
-                        lstLocSymbol.Add(new Tuple<string,Point>(id,p));
+                        lstLocSymbol.Add(new Tuple<string, Point>(id, p));
                     }
                 }
             }
-
             return listComponents;
         }
 
@@ -551,34 +557,44 @@ namespace Scada.Scheme
             return maxID;
         }
 
-        private int countPatterOcc(List<ObjetcComponentLocation> source, List<string> pattern) 
+        private int countPatterOcc(List<ObjetcComponentLocation> source, XmlNode symbNode) 
         {
             int count = 0;
 
-            for (int i = 0; i <= source.Count - pattern.Count; i++)
-            {
-                List<string> names = source.Skip(i).Take(pattern.Count).Select(item => item.Name).ToList();
-                if (Enumerable.SequenceEqual(names, pattern))
-                {
-                    count++;
-                }
-            }
+            string id = symbNode.SelectSingleNode("SymbolId").InnerText;
 
-            return count;
+            int result = source
+                .Where(obj => obj.SymbID == id)
+                .GroupBy(obj => new { obj.SymbID, obj.RefInstance})
+                .Select(group => new
+                {
+                    SymbID = group.Key.SymbID,
+                    Ref = group.Key.RefInstance
+                })
+                .Count();
+
+            return result;
         }
 
-        private void PatterOcc(List<ObjetcComponentLocation> source, List<string> pattern)
+        private void PatterOcc(List<ObjetcComponentLocation> source, XmlNode symbNode)
         {
             points.Clear();
 
-            for (int i = 0; i <= source.Count - pattern.Count; i++)
-            {
-                List<string> names = source.Skip(i).Take(pattern.Count).Select(item => item.Name).ToList();
-                if (Enumerable.SequenceEqual(names, pattern))
+            string id = symbNode.SelectSingleNode("SymbolId").InnerText;
+
+            var result = source
+                .Where(obj => obj.SymbID == id)
+                .GroupBy(obj => new { obj.SymbID, obj.RefInstance, obj.Position })
+                .Select(group => new
                 {
-                    for (int j = 0; j < pattern.Count; j++)
-                        points.Add(source[i + j].Position);
-                }
+                    SymbID = group.Key.SymbID,
+                    Ref = group.Key.RefInstance,
+                    Pos = group.Key.Position
+                });
+
+            foreach (var item in result)
+            { 
+                points.Add(item.Pos);
             }
         }
 
@@ -1075,7 +1091,7 @@ namespace Scada.Scheme
         /// <summary>
         /// Сохранить схему в файле.
         /// </summary>
-        public bool SaveToFile(string fileName ,out string errMsg)//, bool asSymbol = false)
+        public bool SaveToFile(string fileName ,out string errMsg)
         {
             try
             {
@@ -1144,7 +1160,8 @@ namespace Scada.Scheme
                         component.SaveToXml(componentElem);
 
                         if(((getHihghestGroup(component) is Symbol symb && symb.ID != component.ID)) && !string.IsNullOrEmpty(symbolID)){
-                            componentElem.AppendElem("LinkedSymbolID", symbolID);
+                            componentElem.AppendElem("LinkedSymbolID", symb.SymbolId);
+                            componentElem.AppendElem("RefInstanceSym", component.GroupId);
                         }
 
                         if (component is ComponentGroup)
@@ -1153,7 +1170,7 @@ namespace Scada.Scheme
                             {
                                 symbolID = symbol.SymbolId;
 
-                                if ((isSymbol ) && component.ID == MainSymbol.ID)//change
+                                if ((isSymbol ) && component.ID == MainSymbol.ID)
                                     componentsElem.AppendChild(componentElem);
 
                                 if ((isSymbol ) && symbol.ID == MainSymbol.ID)
@@ -1318,11 +1335,16 @@ namespace Scada.Scheme
     {
         public string Name { get; set; }
         public Point Position { get; set; }
+        public string SymbID { get; set; }
+        public int RefInstance { get; set; }
 
-        public ObjetcComponentLocation(string name, Point pos)
+
+        public ObjetcComponentLocation(string name, Point pos, string symID, int refIns)
         {
             Name = name;
             Position = pos;
+            SymbID = symID;
+            RefInstance = refIns;
         }
     }
 }
