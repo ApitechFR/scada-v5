@@ -3,7 +3,7 @@ using System.Xml;
 using CM = System.ComponentModel;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
-using static Scada.Web.Plugins.SchShapeComp.PropertyGrid.AdvancedCondition;
+using static Scada.Web.Plugins.SchShapeComp.PropertyGrid.AdvancedConditions;
 using Scada.Web.Plugins.SchShapeComp;
 
 namespace Scada.Web.SchShapeComp.PropertyGrid
@@ -11,19 +11,25 @@ namespace Scada.Web.SchShapeComp.PropertyGrid
 	[Serializable]
 	public class PictureConditions : ImageCondition
 	{
-
+		public PictureConditions()
+			: base()
+		{
+			IsVisible = true;
+			Blinking = BlinkingSpeed.None;
+		}
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
 		[Description("The rotation angle of the shape in degrees.")]
-		[CM.DefaultValue(-1)]
-		public int Rotation { get; set; }
-
+		[CM.DefaultValue(null)]
+		public string Rotation { get; set; }
 
 
 		[DisplayName("Blinking Speed"), Category(Categories.Appearance)]
+		[CM.DefaultValue(BlinkingSpeed.None)]
 		public BlinkingSpeed Blinking { get; set; }
 
 		[DisplayName("Visible"), Category(Categories.Appearance)]
+		[CM.DefaultValue(true)]
 		public bool IsVisible { get; set; }
 
 
@@ -31,7 +37,7 @@ namespace Scada.Web.SchShapeComp.PropertyGrid
 		{
 			base.LoadFromXml(xmlNode);
 			IsVisible = xmlNode.GetChildAsBool("IsVisible");
-			Rotation = xmlNode.GetChildAsInt("Rotation");
+			Rotation = xmlNode.GetChildAsString("Rotation");
 			Blinking = xmlNode.GetChildAsEnum<BlinkingSpeed>("Blinking");
 		}
 
