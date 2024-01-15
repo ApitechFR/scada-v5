@@ -1160,7 +1160,7 @@ namespace Scada.Scheme
                         component.SaveToXml(componentElem);
 
                         if(((getHihghestGroup(component) is Symbol symb && symb.ID != component.ID)) && !string.IsNullOrEmpty(symbolID)){
-                            componentElem.AppendElem("LinkedSymbolID", symbolID);
+                            componentElem.AppendElem("LinkedSymbolID", symb.SymbolId);
                             componentElem.AppendElem("RefInstanceSym", component.GroupId);
                         }
 
