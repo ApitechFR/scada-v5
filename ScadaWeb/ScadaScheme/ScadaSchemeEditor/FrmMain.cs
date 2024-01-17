@@ -192,9 +192,34 @@ namespace Scada.Scheme.Editor
             ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
             foreach (var s in availableSymbols)
             {
-                lvCompTypes.Items.Add(new ListViewItem($"{s.Value} ({Path.GetFileName(s.Key)})", "component.png", symbolsViewGroup) { IndentCount = 1 });
+				string updated = "";
+				if (!isUpToDate(s.Key, indexPath))
+					updated = "--OLD-- ";
+                lvCompTypes.Items.Add(new ListViewItem($"{updated}{s.Value} ({Path.GetFileName(s.Key)})", "component.png", symbolsViewGroup) { IndentCount = 1 });
             }
             lvCompTypes.Groups.Add(symbolsViewGroup);
+        }
+
+        //<summary>
+        //Find symbolId in XML
+        //</summary>
+        private bool isUpToDate(string symbolPath, string indexPath)
+		{
+
+            XmlDocument xmlSymbolDoc = new XmlDocument();
+            xmlSymbolDoc.Load(symbolPath);
+
+            XmlNode symbolIdNode = xmlSymbolDoc.SelectSingleNode("/SchemeSymbol/MainSymbol/SymbolId");
+            string symbolIdValue = "";
+
+            if (symbolIdNode != null)
+			{
+				symbolIdValue = symbolIdNode.InnerText;
+            }
+
+			if (editor.SchemeView.UpdatedSymbolId.ContainsKey(symbolIdValue) && editor.SchemeView.UpdatedSymbolId[symbolIdValue]) return true;
+			else if (!editor.SchemeView.UpdatedSymbolId.ContainsKey(symbolIdValue)) return true;
+			else return false;
         }
 
         private string getSymbolIndexFilePath()
@@ -253,23 +278,48 @@ namespace Scada.Scheme.Editor
             if (e.Button == MouseButtons.Right)
             {
                 ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
-                string symbolPath = availableSymbols.ElementAt(clickedItem.Index-(lvCompTypes.Items.Count-availableSymbols.Count)).Key;
-                if (clickedItem != null)
-                {
-                    ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
-                    ToolStripMenuItem optionMenuItem = new ToolStripMenuItem("Delete symbol");
-                    contextMenuStrip.Items.Add(optionMenuItem);
-                    optionMenuItem.Click += (s, args) =>
-                    {
-                        if (MessageBox.Show(string.Format("Delete {0} ?", clickedItem.Text), "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                        {
-                            DeleteSymbol(symbolPath);
-                        }
+				if (availableSymbols != null && availableSymbols.Count() != 0 && clickedItem.Index >= (lvCompTypes.Items.Count - availableSymbols.Count))
+				{
+					string symbolPath = availableSymbols.ElementAt(clickedItem.Index - (lvCompTypes.Items.Count - availableSymbols.Count)).Key;
+					if (clickedItem != null)
+					{
+						ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
+						ToolStripMenuItem optionMenuItem = new ToolStripMenuItem("Delete symbol");
+						contextMenuStrip.Items.Add(optionMenuItem);
+						optionMenuItem.Click += (s, args) =>
+						{
+							if (MessageBox.Show(string.Format("Delete {0} ?", clickedItem.Text), "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+							{
+								DeleteSymbol(symbolPath);
+							}
 
-					};
-					contextMenuStrip.Show(lvCompTypes, e.Location);
+						};
+						contextMenuStrip.Show(lvCompTypes, e.Location);
+					}
 				}
 			}
+			else if(e.Button == MouseButtons.Left)
+			{
+                ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
+				if (availableSymbols!= null && availableSymbols.Count() != 0 && clickedItem.Index >= (lvCompTypes.Items.Count - availableSymbols.Count))
+				{
+					string symbolPath = availableSymbols.ElementAt(clickedItem.Index - (lvCompTypes.Items.Count - availableSymbols.Count)).Key;
+					if (clickedItem != null && clickedItem.Text.Contains("OLD"))
+					{
+						DialogResult popup = MessageBox.Show
+							(
+							$"You can't place this symbol unless you update its instances. \n" +
+							$"An instance of an older version of this symbol is present in your scheme, and place a new one would create a confict. \n" +
+							$" Would you like to update it?",
+							"Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+							);
+						if (popup == DialogResult.Yes)
+						{
+							InitScheme(editor.FileName, symbolPath);
+						}
+					}
+				}
+            }
 		}
 		private void DeleteSymbol(string symbolPath)
 		{
@@ -521,7 +571,7 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла.
         /// </summary>
-        private void InitScheme(string fileName = "")
+        private void InitScheme(string fileName = "", string symbolUpdatedPath = "")
         {
             bool loadOK;
             string errMsg;
@@ -534,7 +584,7 @@ namespace Scada.Scheme.Editor
             }
             else
             {
-                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg);
+                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg, symbolUpdatedPath);
             }
 
             appData.AssignViewStamp(editor.SchemeView);

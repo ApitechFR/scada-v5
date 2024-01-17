@@ -101,7 +101,7 @@ namespace Scada.Scheme
 
         public Symbol MainSymbol { get; set; }
 
-        private Dictionary<string,bool> UpdatedSymbolId = new Dictionary<string, bool>();
+        public Dictionary<string,bool> UpdatedSymbolId = new Dictionary<string, bool>();
 
         private Point locFirstComponent = new Point();
 
@@ -110,6 +110,8 @@ namespace Scada.Scheme
         List<Tuple<string, Point>> lstLocSymbol = new List<Tuple<string, Point>>();
 
         public bool updated = false;
+
+        public string symbolPathUpToDate;
 
         /// <summary>
         /// Adds the input channels to the view.
@@ -455,9 +457,6 @@ namespace Scada.Scheme
                         images[image.Name] = image;
                 }
             }
-
-            //clear list
-            UpdatedSymbolId.Clear();
         }
 
         private Point GetMinimumPoint(List<Point> list, int nb)
@@ -604,7 +603,18 @@ namespace Scada.Scheme
 
             if (!IsSymbolUpToDate(symbol, symbolIndexPath))
             {
-                if (!UpdatedSymbolId.ContainsKey(symbol.SymbolId))
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(symbolIndexPath);
+                XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
+                // if user want to update this symbol particulary 
+                if (indexEntry.Attributes["path"].Value == symbolPathUpToDate) 
+                {
+                    symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
+                    LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
+                    UpdatedSymbolId[symbol.SymbolId] = true;
+                    updated = true;
+                }
+                else if (!UpdatedSymbolId.ContainsKey(symbol.SymbolId))
                 {
                     DialogResult popup = MessageBox.Show
                         (
@@ -616,10 +626,6 @@ namespace Scada.Scheme
 
                     if (popup == DialogResult.Yes)
                     {
-                        XmlDocument xmlDoc = new XmlDocument();
-                        xmlDoc.Load(symbolIndexPath);
-                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
-
                         symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
                         LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
                         UpdatedSymbolId.Add(symbol.SymbolId, true);
@@ -635,9 +641,6 @@ namespace Scada.Scheme
                 {
                     if(UpdatedSymbolId.ContainsKey(symbol.SymbolId) && UpdatedSymbolId[symbol.SymbolId])
                     {
-                        XmlDocument xmlDoc = new XmlDocument();
-                        xmlDoc.Load(symbolIndexPath);
-                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
 
                         symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
                         LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
@@ -1067,7 +1070,7 @@ namespace Scada.Scheme
         /// <summary>
         /// Загрузить схему из файла.
         /// </summary>
-        public bool LoadFromFile(string fileName,string symbolPath, out string errMsg)
+        public bool LoadFromFile(string fileName,string symbolPath, out string errMsg, string symbolUpdatedPath = "")
         {
             Symbolpath = symbolPath;
             try
@@ -1075,6 +1078,7 @@ namespace Scada.Scheme
                 using (FileStream fileStream =
                     new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
+                    symbolPathUpToDate = symbolUpdatedPath;
                     LoadFromStream(fileStream);
                 }
 
