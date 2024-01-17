@@ -2273,6 +2273,7 @@ namespace Scada.Scheme.Editor
 
                 foreach (BaseComponent child in childrenToChange)
                 {
+					child.ItemChanged += Scheme_ItemChanged;
                     child.GroupId = (c.GroupId != -1) ? c.GroupId : -1;
                     child.AliasesDictionnary = new Dictionary<string, Alias>();
                     child.OnItemChanged(SchemeChangeTypes.ComponentChanged, child);
