@@ -457,9 +457,6 @@ namespace Scada.Scheme
                         images[image.Name] = image;
                 }
             }
-
-            //clear list
-            //UpdatedSymbolId.Clear();
         }
 
         private Point GetMinimumPoint(List<Point> list, int nb)
@@ -609,8 +606,8 @@ namespace Scada.Scheme
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.Load(symbolIndexPath);
                 XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
-                
-                if (indexEntry.Attributes["path"].Value == symbolPathUpToDate) // if user want to update this symbol particulary 
+                // if user want to update this symbol particulary 
+                if (indexEntry.Attributes["path"].Value == symbolPathUpToDate) 
                 {
                     symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
                     LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
