@@ -218,6 +218,7 @@ namespace Scada.Scheme.Editor
             }
 
 			if (editor.SchemeView.UpdatedSymbolId.ContainsKey(symbolIdValue) && editor.SchemeView.UpdatedSymbolId[symbolIdValue]) return true;
+			else if (!editor.SchemeView.UpdatedSymbolId.ContainsKey(symbolIdValue)) return true;
 			else return false;
         }
 
@@ -277,27 +278,30 @@ namespace Scada.Scheme.Editor
             if (e.Button == MouseButtons.Right)
             {
                 ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
-                string symbolPath = availableSymbols.ElementAt(clickedItem.Index-(lvCompTypes.Items.Count-availableSymbols.Count)).Key;
-                if (clickedItem != null)
-                {
-                    ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
-                    ToolStripMenuItem optionMenuItem = new ToolStripMenuItem("Delete symbol");
-                    contextMenuStrip.Items.Add(optionMenuItem);
-                    optionMenuItem.Click += (s, args) =>
-                    {
-                        if (MessageBox.Show(string.Format("Delete {0} ?", clickedItem.Text), "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                        {
-                            DeleteSymbol(symbolPath);
-                        }
+				if (availableSymbols != null && availableSymbols.Count() != 0 && clickedItem.Index >= (lvCompTypes.Items.Count - availableSymbols.Count))
+				{
+					string symbolPath = availableSymbols.ElementAt(clickedItem.Index - (lvCompTypes.Items.Count - availableSymbols.Count)).Key;
+					if (clickedItem != null)
+					{
+						ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
+						ToolStripMenuItem optionMenuItem = new ToolStripMenuItem("Delete symbol");
+						contextMenuStrip.Items.Add(optionMenuItem);
+						optionMenuItem.Click += (s, args) =>
+						{
+							if (MessageBox.Show(string.Format("Delete {0} ?", clickedItem.Text), "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+							{
+								DeleteSymbol(symbolPath);
+							}
 
-					};
-					contextMenuStrip.Show(lvCompTypes, e.Location);
+						};
+						contextMenuStrip.Show(lvCompTypes, e.Location);
+					}
 				}
 			}
 			else if(e.Button == MouseButtons.Left)
 			{
                 ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
-				if (availableSymbols.Count() != 0 && clickedItem.Index >= (lvCompTypes.Items.Count - availableSymbols.Count))
+				if (availableSymbols!= null && availableSymbols.Count() != 0 && clickedItem.Index >= (lvCompTypes.Items.Count - availableSymbols.Count))
 				{
 					string symbolPath = availableSymbols.ElementAt(clickedItem.Index - (lvCompTypes.Items.Count - availableSymbols.Count)).Key;
 					if (clickedItem != null && clickedItem.Text.Contains("OLD"))
@@ -311,8 +315,7 @@ namespace Scada.Scheme.Editor
 							);
 						if (popup == DialogResult.Yes)
 						{
-							editor.SchemeView.symbolPathUpToDate = symbolPath;
-							InitScheme(editor.FileName);
+							InitScheme(editor.FileName, symbolPath);
 						}
 					}
 				}
@@ -568,7 +571,7 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла.
         /// </summary>
-        private void InitScheme(string fileName = "")
+        private void InitScheme(string fileName = "", string symbolUpdatedPath = "")
         {
             bool loadOK;
             string errMsg;
@@ -581,7 +584,7 @@ namespace Scada.Scheme.Editor
             }
             else
             {
-                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg);
+                loadOK = editor.LoadSchemeFromFile(fileName, out errMsg, symbolUpdatedPath);
             }
 
             appData.AssignViewStamp(editor.SchemeView);

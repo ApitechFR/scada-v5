@@ -606,15 +606,15 @@ namespace Scada.Scheme
 
             if (!IsSymbolUpToDate(symbol, symbolIndexPath))
             {
-                if(symbolPath == symbolPathUpToDate) // if user want to update this symbol particulary 
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(symbolIndexPath);
+                XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
+                
+                if (indexEntry.Attributes["path"].Value == symbolPathUpToDate) // if user want to update this symbol particulary 
                 {
-                    XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(symbolIndexPath);
-                    XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
-
                     symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
                     LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
-                    UpdatedSymbolId.Add(symbol.SymbolId, true);
+                    UpdatedSymbolId[symbol.SymbolId] = true;
                     updated = true;
                 }
                 else if (!UpdatedSymbolId.ContainsKey(symbol.SymbolId))
@@ -629,10 +629,6 @@ namespace Scada.Scheme
 
                     if (popup == DialogResult.Yes)
                     {
-                        XmlDocument xmlDoc = new XmlDocument();
-                        xmlDoc.Load(symbolIndexPath);
-                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
-
                         symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
                         LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
                         UpdatedSymbolId.Add(symbol.SymbolId, true);
@@ -648,9 +644,6 @@ namespace Scada.Scheme
                 {
                     if(UpdatedSymbolId.ContainsKey(symbol.SymbolId) && UpdatedSymbolId[symbol.SymbolId])
                     {
-                        XmlDocument xmlDoc = new XmlDocument();
-                        xmlDoc.Load(symbolIndexPath);
-                        XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
 
                         symbol.LastModificationDate = DateTime.Parse(indexEntry.Attributes["lastModificationDate"].Value);
                         LoadFromSymbolFile(indexEntry.Attributes["path"].Value, symbol);
@@ -1080,7 +1073,7 @@ namespace Scada.Scheme
         /// <summary>
         /// Загрузить схему из файла.
         /// </summary>
-        public bool LoadFromFile(string fileName,string symbolPath, out string errMsg)
+        public bool LoadFromFile(string fileName,string symbolPath, out string errMsg, string symbolUpdatedPath = "")
         {
             Symbolpath = symbolPath;
             try
@@ -1088,6 +1081,7 @@ namespace Scada.Scheme
                 using (FileStream fileStream =
                     new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
+                    symbolPathUpToDate = symbolUpdatedPath;
                     LoadFromStream(fileStream);
                 }
 

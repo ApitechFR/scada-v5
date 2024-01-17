@@ -287,7 +287,7 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла
         /// </summary>
-        private bool InitScheme(string fileName, out string errMsg)//, bool isSymbol=false)
+        private bool InitScheme(string fileName, out string errMsg, string symbolUpdatedPath = "")
         {
             ClearChanges();
             ClearSelComponents();
@@ -298,7 +298,7 @@ namespace Scada.Scheme.Editor
 
                 lock (SchemeView.SyncRoot)
                 {
-                    loadOK = SchemeView.LoadFromFile(fileName, getSymbolsDir(fileName), out errMsg);
+                    loadOK = SchemeView.LoadFromFile(fileName, getSymbolsDir(fileName), out errMsg, symbolUpdatedPath);
                 }
 
                 if (!loadOK)
@@ -603,9 +603,9 @@ namespace Scada.Scheme.Editor
         /// <summary>
         /// Загрузить схему из файла
         /// </summary>
-        public bool LoadSchemeFromFile(string fileName, out string errMsg)
+        public bool LoadSchemeFromFile(string fileName, out string errMsg, string symbolUpdatedPath = "")
         {
-            return InitScheme(fileName, out errMsg);
+            return InitScheme(fileName, out errMsg, symbolUpdatedPath);
         }
 
         /// <summary>
