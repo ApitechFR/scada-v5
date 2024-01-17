@@ -298,28 +298,6 @@ namespace Scada.Scheme.Editor
 					}
 				}
 			}
-			else if(e.Button == MouseButtons.Left)
-			{
-                ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
-				if (availableSymbols!= null && availableSymbols.Count() != 0 && clickedItem.Index >= (lvCompTypes.Items.Count - availableSymbols.Count))
-				{
-					string symbolPath = availableSymbols.ElementAt(clickedItem.Index - (lvCompTypes.Items.Count - availableSymbols.Count)).Key;
-					if (clickedItem != null && clickedItem.Text.Contains("OLD"))
-					{
-						DialogResult popup = MessageBox.Show
-							(
-							$"You can't place this symbol unless you update its instances. \n" +
-							$"An instance of an older version of this symbol is present in your scheme, and place a new one would create a confict. \n" +
-							$" Would you like to update it?",
-							"Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
-							);
-						if (popup == DialogResult.Yes)
-						{
-							InitScheme(editor.FileName, symbolPath);
-						}
-					}
-				}
-            }
 		}
 		private void DeleteSymbol(string symbolPath)
 		{
@@ -1806,10 +1784,31 @@ namespace Scada.Scheme.Editor
 
 			string typeName = "";
 
-            //Symboles
-            if (lvCompTypes.SelectedItems.Count > 0 && lvCompTypes.SelectedItems[0].Group.Header == "Symbols")
-            {
-                editor.SymbolPath = availableSymbols.ElementAt(lvCompTypes.SelectedIndices[0]-(lvCompTypes.Items.Count - availableSymbols.Count)).Key;
+			//Symboles
+			if (lvCompTypes.SelectedItems.Count > 0 && lvCompTypes.SelectedItems[0].Group.Header == "Symbols")
+			{
+				editor.SymbolPath = availableSymbols.ElementAt(lvCompTypes.SelectedIndices[0] - (lvCompTypes.Items.Count - availableSymbols.Count)).Key;
+
+                string indexPath = getSymbolIndexFilePath();
+
+                if (lvCompTypes.SelectedItems[0] != null && !isUpToDate(editor.SymbolPath, indexPath))
+				{
+                    editor.PointerMode = PointerMode.Select;
+                    DialogResult popup = MessageBox.Show
+						(
+						$"You can't place this symbol unless you update its instances. \n" +
+						$"An instance of an older version of this symbol is present in your scheme, and place a new one would create a confict. \n" +
+						$" Would you like to update it?",
+						"Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+						);
+
+					if (popup == DialogResult.Yes)
+					{
+						InitScheme(editor.FileName, editor.SymbolPath);
+					}
+					return;
+
+                }
                 if (File.Exists(editor.SymbolPath))
                 {
                     XmlDocument xmlDoc = new XmlDocument();
