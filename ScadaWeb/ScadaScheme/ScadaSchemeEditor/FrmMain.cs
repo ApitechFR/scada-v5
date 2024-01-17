@@ -192,9 +192,33 @@ namespace Scada.Scheme.Editor
             ListViewGroup symbolsViewGroup = new ListViewGroup("Symbols");
             foreach (var s in availableSymbols)
             {
-                lvCompTypes.Items.Add(new ListViewItem($"{s.Value} ({Path.GetFileName(s.Key)})", "component.png", symbolsViewGroup) { IndentCount = 1 });
+				string updated = "";
+				if (!isUpToDate(s.Key, indexPath))
+					updated = "--OLD-- ";
+                lvCompTypes.Items.Add(new ListViewItem($"{updated}{s.Value} ({Path.GetFileName(s.Key)})", "component.png", symbolsViewGroup) { IndentCount = 1 });
             }
             lvCompTypes.Groups.Add(symbolsViewGroup);
+        }
+
+        //<summary>
+        //Find symbolId in XML
+        //</summary>
+        private bool isUpToDate(string symbolPath, string indexPath)
+		{
+
+            XmlDocument xmlSymbolDoc = new XmlDocument();
+            xmlSymbolDoc.Load(symbolPath);
+
+            XmlNode symbolIdNode = xmlSymbolDoc.SelectSingleNode("/SchemeSymbol/MainSymbol/SymbolId");
+            string symbolIdValue = "";
+
+            if (symbolIdNode != null)
+			{
+				symbolIdValue = symbolIdNode.InnerText;
+            }
+
+			if (editor.SchemeView.UpdatedSymbolId.ContainsKey(symbolIdValue) && editor.SchemeView.UpdatedSymbolId[symbolIdValue]) return true;
+			else return false;
         }
 
         private string getSymbolIndexFilePath()
@@ -270,6 +294,29 @@ namespace Scada.Scheme.Editor
 					contextMenuStrip.Show(lvCompTypes, e.Location);
 				}
 			}
+			else if(e.Button == MouseButtons.Left)
+			{
+                ListViewItem clickedItem = lvCompTypes.GetItemAt(e.X, e.Y);
+				if (availableSymbols.Count() != 0 && clickedItem.Index >= (lvCompTypes.Items.Count - availableSymbols.Count))
+				{
+					string symbolPath = availableSymbols.ElementAt(clickedItem.Index - (lvCompTypes.Items.Count - availableSymbols.Count)).Key;
+					if (clickedItem != null && clickedItem.Text.Contains("OLD"))
+					{
+						DialogResult popup = MessageBox.Show
+							(
+							$"You can't place this symbol because \n" +
+							$"there is a more recent version of this  symbol: \n" +
+							$" Would you like to update it?",
+							"Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+							);
+						if (popup == DialogResult.Yes)
+						{
+							editor.SchemeView.symbolPathUpToDate = symbolPath;
+							InitScheme(editor.FileName);
+						}
+					}
+				}
+            }
 		}
 		private void DeleteSymbol(string symbolPath)
 		{
