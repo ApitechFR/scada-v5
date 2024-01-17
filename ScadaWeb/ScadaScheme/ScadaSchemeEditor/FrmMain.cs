@@ -308,8 +308,8 @@ namespace Scada.Scheme.Editor
 					{
 						DialogResult popup = MessageBox.Show
 							(
-							$"You can't place this symbol because \n" +
-							$"there is a more recent version of this  symbol: \n" +
+							$"You can't place this symbol unless you update its instances. \n" +
+							$"An instance of an older version of this symbol is present in your scheme, and place a new one would create a confict. \n" +
 							$" Would you like to update it?",
 							"Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
 							);
