@@ -266,6 +266,33 @@ scada.scheme.BarGraphRenderer.prototype = Object.create(
 );
 scada.scheme.BarGraphRenderer.constructor = scada.scheme.BarGraphRenderer;
 
+scada.scheme.BarGraphRenderer.prototype.calculateFillingRate = function (props, cnlDataExt) {
+    let valueToUse;
+
+    if (cnlDataExt !== null) {
+        valueToUse = cnlDataExt;
+    } else if (props.CtrlCnlNum !== 0) {
+        valueToUse = props.CtrlCnlNum;
+    } else if (props.InCnlNum !== 0) {
+        valueToUse = props.InCnlNum;
+    } else {
+        return 0; 
+    }
+
+    if (valueToUse < props.MinValue) {
+        return 0;
+    }
+
+    // If the value is less than MinValue, return 0%
+    if (valueToUse > props.MaxValue) {
+        return 100;
+    }
+
+    // Normal calculation of the filling rate
+    return (valueToUse - props.MinValue) * 100 / (props.MaxValue - props.MinValue);
+};
+
+
 scada.scheme.BarGraphRenderer.prototype.createDom = function (
     component,
     renderContext,
@@ -274,29 +301,47 @@ scada.scheme.BarGraphRenderer.prototype.createDom = function (
 
     var divComp = $("<div id='comp" + component.id + "'></div>");
 
-    var bar = $(
-        "<div class='bar' style='height:" +
-        props.Value +
-        "%" +
-        ";background-color:" +
-        props.BarColor +
-        "' data-value='" +
-        parseInt(props.Value) +
-        "'></div>",
-    );
+    if (this.calculateFillingRate(props,null) === 0) {
+        var disabledBar = $(
+            "<div class='bar disabled' style='height: 71%; background-color: #5f5f81; filter: blur(1.5px);'>" +
+            "<span class='error-cross' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 35px; color: red;'>X</span>" +
+            "</div>"
+        );
+        divComp.append(disabledBar);
+    } else {
+        var bar = $(
+            "<div class='bar' style='height:" +
+            this.calculateFillingRate(props,null) +
+            "%" +
+            ";background-color:" +
+            props.BarColor +
+            "' data-value='" +
+            this.calculateFillingRate(props, null) +
+            "'></div>",
+        );
+        divComp.append(bar);
+    }
 
-    divComp.append(bar);
-
-    this.prepareComponent(divComp, component);
+    this.prepareComponent(divComp, component, false, true);
 
     divComp.css({
         border: props.BorderWidth + "px solid " + props.BorderColor,
         display: "flex",
         "align-items": "flex-end",
         "justify-content": "center",
+        position: "relative",
     });
 
     component.dom = divComp;
+};
+//create prototype for set dynamic filling rate for bar graph 
+scada.scheme.BarGraphRenderer.prototype.setDynamicFillingRate = function (divComp, props, cnlDataExt) {
+    var bar = divComp.find(".bar");
+    var fillingRate = this.calculateFillingRate(props, cnlDataExt);
+    bar.css({
+        height: fillingRate + "%",
+    });
+    bar.attr("data-value", parseInt(fillingRate));
 };
 
 scada.scheme.BarGraphRenderer.prototype.updateData = function (
@@ -318,6 +363,11 @@ scada.scheme.BarGraphRenderer.prototype.updateData = function (
         });
         divComp.find(".bar").attr("data-value", parseInt(props.Value));
     }
+    //TODO: add dynamic filling rate for bar graph
+    //get channel value and set it to bar graph
+    var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
+    this.setDynamicFillingRate(component.dom, props, cnlDataExt);
+
 
     if (cnlDataExt.Stat > 0 && props.Conditions) {
         var cnlVal = cnlDataExt.Val;
@@ -326,7 +376,7 @@ scada.scheme.BarGraphRenderer.prototype.updateData = function (
             if (scada.scheme.calc.conditionSatisfied(condition, cnlVal)) {
                 if (scada.scheme.calc.conditionSatisfied(condition, cnlVal)) {
                     var barStyles = {};
-
+                    //TODO: REMOVE THIS 
                     if (condition.Level === "Min") {
                         barStyles.height = "10%";
                     } else if (condition.Level === "Low") {
@@ -343,7 +393,7 @@ scada.scheme.BarGraphRenderer.prototype.updateData = function (
                     }
 
                     divComp.find(".bar").css(barStyles);
-
+                    //TODO: remove this
                     if (condition.TextContent) {
                         scada.scheme.addInfoTooltipToDiv(divComp[0], condition.TextContent);
                     }
@@ -378,8 +428,6 @@ scada.scheme.BarGraphRenderer.prototype.updateData = function (
         }
     }
 };
-
-
 
 
 /********** Dynamic Text Renderer **********/
