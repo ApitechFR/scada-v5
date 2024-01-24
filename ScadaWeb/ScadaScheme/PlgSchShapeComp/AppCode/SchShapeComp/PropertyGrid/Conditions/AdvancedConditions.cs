@@ -24,6 +24,8 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			BackgroundColor = "";
 			IsVisible = true;
 			Blinking = BlinkingSpeed.None;
+			Rotation = 0;
+			
 		}
 
 		[DisplayName("Background Color"), Category(Categories.Appearance)]
@@ -35,6 +37,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
+		[CM.DefaultValue(0)]
 		public int? Rotation { get; set; }
 		
 
