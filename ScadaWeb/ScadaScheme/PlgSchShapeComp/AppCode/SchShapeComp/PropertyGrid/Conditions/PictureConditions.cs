@@ -16,12 +16,14 @@ namespace Scada.Web.SchShapeComp.PropertyGrid
 		{
 			IsVisible = true;
 			Blinking = BlinkingSpeed.None;
+			Rotation = 0;
+			
 		}
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
 		[Description("The rotation angle of the shape in degrees.")]
-		[CM.DefaultValue(null)]
-		public string Rotation { get; set; }
+		[CM.DefaultValue(0)]
+		public int? Rotation { get; set; }
 
 
 		[DisplayName("Blinking Speed"), Category(Categories.Appearance)]
@@ -37,7 +39,7 @@ namespace Scada.Web.SchShapeComp.PropertyGrid
 		{
 			base.LoadFromXml(xmlNode);
 			IsVisible = xmlNode.GetChildAsBool("IsVisible");
-			Rotation = xmlNode.GetChildAsString("Rotation");
+			Rotation = xmlNode.GetChildAsInt("Rotation");
 			Blinking = xmlNode.GetChildAsEnum<BlinkingSpeed>("Blinking");
 		}
 
