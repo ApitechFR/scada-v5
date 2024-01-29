@@ -331,8 +331,9 @@ scada.scheme.BarGraphRenderer.prototype.createDom = function (
         "justify-content": "center",
         position: "relative",
     });
-
+    
     component.dom = divComp;
+    scada.scheme.setRotate(divComp, props);
 };
 //create prototype for set dynamic filling rate for bar graph 
 scada.scheme.BarGraphRenderer.prototype.setDynamicFillingRate = function (divComp, props, cnlDataExt) {
@@ -363,70 +364,13 @@ scada.scheme.BarGraphRenderer.prototype.updateData = function (
         });
         divComp.find(".bar").attr("data-value", parseInt(props.Value));
     }
-    //TODO: add dynamic filling rate for bar graph
+
     //get channel value and set it to bar graph
     var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
     this.setDynamicFillingRate(component.dom, props, cnlDataExt);
 
+    scada.scheme.updateComponentData(component, renderContext);
 
-    if (cnlDataExt.Stat > 0 && props.Conditions) {
-        var cnlVal = cnlDataExt.Val;
-
-        for (var condition of props.Conditions) {
-            if (scada.scheme.calc.conditionSatisfied(condition, cnlVal)) {
-                if (scada.scheme.calc.conditionSatisfied(condition, cnlVal)) {
-                    var barStyles = {};
-                    //TODO: REMOVE THIS 
-                    if (condition.Level === "Min") {
-                        barStyles.height = "10%";
-                    } else if (condition.Level === "Low") {
-                        barStyles.height = "30%";
-                    } else if (condition.Level === "Medium") {
-                        barStyles.height = "50%";
-                    } else if (condition.Level === "High") {
-                        barStyles.height = "70%";
-                    } else if (condition.Level === "Max") {
-                        barStyles.height = "100%";
-                    }
-                    if (condition.FillColor) {
-                        barStyles["background-color"] = condition.FillColor;
-                    }
-
-                    divComp.find(".bar").css(barStyles);
-                    //TODO: remove this
-                    if (condition.TextContent) {
-                        scada.scheme.addInfoTooltipToDiv(divComp[0], condition.TextContent);
-                    }
-                    // Set other CSS properties based on Condition
-                    if (condition.Color) {
-                        divComp.css("color", condition.Color);
-                    }
-                    if (condition.BackgroundColor) {
-                        divComp.css("background-color", condition.BackgroundColor);
-                    }
-                    if (condition.TextContent) {
-                        divComp.text(condition.TextContent);
-                    }
-                    divComp.css("visibility", condition.IsVisible ? "visible" : "hidden");
-                    if (condition.Width) {
-                        divComp.css("width", condition.Width);
-                    }
-                    if (condition.Height) {
-                        divComp.css("height", condition.Height);
-                    }
-
-                    // Handle Blinking
-                    if (condition.Blinking == 1) {
-                        divComp.addClass("slow-blink");
-                    } else if (condition.Blinking == 2) {
-                        divComp.addClass("fast-blink");
-                    } else {
-                        divComp.removeClass("slow-blink fast-blink");
-                    }
-                }
-            }
-        }
-    }
 };
 
 
