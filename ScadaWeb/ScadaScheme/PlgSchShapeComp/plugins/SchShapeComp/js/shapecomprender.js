@@ -341,6 +341,7 @@ scada.scheme.BarGraphRenderer.prototype.setDynamicFillingRate = function (divCom
     var fillingRate = this.calculateFillingRate(props, cnlDataExt);
     bar.css({
         height: fillingRate + "%",
+   
     });
     bar.attr("data-value", parseInt(fillingRate));
 };
@@ -360,7 +361,6 @@ scada.scheme.BarGraphRenderer.prototype.updateData = function (
         });
         divComp.find(".bar").css({
             "background-color": props.BarColor,
-            height: props.Value + "%",
         });
         divComp.find(".bar").attr("data-value", parseInt(props.Value));
     }
