@@ -266,6 +266,33 @@ scada.scheme.BarGraphRenderer.prototype = Object.create(
 );
 scada.scheme.BarGraphRenderer.constructor = scada.scheme.BarGraphRenderer;
 
+scada.scheme.BarGraphRenderer.prototype.calculateFillingRate = function (props, cnlDataExt) {
+    let valueToUse;
+
+    if (cnlDataExt !== null) {
+        valueToUse = cnlDataExt;
+    } else if (props.CtrlCnlNum !== 0) {
+        valueToUse = props.CtrlCnlNum;
+    } else if (props.InCnlNum !== 0) {
+        valueToUse = props.InCnlNum;
+    } else {
+        return 0; 
+    }
+
+    if (valueToUse < props.MinValue) {
+        return 0;
+    }
+
+    // If the value is less than MinValue, return 0%
+    if (valueToUse > props.MaxValue) {
+        return 100;
+    }
+
+    // Normal calculation of the filling rate
+    return (valueToUse - props.MinValue) * 100 / (props.MaxValue - props.MinValue);
+};
+
+
 scada.scheme.BarGraphRenderer.prototype.createDom = function (
     component,
     renderContext,
@@ -274,29 +301,49 @@ scada.scheme.BarGraphRenderer.prototype.createDom = function (
 
     var divComp = $("<div id='comp" + component.id + "'></div>");
 
-    var bar = $(
-        "<div class='bar' style='height:" +
-        props.Value +
-        "%" +
-        ";background-color:" +
-        props.BarColor +
-        "' data-value='" +
-        parseInt(props.Value) +
-        "'></div>",
-    );
+    if (this.calculateFillingRate(props,null) === 0) {
+        var disabledBar = $(
+            "<div class='bar disabled' style='height: 71%; background-color: #5f5f81; filter: blur(1.5px);'>" +
+            "<span class='error-cross' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 35px; color: red;'>X</span>" +
+            "</div>"
+        );
+        divComp.append(disabledBar);
+    } else {
+        var bar = $(
+            "<div class='bar' style='height:" +
+            this.calculateFillingRate(props,null) +
+            "%" +
+            ";background-color:" +
+            props.BarColor +
+            "' data-value='" +
+            this.calculateFillingRate(props, null) +
+            "'></div>",
+        );
+        divComp.append(bar);
+    }
 
-    divComp.append(bar);
-
-    this.prepareComponent(divComp, component);
+    this.prepareComponent(divComp, component, false, true);
 
     divComp.css({
         border: props.BorderWidth + "px solid " + props.BorderColor,
         display: "flex",
         "align-items": "flex-end",
         "justify-content": "center",
+        position: "relative",
     });
-
+    
     component.dom = divComp;
+    scada.scheme.setRotate(divComp, props);
+};
+//create prototype for set dynamic filling rate for bar graph 
+scada.scheme.BarGraphRenderer.prototype.setDynamicFillingRate = function (divComp, props, cnlDataExt) {
+    var bar = divComp.find(".bar");
+    var fillingRate = this.calculateFillingRate(props, cnlDataExt);
+    bar.css({
+        height: fillingRate + "%",
+   
+    });
+    bar.attr("data-value", parseInt(fillingRate));
 };
 
 scada.scheme.BarGraphRenderer.prototype.updateData = function (
@@ -314,72 +361,17 @@ scada.scheme.BarGraphRenderer.prototype.updateData = function (
         });
         divComp.find(".bar").css({
             "background-color": props.BarColor,
-            height: props.Value + "%",
         });
         divComp.find(".bar").attr("data-value", parseInt(props.Value));
     }
 
-    if (cnlDataExt.Stat > 0 && props.Conditions) {
-        var cnlVal = cnlDataExt.Val;
+    //get channel value and set it to bar graph
+    var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
+    this.setDynamicFillingRate(component.dom, props, cnlDataExt);
 
-        for (var condition of props.Conditions) {
-            if (scada.scheme.calc.conditionSatisfied(condition, cnlVal)) {
-                if (scada.scheme.calc.conditionSatisfied(condition, cnlVal)) {
-                    var barStyles = {};
+    scada.scheme.updateComponentData(component, renderContext);
 
-                    if (condition.Level === "Min") {
-                        barStyles.height = "10%";
-                    } else if (condition.Level === "Low") {
-                        barStyles.height = "30%";
-                    } else if (condition.Level === "Medium") {
-                        barStyles.height = "50%";
-                    } else if (condition.Level === "High") {
-                        barStyles.height = "70%";
-                    } else if (condition.Level === "Max") {
-                        barStyles.height = "100%";
-                    }
-                    if (condition.FillColor) {
-                        barStyles["background-color"] = condition.FillColor;
-                    }
-
-                    divComp.find(".bar").css(barStyles);
-
-                    if (condition.TextContent) {
-                        scada.scheme.addInfoTooltipToDiv(divComp[0], condition.TextContent);
-                    }
-                    // Set other CSS properties based on Condition
-                    if (condition.Color) {
-                        divComp.css("color", condition.Color);
-                    }
-                    if (condition.BackgroundColor) {
-                        divComp.css("background-color", condition.BackgroundColor);
-                    }
-                    if (condition.TextContent) {
-                        divComp.text(condition.TextContent);
-                    }
-                    divComp.css("visibility", condition.IsVisible ? "visible" : "hidden");
-                    if (condition.Width) {
-                        divComp.css("width", condition.Width);
-                    }
-                    if (condition.Height) {
-                        divComp.css("height", condition.Height);
-                    }
-
-                    // Handle Blinking
-                    if (condition.Blinking == 1) {
-                        divComp.addClass("slow-blink");
-                    } else if (condition.Blinking == 2) {
-                        divComp.addClass("fast-blink");
-                    } else {
-                        divComp.removeClass("slow-blink fast-blink");
-                    }
-                }
-            }
-        }
-    }
 };
-
-
 
 
 /********** Dynamic Text Renderer **********/
