@@ -27,6 +27,8 @@ namespace Scada.Scheme.Model.PropertyGrid
         private string[] _xmlNames = { "Cnl.xml", "CnlType.xml", "Device.xml", "Obj.xml" };
         private string _errFolder = "Aucun dossier sélectionné.";
         private string _errProject = "Veuillez sélectionner un dossier projet valide.";
+        private string[] tabElement = {"By device", "By object"};
+
 
         Scada.Scheme.SchemeContext context = Scada.Scheme.SchemeContext.GetInstance();
 
@@ -45,38 +47,25 @@ namespace Scada.Scheme.Model.PropertyGrid
             TreeNode allNode = new TreeNode("All");
             parentNode.Nodes.Add(allNode);
 
-            TreeNode devicesNode = new TreeNode("By devices");
-            parentNode.Nodes.Add(devicesNode);
-
-            TreeNode objectsNode = new TreeNode("By objects");
-            parentNode.Nodes.Add(objectsNode);
-
-            //devices
-            List<string> lstNameDevices = new List<string>();
-            foreach (string[] tab in _lstProperties)
+            int count = 0;
+            foreach(string s in tabElement)
             {
-                if (!String.IsNullOrEmpty(tab[8]) && !lstNameDevices.Contains(tab[8]))
-                    lstNameDevices.Add(tab[8]);
-            }
-            foreach(string device in lstNameDevices)
-            {
-                TreeNode node = new TreeNode(device);
-                devicesNode.Nodes.Add(node);
-            }
+                TreeNode node = new TreeNode(s);
+                parentNode.Nodes.Add(node);
 
-            //objects
-            List<string> lstNameObjets = new List<string>();
-            foreach (string[] tab in _lstProperties)
-            {
-                if (!String.IsNullOrEmpty(tab[9]) && !lstNameObjets.Contains(tab[9]))
-                    lstNameObjets.Add(tab[9]);
+                List<string> list = new List<string>();
+                foreach (string[] tab in _lstProperties)
+                {
+                    if (!String.IsNullOrEmpty(tab[8+count]) && !list.Contains(tab[8+count]))
+                        list.Add(tab[8+count]);
+                }
+                foreach (string device in list)
+                {
+                    TreeNode n = new TreeNode(device);
+                    node.Nodes.Add(n);
+                }
+                count++;
             }
-            foreach (string objet in lstNameObjets)
-            {
-                TreeNode node = new TreeNode(objet);
-                objectsNode.Nodes.Add(node);
-            }
-
         }
 
         private void fillDataGridView()
@@ -285,7 +274,7 @@ namespace Scada.Scheme.Model.PropertyGrid
 
         private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            if(e.Node.Parent != null && e.Node.Parent.Text == "By devices")
+            if(e.Node.Parent != null && tabElement.Contains(e.Node.Parent.Text) && e.Node.Parent.Text.Contains("device"))
             {
                 string selectedDevice = e.Node.Text;
 
@@ -294,7 +283,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 dataGridView1.DataSource = dataView;
             }
 
-            if (e.Node.Parent != null && e.Node.Parent.Text == "By objetcs")
+            if (e.Node.Parent != null && tabElement.Contains(e.Node.Parent.Text) && e.Node.Parent.Text.Contains("object"))
             {
                 string selectedObject = e.Node.Text;
 
