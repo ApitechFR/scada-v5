@@ -27,7 +27,7 @@ namespace Scada.Scheme.Model.PropertyGrid
         private string[] _xmlNames = { "Cnl.xml", "CnlType.xml", "Device.xml", "Obj.xml" };
         private string _errFolder = "Aucun dossier sélectionné.";
         private string _errProject = "Veuillez sélectionner un dossier projet valide.";
-        private string[] tabElement = {"By devices", "By objects"};
+        private string[] tabElement = {"By device", "By object"};
 
 
         Scada.Scheme.SchemeContext context = Scada.Scheme.SchemeContext.GetInstance();
@@ -274,7 +274,7 @@ namespace Scada.Scheme.Model.PropertyGrid
 
         private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            if(e.Node.Parent != null && tabElement.Contains(e.Node.Parent.Text) && e.Node.Parent.Text.Contains("devices"))
+            if(e.Node.Parent != null && tabElement.Contains(e.Node.Parent.Text) && e.Node.Parent.Text.Contains("device"))
             {
                 string selectedDevice = e.Node.Text;
 
@@ -283,7 +283,7 @@ namespace Scada.Scheme.Model.PropertyGrid
                 dataGridView1.DataSource = dataView;
             }
 
-            if (e.Node.Parent != null && tabElement.Contains(e.Node.Parent.Text) && e.Node.Parent.Text.Contains("objects"))
+            if (e.Node.Parent != null && tabElement.Contains(e.Node.Parent.Text) && e.Node.Parent.Text.Contains("object"))
             {
                 string selectedObject = e.Node.Text;
 
