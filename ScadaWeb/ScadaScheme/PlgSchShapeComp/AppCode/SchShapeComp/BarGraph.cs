@@ -16,15 +16,17 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public BarGraph()
 		{
 			serBinder = PlgUtils.SerializationBinder;
-			BarColor = "blue";
+			FillColor = "Blue";
 			Conditions = new List<BarGraphConditions>();
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "NA (0)";
 			CtrlCnlNumCustom = "NA (0)";
 			BorderWidth = 1;
-			BorderColor = "black";
+			BorderColor = "Black";
 			Rotation = 0;
+			MaxValue = 100;
+			MinValue = 0;
 		}
 
 		[DisplayName("Conditions"), Category(Categories.Behavior)]
@@ -36,8 +38,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[DisplayName("Bar Fill Color"), Category(Categories.Appearance)]
 		[Description("The fill color of the Bar Graph.")]
 		[CM.Editor(typeof(ColorEditor), typeof(UITypeEditor))]
-		[CM.DefaultValue("blue")]
-		public string BarColor { get; set; }
+		[CM.DefaultValue("Blue")]
+		public string FillColor { get; set; }
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
 		[Description("The rotation of the graph")]
@@ -49,16 +51,17 @@ namespace Scada.Web.Plugins.SchShapeComp
 		/// Get or set the max value
 		/// </summary>
 		[DisplayName("Bar Max Value"), Category(Categories.Appearance)]
-		[Description("The max value of the Bar Graph.")]
-		public double? MaxValue { get; set; }
+		[Description("The max value (decimal) of the Bar Graph.")]
+		[CM.DefaultValue(100)]
+		public double MaxValue { get; set; }
 
 		/// <summary>
 		/// Get or set the min value
 		/// </summary>
 		[DisplayName("Bar Min Value"), Category(Categories.Appearance)]
-		[Description("The min value of the Bar Graph.")]
+		[Description("The min value (decimal) of the Bar Graph.")]
 		[CM.DefaultValue(0)]
-		public double? MinValue { get; set; }
+		public double MinValue { get; set; }
 
 		/// <summary>
 		/// Get or set the action
@@ -106,7 +109,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public override void LoadFromXml(XmlNode xmlNode)
 		{
 			base.LoadFromXml(xmlNode);
-			BarColor = xmlNode.GetChildAsString("BarColor");
+			FillColor = xmlNode.GetChildAsString("FillColor");
 			Action = xmlNode.GetChildAsEnum<Actions>("Action");
 			InCnlNum = xmlNode.GetChildAsInt("InCnlNum");
 			CtrlCnlNum = xmlNode.GetChildAsInt("CtrlCnlNum");
@@ -139,7 +142,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 				XmlElement conditionElem = conditionsElem.AppendElem("Condition");
 				condition.SaveToXml(conditionElem);
 			}
-			xmlElem.AppendElem("BarColor", BarColor);
+			xmlElem.AppendElem("FillColor", FillColor);
 			xmlElem.AppendElem("InCnlNum", InCnlNum);
 			xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
