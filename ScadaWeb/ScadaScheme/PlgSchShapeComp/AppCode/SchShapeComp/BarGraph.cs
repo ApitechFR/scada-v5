@@ -7,6 +7,7 @@ using CM = System.ComponentModel;
 using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 using System.Collections.Generic;
 using Scada.Scheme.Model.DataTypes;
+using System.Windows.Forms;
 
 namespace Scada.Web.Plugins.SchShapeComp
 {
@@ -45,23 +46,48 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[Description("The rotation of the graph")]
 		[CM.DefaultValue(0)]
 		public int Rotation { get; set; }
-		
 
-		/// <summary>
-		/// Get or set the max value
-		/// </summary>
+		public double maxValue = 100;
+		public double minValue = 0;
+
 		[DisplayName("Bar Max Value"), Category(Categories.Appearance)]
 		[Description("The max value (decimal) of the Bar Graph.")]
 		[CM.DefaultValue(100)]
-		public double MaxValue { get; set; }
+		public double MaxValue
+		{
+			get => maxValue;
+			set
+			{
+				if (value > MinValue) 
+				{
+					maxValue = value;
+				}
+				else
+				{
+				MessageBox.Show("MaxValue doit être supérieur à MinValue.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				}
+			}
+		}
 
-		/// <summary>
-		/// Get or set the min value
-		/// </summary>
 		[DisplayName("Bar Min Value"), Category(Categories.Appearance)]
 		[Description("The min value (decimal) of the Bar Graph.")]
 		[CM.DefaultValue(0)]
-		public double MinValue { get; set; }
+		public double MinValue
+		{
+			get => minValue;
+			set
+			{
+				if (value < MaxValue) 
+				{
+					minValue = value;
+				}
+				else
+				{
+					MessageBox.Show("MinValue doit être inférieur à MaxValue.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				}
+			}
+		}
+
 
 		/// <summary>
 		/// Get or set the action
