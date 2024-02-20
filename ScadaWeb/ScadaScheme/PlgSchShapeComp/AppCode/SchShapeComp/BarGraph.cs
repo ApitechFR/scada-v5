@@ -7,6 +7,7 @@ using CM = System.ComponentModel;
 using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 using System.Collections.Generic;
 using Scada.Scheme.Model.DataTypes;
+using System.Windows.Forms;
 
 namespace Scada.Web.Plugins.SchShapeComp
 {
@@ -16,15 +17,17 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public BarGraph()
 		{
 			serBinder = PlgUtils.SerializationBinder;
-			BarColor = "blue";
-			Value = 10;
+			FillColor = "Blue";
 			Conditions = new List<BarGraphConditions>();
 			InCnlNum = 0;
 			CtrlCnlNum = 0;
 			InCnlNumCustom = "NA (0)";
 			CtrlCnlNumCustom = "NA (0)";
 			BorderWidth = 1;
-			BorderColor = "black";
+			BorderColor = "Black";
+			Rotation = 0;
+			MaxValue = 100;
+			MinValue = 0;
 		}
 
 		[DisplayName("Conditions"), Category(Categories.Behavior)]
@@ -36,13 +39,54 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[DisplayName("Bar Fill Color"), Category(Categories.Appearance)]
 		[Description("The fill color of the Bar Graph.")]
 		[CM.Editor(typeof(ColorEditor), typeof(UITypeEditor))]
-		[CM.DefaultValue("blue")]
-		public string BarColor { get; set; }
+		[CM.DefaultValue("Blue")]
+		public string FillColor { get; set; }
 
-		[DisplayName("Bar Fill Level"), Category(Categories.Appearance)]
-		[Description("Fill level of the Bar Graph.")]
-		[CM.DefaultValue(10)]
-		public double Value { get; set; }
+		[DisplayName("Rotation"), Category(Categories.Appearance)]
+		[Description("The rotation of the graph")]
+		[CM.DefaultValue(0)]
+		public int Rotation { get; set; }
+
+		public double maxValue = 100;
+		public double minValue = 0;
+
+		[DisplayName("Bar Max Value"), Category(Categories.Appearance)]
+		[Description("The max value (decimal) of the Bar Graph.")]
+		[CM.DefaultValue(100)]
+		public double MaxValue
+		{
+			get => maxValue;
+			set
+			{
+				if (value > MinValue) 
+				{
+					maxValue = value;
+				}
+				else
+				{
+				MessageBox.Show("MaxValue doit être supérieur à MinValue.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				}
+			}
+		}
+
+		[DisplayName("Bar Min Value"), Category(Categories.Appearance)]
+		[Description("The min value (decimal) of the Bar Graph.")]
+		[CM.DefaultValue(0)]
+		public double MinValue
+		{
+			get => minValue;
+			set
+			{
+				if (value < MaxValue) 
+				{
+					minValue = value;
+				}
+				else
+				{
+					MessageBox.Show("MinValue doit être inférieur à MaxValue.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				}
+			}
+		}
 
 
 		/// <summary>
@@ -79,8 +123,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.DefaultValue(0)]
 		public int CtrlCnlNum { get; set; }
 
-
-
+		
 		/// <summary>
 		/// Get or set the control channel number custom
 		/// </summary>
@@ -92,13 +135,15 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public override void LoadFromXml(XmlNode xmlNode)
 		{
 			base.LoadFromXml(xmlNode);
-			Value = xmlNode.GetChildAsDouble("Value");
-			BarColor = xmlNode.GetChildAsString("BarColor");
+			FillColor = xmlNode.GetChildAsString("FillColor");
 			Action = xmlNode.GetChildAsEnum<Actions>("Action");
 			InCnlNum = xmlNode.GetChildAsInt("InCnlNum");
 			CtrlCnlNum = xmlNode.GetChildAsInt("CtrlCnlNum");
 			InCnlNumCustom = xmlNode.GetChildAsString("InCnlNumCustom");
 			CtrlCnlNumCustom = xmlNode.GetChildAsString("CtrlCnlNumCustom");
+			MaxValue = xmlNode.GetChildAsDouble("MaxValue");
+			MinValue = xmlNode.GetChildAsDouble("MinValue");
+			Rotation = xmlNode.GetChildAsInt("Rotation");
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
 
 			if (conditionsNode != null)
@@ -117,20 +162,21 @@ namespace Scada.Web.Plugins.SchShapeComp
 		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
-			
-			xmlElem.AppendElem("Value", Value);
 			XmlElement conditionsElem = xmlElem.AppendElem("Conditions");
 			foreach (BarGraphConditions condition in Conditions)
 			{
 				XmlElement conditionElem = conditionsElem.AppendElem("Condition");
 				condition.SaveToXml(conditionElem);
 			}
-			xmlElem.AppendElem("BarColor", BarColor);
+			xmlElem.AppendElem("FillColor", FillColor);
 			xmlElem.AppendElem("InCnlNum", InCnlNum);
 			xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
 			xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
 			xmlElem.AppendElem("Action", Action.ToString());
+			xmlElem.AppendElem("MaxValue", MaxValue);
+			xmlElem.AppendElem("MinValue", MinValue);
+			xmlElem.AppendElem("Rotation", Rotation);
 		}
 
 		public override BaseComponent Clone()
@@ -139,9 +185,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 
 			foreach (BarGraphConditions condition in cloneComponent.Conditions)
 			{
-				condition.SchemeView = schemeView;
+			  condition.SchemeView = schemeView;
 			}
-
 			return cloneComponent;
 		}
 	}
