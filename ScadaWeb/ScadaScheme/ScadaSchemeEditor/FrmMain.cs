@@ -45,6 +45,7 @@ using Button = System.Windows.Forms.Button;
 using ListViewItem = System.Windows.Forms.ListViewItem;
 using CM = System.ComponentModel;
 using File = System.IO.File;
+using System.Text.RegularExpressions;
 
 namespace Scada.Scheme.Editor
 {
@@ -2162,12 +2163,13 @@ namespace Scada.Scheme.Editor
 					{
 						var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
 						var componentChannelProperty = c.GetType().GetProperty(componentChannelPropertyName);
-
-						if (editor?.SchemeView?.MainSymbol?.AliasCnlDictionary != null && e?.NewAlias?.Name != null)
+						
+						if (e?.NewAlias?.Name != null)
 						{
-							if (editor.SchemeView.MainSymbol.AliasCnlDictionary.TryGetValue(e.NewAlias.Name, out var ChannelNumber))
+							var match = Regex.Match(e.NewAlias.Value.ToString(), @"\((\d+)\)");
+							if (match.Success)
 							{
-								componentChannelProperty.SetValue(c, ChannelNumber, null);
+								componentChannelProperty.SetValue(c, int.Parse(match.Groups[1].Value), null);
 							}
 							else
 							{
