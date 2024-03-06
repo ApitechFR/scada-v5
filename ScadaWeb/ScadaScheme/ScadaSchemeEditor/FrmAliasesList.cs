@@ -76,21 +76,29 @@ namespace Scada.Scheme.Editor
                 bool isInSymbol = allowCreation;
                 new FrmAliasEdition(false, _selectedAlias, allowCreation, isInSymbol).ShowDialog();
                 if (_selectedAlias.isCnlLinked && !s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name))
-                    s.AliasCnlDictionary.Add(_selectedAlias.Name, int.Parse(_selectedAlias.Value.ToString()));
+                {
+                    if (_selectedAlias.Value.ToString().Contains("("))
+                    {
+                        string[] num = _selectedAlias.Value.ToString().Split(')');
+                        string numFinal = num[0].Substring(1);
+                        s.AliasCnlDictionary.Add(_selectedAlias.Name, int.Parse(numFinal));
+                    }
+                    else s.AliasCnlDictionary.Add(_selectedAlias.Name, int.Parse(_selectedAlias.Value.ToString()));
+                }
                 else if (_selectedAlias.isCnlLinked && s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name) && !isInSymbol)
                 {
                     //find channel number
                     Match match = Regex.Match(_selectedAlias.Value.ToString(), @"\((\d+)\)");
-                    if(match.Success)
+                    if (match.Success)
                     {
-						string matchValue = match.Groups[1].Value;
+                        string matchValue = match.Groups[1].Value;
 
-                        if(int.TryParse(matchValue, out int channelNumber))
+                        if (int.TryParse(matchValue, out int channelNumber))
                         {
-							s.AliasCnlDictionary[_selectedAlias.Name] = channelNumber;
+                            s.AliasCnlDictionary[_selectedAlias.Name] = channelNumber;
 
-						}
-						else
+                        }
+                        else
                         {
                             Console.WriteLine("Error parsing channel number");
                         }
@@ -98,7 +106,7 @@ namespace Scada.Scheme.Editor
                     else
                     {
                         Console.WriteLine("match failed");
-                    }  
+                    }
                 }
                 else if (_selectedAlias.isCnlLinked && s.AliasCnlDictionary.ContainsKey(_selectedAlias.Name) && isInSymbol)
                 {
