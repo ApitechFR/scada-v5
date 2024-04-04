@@ -1,6 +1,5 @@
 ﻿using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
-using Scada.Web.SchShapeComp.PropertyGrid;
 using System;
 using System.Drawing.Design;
 using System.Xml;
@@ -24,7 +23,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			BackgroundColor = "";
 			IsVisible = true;
 			Blinking = BlinkingSpeed.None;
-			Rotation = 0;
+			Rotation = null;
 			
 		}
 
@@ -37,10 +36,8 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
-		[CM.DefaultValue(0)]
 		public int? Rotation { get; set; }
 		
-
 
 		[DisplayName("Blinking Speed"), Category(Categories.Appearance)]
 		public BlinkingSpeed Blinking { get; set; }
@@ -50,17 +47,24 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			base.LoadFromXml(xmlNode);
 			BackgroundColor = xmlNode.GetChildAsString("BackgroundColor");
 			IsVisible = xmlNode.GetChildAsBool("IsVisible");
-			Rotation = xmlNode.GetChildAsInt("Rotation");
 			Blinking = xmlNode.GetChildAsEnum<BlinkingSpeed>("Blinking");
+
+			// If the rotation node is not null, parse the value and assign it to the Rotation property
+			XmlNode rotationNode = xmlNode.SelectSingleNode("Rotation");
+			Rotation = rotationNode != null ? (int?)int.Parse(rotationNode.InnerText) : null;
 		}
-		
+
 		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
 			xmlElem.AppendElem("BackgroundColor", BackgroundColor);
-			xmlElem.AppendElem("Rotation", Rotation);
 			xmlElem.AppendElem("IsVisible", IsVisible);
 			xmlElem.AppendElem("Blinking", Blinking);
+
+			if (Rotation.HasValue)
+			{
+				xmlElem.AppendElem("Rotation", Rotation.Value);
+			}
 		}
 		
 		public override object Clone()
