@@ -71,10 +71,11 @@ scada.scheme.updateStyles = function (divComp, cond) {
 scada.scheme.setRotate = function (divComp, props) {
     setTimeout(function () {
         var compWrapper = divComp.closest('.comp-wrapper');
-        if (compWrapper.length > 0) {
+        if (compWrapper.length > 0 && props.Rotation) {
             var rotation = parseInt(props.Rotation, 10);
 
-            if (isNaN(rotation) || rotation === 0) {
+            if (rotation) {
+
                 compWrapper.css('transform', '');
                 console.log("Transform removed from comp-wrapper of " + divComp.attr('id'));
             } else {
