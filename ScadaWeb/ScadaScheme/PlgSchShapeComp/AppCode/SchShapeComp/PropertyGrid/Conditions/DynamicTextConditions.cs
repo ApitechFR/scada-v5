@@ -10,14 +10,12 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		public DynamicTextConditions()
 			: base()
 		{
-			IsVisible = true;
-			Blinking = BlinkingSpeed.None;
-			TextContent = "";
-			FontSize = "";
+			TextContent = "None";
+			FontSize = null;
 		}
 
 		[DisplayName("FontSize"),Category(Categories.Appearance)]
-		public string FontSize { get; set; }
+		public int? FontSize { get; set; }
 
 		[DisplayName("Text Content"),Category(Categories.Appearance)]
 		public string TextContent { get; set; }
@@ -26,14 +24,19 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		{
 			base.LoadFromXml(xmlNode);
 			TextContent = xmlNode.GetChildAsString("TextContent");
-			FontSize = xmlNode.GetChildAsString("FontSize");
+
+			XmlNode fontSizeNode = xmlNode.SelectSingleNode("FontSize");
+			FontSize = fontSizeNode != null ? (int?)int.Parse(fontSizeNode.InnerText) : null;
 		}
 
 		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
-			xmlElem.AppendElem("TextContent", TextContent);
-			xmlElem.AppendElem("FontSize", FontSize);
+			xmlElem.AppendElem("TextContent", string.IsNullOrEmpty(TextContent) ? "None" : TextContent);
+			if (FontSize.HasValue)
+			{
+				xmlElem.AppendElem("FontSize", FontSize.Value);
+			}
 		}
 
 	}
