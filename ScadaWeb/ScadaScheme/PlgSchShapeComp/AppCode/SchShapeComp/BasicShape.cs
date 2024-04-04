@@ -37,7 +37,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
 		public List<BasicShapeConditions> Conditions { get; protected set; }
 
-		// Ajoute ShapeType qui va inclure une logique spéciale lors de la sélection de "Line" pour ajuster SizeX et SizeY à Size(416, 3)
 		/// <summary>
 		/// shape type 
 		/// </summary>
