@@ -15,6 +15,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 	[Serializable]
 	public class BasicShape : BaseComponent, IDynamicComponent
 	{
+		private string shapeType;
 		public BasicShape()
 		{
 			serBinder = PlgUtils.SerializationBinder;
@@ -36,20 +37,43 @@ namespace Scada.Web.Plugins.SchShapeComp
 		[CM.Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
 		public List<BasicShapeConditions> Conditions { get; protected set; }
 
-
+		// Ajoute ShapeType qui va inclure une logique spéciale lors de la sélection de "Line" pour ajuster SizeX et SizeY à Size(416, 3)
+		/// <summary>
+		/// shape type 
+		/// </summary>
 		[DisplayName("Shape Type"), Category(Categories.Appearance)]
-		[Description("The type of SVG shape.")]
+		[Description("The type of the shape.")]
 		[CM.Editor(typeof(BasicShapeSelectEditor), typeof(UITypeEditor))]
 		[CM.DefaultValue("Circle")]
-		public string ShapeType { get; set; }
+		public string ShapeType
+		{
+			get=>shapeType;
+			set
+			{
+				shapeType = value;
+				if (shapeType == "Line")
+				{
+					this.Size = new Size(416, 3);
+				}
+				else
+				{
+					this.Size = new Size(100, 100);
+				}
+			}
+		}
 
-		
+		[DisplayName("Size"), Category(Categories.Appearance)]
+		[Description("The size of the shape.")]
+		public Size Size
+		{
+			get { return base.Size; }
+			set { base.Size = value; }
+		}
+
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
 		[Description("The rotation angle of the SVG shape in degrees.")]
 		[CM.DefaultValue(0)]
 		public int Rotation { get; set; }
-
-		
 
 		/// <summary>
 		/// Get or set the input channel number
@@ -107,6 +131,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 			CtrlCnlNumCustom = xmlNode.GetChildAsString("CtrlCnlNumCustom");
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
 
+
 			if (conditionsNode != null)
 			{
 				Conditions = new List<BasicShapeConditions>();
@@ -119,6 +144,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 				}
 			}
 			ShapeType = xmlNode.GetChildAsString("ShapeType");
+			
 		}
 
 		public override void SaveToXml(XmlElement xmlElem)
@@ -137,6 +163,7 @@ namespace Scada.Web.Plugins.SchShapeComp
 			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
 			xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
 			xmlElem.AppendElem("Action", Action.ToString());
+		
 		}
 
 		public override BaseComponent Clone()
