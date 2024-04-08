@@ -13,59 +13,64 @@
 
 /********** Static SVG Shape Renderer **********/
 
-scada.scheme.addInfoTooltipToDiv = function (targetDiv, text) {
-    if (targetDiv instanceof jQuery) {
-        targetDiv = targetDiv[0];
-    }
-
-    if (!targetDiv) return;
-    if (!targetDiv) return;
-
-    // Create tooltip
-    const tooltip = document.createElement("div");
-    tooltip.style.position = "absolute";
-    tooltip.style.bottom = "45%";
-    tooltip.style.left = "50%";
-    tooltip.style.transform = "translateX(-50%)";
-    tooltip.style.padding = "10px";
-    tooltip.style.backgroundColor = "black";
-    tooltip.style.color = "white";
-    tooltip.style.borderRadius = "5px";
-    tooltip.style.zIndex = "10";
-    tooltip.style.whiteSpace = "nowrap";
-    tooltip.style.marginBottom = "5px";
-
-    tooltip.textContent = text;
-
-    targetDiv.style.position = "relative";
-    targetDiv.appendChild(tooltip);
-};
-
-scada.scheme.handleBlinking = function (divComp, blinking) {
-    divComp.removeClass("no-blink slow-blink fast-blink");
-    switch (blinking) {
-        case "None":
-            break;
-        case "Slow":
-            divComp.addClass("slow-blink");
-            break;
-        case "Fast":
-            divComp.addClass("fast-blink");
-            break;
+scada.scheme.handleBlinking = function (divComp, blinking, bool) {
+    if (bool) {
+        divComp.removeClass("no-blink slow-blink fast-blink");
+        switch (blinking) {
+            case 0:
+                break;
+            case 1:
+                divComp.addClass("slow-blink");
+                break;
+            case 2:
+                divComp.addClass("fast-blink");
+                break;
+        }
+    } else {
+        divComp.removeClass("no-blink slow-blink fast-blink");
     }
 };
-scada.scheme.updateStyles = function (divComp, cond) {
-    if (cond.Color) divComp.css("color", cond.Color);
-    if (cond.BackgroundColor)
-        divComp.css("background-color", cond.BackgroundColor);
-    if (cond.TextContent)
-        scada.scheme.addInfoTooltipToDiv(divComp[0], cond.TextContent);
-    if (cond.Rotation)
-        divComp.css("transform", "rotate(" + cond.Rotation + "deg)");
-    if (cond.IsVisible !== undefined)
-        divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
-    if (cond.Width) divComp.css("width", cond.Width);
-    if (cond.Height) divComp.css("height", cond.Height);
+scada.scheme.updateStyles = function (divComp, cond, bool) {
+    if ("color" in cond) {
+        divComp.css("color", cond.color);
+    }
+    if ("rotation" in cond) {
+        divComp.css("transform", "rotate(" + cond.rotation + "deg)");
+    }
+
+    if ("backgroundColor" in cond) {
+        if (bool) {
+            divComp.css("background-color", cond.backgroundColor);
+        } else {
+            divComp.css(
+                "background-color",
+                cond.backColor ? String(cond.backColor) : "",
+            );
+        }
+    }
+    if ("isVisible" in cond) {
+        if (bool) {
+            divComp.css("visibility", cond.isVisible ? "visible" : "hidden");
+        } else {
+            divComp.css("visibility", "visible");
+        }
+    }
+
+    if ("width" in cond) {
+        if (bool) {
+            divComp.css("width", cond.width);
+        } else {
+            divComp.css("width", "100px");
+        }
+    }
+
+    if ("height" in cond) {
+        if (bool) {
+            divComp.css("height", cond.height);
+        } else {
+            divComp.css("height", "100px");
+        }
+    }
 };
 
 scada.scheme.setRotate = function (divComp, props) {
@@ -108,33 +113,85 @@ scada.scheme.updateColors = function (divComp, cnlDataExt, isHovered, props) {
     setBorderColor(divComp, borderColor, true, statusColor);
 };
 
+function mergeAndModifyConditions(conditions) {
+    let result = [];
+    const criteriaFields = [
+        "compareOperator1",
+        "compareArgument1",
+        "logicalOperator",
+        "compareOperator2",
+        "compareArgument2",
+    ];
+
+    let groups = conditions.reduce((acc, condition) => {
+        const criteriaKey = criteriaFields
+            .map((field) => condition[field])
+            .join("_");
+        if (!acc[criteriaKey]) acc[criteriaKey] = [];
+        acc[criteriaKey].push(condition);
+        return acc;
+    }, {});
+
+    Object.values(groups).forEach((group) => {
+        let mergedCondition = { ...group[0] };
+        group.slice(1).forEach((condition) => {
+            Object.keys(condition).forEach((key) => {
+                if (!criteriaFields.includes(key) && condition[key] != null) {
+                    // for blinking attribute
+                    if (key.toLowerCase() === "blinking") {
+                        if (
+                            condition[key] !== 0 ||
+                            mergedCondition[key] === undefined ||
+                            mergedCondition[key] === null ||
+                            mergedCondition[key] === 0
+                        ) {
+                            mergedCondition[key] = condition[key];
+                        }
+                    } else {
+                        // for other attributes
+                        if (
+                            mergedCondition[key] === undefined ||
+                            mergedCondition[key] === null ||
+                            mergedCondition[key] === ""
+                        ) {
+                            mergedCondition[key] = condition[key];
+                        }
+                    }
+                }
+            });
+        });
+
+        result.push(mergedCondition);
+    });
+
+    return result;
+}
 scada.scheme.updateComponentData = function (component, renderContext) {
     var props = component.props;
-
-    if (props.InCnlNum <= 0) {
+    if (props.inCnlNum <= 0) {
         return;
     }
-
-
     var divComp = component.dom;
-    var cnlDataExt = renderContext.getCnlDataExt(props.InCnlNum);
-    //set backcolor
-    this.setBackColor(divComp, props.BackColor);
+    var cnlDataExt = renderContext.getCnlDataExt(props.inCnlNum);
 
-    if (!props.Conditions || cnlDataExt.Stat <= 0) {
-        return;
-    }
+    if (props.conditions && cnlDataExt.d.stat > 0) {
+        var cnlVal = cnlDataExt.d.val;
+        var mergedAndModifiedConditions = mergeAndModifyConditions(
+            props.conditions,
+        );
+        let count = 0;
 
-    var cnlVal = cnlDataExt.Val;
-
-    for (var cond of props.Conditions) {
-        if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
-            scada.scheme.updateStyles(divComp, cond);
-            scada.scheme.handleBlinking(divComp, cond.Blinking);
-            if (cond.Rotation !== -1 && cond.Rotation !== props.Rotation) {
-                scada.scheme.setRotate(divComp, cond);
+        for (var cond of mergedAndModifiedConditions) {
+            if (scada.scheme.calc.conditionSatisfied(cond, cnlVal)) {
+                scada.scheme.updateStyles(divComp, cond, true);
+                scada.scheme.handleBlinking(divComp, cond.blinking, true);
+                count = count + 1;
+            } else {
+                if (count < 0) {
+                    scada.scheme.updateStyles(divComp, props, false);
+                    scada.scheme.handleBlinking(divComp, cond.blinking, false);
+                }
             }
-            break;
         }
     }
 };
@@ -306,7 +363,7 @@ scada.scheme.BarGraphRenderer.prototype.createDom = function (
 
     if (this.calculateFillingRate(props,null) === -1) {
         var disabledBar = $(
-            "<div class='bar disabled' title='Erreur de configuration : MaxValue < MinValue ou absence de données valides' style='height: 71%; background-color: #5f5f81; filter: blur(1.5px);'>" +
+            "<div class='bar disabled' title='Erreur de configuration : absence de données valides' style='height: 71%; background-color: #5f5f81; filter: blur(1.5px);'>" +
             "<span class='error-cross' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 35px; color: red;'>X</span>" +
             "</div>"
         );
