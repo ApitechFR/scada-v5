@@ -23,6 +23,7 @@
  * Modified : 2020
  */
 
+using Scada.Scheme.DataTransfer;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Web;
@@ -745,6 +746,50 @@ namespace Scada.Scheme.Editor
                         if (mainSymbolNode != null)
                         {
                             component.LoadFromXml(mainSymbolNode);
+
+                            // for Dynamic Picture
+                            XmlNode imagesNode = xmlDoc.SelectSingleNode(".//Images");
+                            Dictionary <string,string> dataImages = new Dictionary<string,string>();
+                            if (imagesNode.InnerText != null)
+                            {
+                                foreach (XmlNode image in imagesNode.SelectNodes("Image"))
+                                {
+                                    if (!dataImages.Keys.Contains(image.SelectSingleNode("Name").InnerText))
+                                    {
+                                        dataImages.Add(image.SelectSingleNode("Name").InnerText, image.SelectSingleNode("Data").InnerText);
+                                    }
+                                    else
+                                    {
+                                        dataImages[image.SelectSingleNode("Name").InnerText] = image.SelectSingleNode("Data").InnerText;
+                                    }
+                                }
+                            }
+                            if (File.Exists(FileName))
+                            {
+                                XmlDocument existingDoc = new XmlDocument();
+                                existingDoc.Load(FileName);
+                                XmlNode imagesNodeExistingDoc = existingDoc.SelectSingleNode("//Images");
+                                if(imagesNodeExistingDoc != null)
+                                {
+                                    foreach(var dataImg in dataImages)
+                                    {
+                                        XmlNode newImageNode = existingDoc.CreateElement("Image");
+                                        XmlNode nameNode = existingDoc.CreateElement("Name");
+                                        nameNode.InnerText = dataImg.Key;
+                                        XmlNode dataNode = existingDoc.CreateElement("Data");
+                                        dataNode.InnerText = dataImg.Value;
+
+                                        // Append Name and Data elements to Image element
+                                        newImageNode.AppendChild(nameNode);
+                                        newImageNode.AppendChild(dataNode);
+
+                                        // Append the new Image element to the Images element
+                                        imagesNodeExistingDoc.AppendChild(newImageNode);
+                                    }
+                                }
+                                existingDoc.Save(FileName);
+
+                            }
                         }
                     }
                     this.History.BeginPoint();
