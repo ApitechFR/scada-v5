@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing.Design;
+using System.Xml;
 using Scada.Scheme.Model.PropertyGrid;
 using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 using CM = System.ComponentModel;
@@ -12,34 +13,43 @@ namespace Scada.Web.AppCode.SchShapeComp.PropertyGrid.Conditions
 		public BasicShapeConditions()
 			: base()
 		{
-			IsVisible = true;
-			Blinking = BlinkingSpeed.None;
-			BackgroundColor = "";
-			Height = "";
-			Width = "";
+			
+			Height = null;
+			Width = null;
 		}
 
 		[DisplayName("Height"), Category(Categories.Appearance)]
-		public string Height { get; set; }
+		public int? Height { get; set; }
 
 		[DisplayName("Width"), Category(Categories.Appearance)]
-		public string Width { get; set; }
+		public int? Width { get; set; }
 
 		
-		public override void LoadFromXml(System.Xml.XmlNode xmlNode)
+		public override void LoadFromXml(XmlNode xmlNode)
 		{
 			base.LoadFromXml(xmlNode);
-			Height = xmlNode.GetChildAsString("Height");
-			Width = xmlNode.GetChildAsString("Width");
 			
+			XmlNode heightNode = xmlNode.SelectSingleNode("Height");
+			Height = heightNode != null ? (int?)int.Parse(heightNode.InnerText) : null;
+			
+			XmlNode widthNode = xmlNode.SelectSingleNode("Width");
+			Width = widthNode != null ? (int?)int.Parse(widthNode.InnerText) : null;
+
 		}
 
-		public override void SaveToXml(System.Xml.XmlElement xmlElem)
+		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
-			xmlElem.AppendElem("Height", Height);
-			xmlElem.AppendElem("Width", Width);
 			
+			if (Width.HasValue)
+			{
+				xmlElem.AppendElem("Width", Width.Value);
+			}
+			if (Height.HasValue)
+			{
+				xmlElem.AppendElem("Height", Height.Value);
+			}
+
 		}
 	}
 }
