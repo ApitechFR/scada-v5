@@ -74,6 +74,8 @@ namespace Scada.Scheme.Editor
         private bool existingSymbolWasConverted;
         private bool existingSchemeWasConverted;
 
+		private static FrmMain instance;
+
 
 		/// <summary>
 		/// Конструктор.
@@ -101,6 +103,8 @@ namespace Scada.Scheme.Editor
             editor.ClipboardChanged += Editor_ClipboardChanged;
             editor.History.HistoryChanged += History_HistoryChanged;
             SchemeContext.GetInstance().SchemePath = editor.FileName;
+
+			instance = this;
         }
 
 
@@ -311,7 +315,7 @@ namespace Scada.Scheme.Editor
             XmlDocument indexXmlDocument = new XmlDocument();
             indexXmlDocument.Load(indexFile);
 
-			XmlNodeList elements = indexXmlDocument.SelectNodes("//symbol[@path='" + symbolPath + "']");
+			XmlNodeList elements = indexXmlDocument.SelectNodes("/root/symbols/symbol[@path='" + symbolPath + "']");
 			if (elements.Count > 0)
 			{
 				XmlNode elementToDelete = elements[0];
@@ -682,6 +686,38 @@ namespace Scada.Scheme.Editor
 			return result;
 		}
 
+		private Dictionary<string,string> readImageFromSymbolFile(string symbolPath)
+		{
+			Dictionary<string, string> dico = new Dictionary<string, string>();
+
+			XmlDocument xmlDoc = new XmlDocument();
+
+            if (symbolPath != null)
+                xmlDoc.Load(symbolPath);
+
+            XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
+
+			if (mainSymbolNode != null)
+			{
+				XmlNode imagesNode = xmlDoc.SelectSingleNode(".//Images");
+				if (imagesNode.InnerText != null)
+				{
+					foreach (XmlNode image in imagesNode.SelectNodes("Image"))
+					{
+						if (!dico.Keys.Contains(image.SelectSingleNode("Name").InnerText))
+						{
+                            dico.Add(image.SelectSingleNode("Name").InnerText, image.SelectSingleNode("Data").InnerText);
+						}
+						else
+						{
+                            dico[image.SelectSingleNode("Name").InnerText] = image.SelectSingleNode("Data").InnerText;
+						}
+					}
+				}
+			}
+            return dico;
+		}
+
 		private void updateSymbolIndex(string xmlPath, string symbolFileName)
 		{
 			try
@@ -696,21 +732,45 @@ namespace Scada.Scheme.Editor
                 else
                 {
                     XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
-                    XmlElement root = xmlDoc.CreateElement("symbols");
+					XmlElement root = xmlDoc.CreateElement("root");
+                    XmlElement symbolsElem = xmlDoc.CreateElement("symbols");
+					XmlElement images = xmlDoc.CreateElement("images");
                     xmlDoc.InsertBefore(xmlDeclaration, xmlDoc.DocumentElement);
-                    xmlDoc.AppendChild(root);
+					xmlDoc.AppendChild(root);
+                    root.AppendChild(symbolsElem);
+					root.AppendChild(images);
                 }
 
-				XmlNode entryToUpdate = xmlDoc.SelectSingleNode($"//symbol[@path='{symbolFileName}']");
+				XmlNode entryToUpdate = xmlDoc.SelectSingleNode($"/root/symbols/symbol[@path='{symbolFileName}']");
+				XmlNode imagesNode = xmlDoc.SelectSingleNode(".//images");
 
                 if (entryToUpdate != null)
                 {
                     entryToUpdate.Attributes["lastModificationDate"].Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
                     entryToUpdate.Attributes["name"].Value = currentSymbol.Name != "" ? currentSymbol.Name : Path.GetFileNameWithoutExtension(symbolFileName);
+					if(imagesNode != null)
+					{
+						Dictionary<string, string> images = readImageFromSymbolFile(symbolFileName);
+
+                        XmlNodeList imageNodes = xmlDoc.SelectNodes("/root/images/image");
+                        // Supprimer tous les nœuds <image>
+                        foreach (XmlNode imageNode in imageNodes)
+                        {
+                            imageNode.ParentNode.RemoveChild(imageNode);
+                        }
+
+                        foreach (KeyValuePair<string, string> image in images)
+                        {
+                            XmlElement newImage = xmlDoc.CreateElement("image");
+                            newImage.SetAttribute("nameImage", image.Key);
+                            newImage.SetAttribute("dataImage", image.Value);
+                            imagesNode.AppendChild(newImage);
+                        }
+                    }
                 }
                 else
                 {
-                    if (xmlDoc.SelectSingleNode($"//symbol[@symbolId='{currentSymbol.SymbolId}']") != null)
+                    if (xmlDoc.SelectSingleNode($"/root/symbols/symbol[@symbolId='{currentSymbol.SymbolId}']") != null)
                     {
                         currentSymbol.ResetSymbolId();
                     }
@@ -719,7 +779,20 @@ namespace Scada.Scheme.Editor
                     newEntry.SetAttribute("path", symbolFileName);
                     newEntry.SetAttribute("symbolId", currentSymbol.SymbolId);
                     newEntry.SetAttribute("lastModificationDate", currentSymbol.LastModificationDate.ToString("dd/MM/yyyy HH:mm:ss"));
-                    xmlDoc.DocumentElement.AppendChild(newEntry);
+                    if (imagesNode != null)
+                    {
+                        Dictionary<string, string> images = readImageFromSymbolFile(symbolFileName);
+                        foreach (KeyValuePair<string, string> image in images)
+                        {
+							XmlElement newImage = xmlDoc.CreateElement("image");
+                            newImage.SetAttribute("nameImage", image.Key);
+                            newImage.SetAttribute("dataImage", image.Value);
+							imagesNode.AppendChild(newImage);
+                        }
+						
+                    }
+                    XmlNode symbolNode = xmlDoc.SelectSingleNode(".//symbols");
+                    if(symbolNode!=null) symbolNode.AppendChild(newEntry);
                 }
                 xmlDoc.Save(xmlPath);
             }
@@ -1777,6 +1850,15 @@ namespace Scada.Scheme.Editor
 			FrmAbout.ShowAbout(appData.AppDirs.ExeDir, log, this);
 		}
 
+		private static bool IsFormOpen()
+		{
+			return instance != null && !instance.IsDisposed;
+		}
+
+		public static void UpdateFormAfterImage(string filename, string symbolpath)
+		{
+			if (IsFormOpen()) instance.InitScheme(filename, symbolpath);
+		}
 
 		private void lvCompTypes_SelectedIndexChanged(object sender, EventArgs e)
 		{
