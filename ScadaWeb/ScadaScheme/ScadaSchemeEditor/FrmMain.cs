@@ -753,7 +753,7 @@ namespace Scada.Scheme.Editor
 						Dictionary<string, string> images = readImageFromSymbolFile(symbolFileName);
 
                         XmlNodeList imageNodes = xmlDoc.SelectNodes("/root/images/image");
-                        // Supprimer tous les nœuds <image>
+                        // Delete all <image> nodes
                         foreach (XmlNode imageNode in imageNodes)
                         {
                             imageNode.ParentNode.RemoveChild(imageNode);
