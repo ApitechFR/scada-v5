@@ -605,7 +605,7 @@ namespace Scada.Scheme
             {
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.Load(symbolIndexPath);
-                XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
+                XmlNode indexEntry = xmlDoc.SelectSingleNode($"/root/symbols/symbol[@symbolId='{symbol.SymbolId}']");
                 // if user want to update this symbol particulary 
                 if (indexEntry.Attributes["path"].Value == symbolPathUpToDate) 
                 {
@@ -663,14 +663,14 @@ namespace Scada.Scheme
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(symbolIndexPath);
 
-            XmlNode indexEntry = xmlDoc.SelectSingleNode($"//symbol[@symbolId='{symbol.SymbolId}']");
+            XmlNode indexEntry = xmlDoc.SelectSingleNode($"/root/symbols/symbol[@symbolId='{symbol.SymbolId}']");
 
             if (indexEntry == null) return true;
             DateTime fileDate = DateTime.Parse( indexEntry.Attributes["lastModificationDate"].Value);
             return fileDate <= symbol.LastModificationDate;
         }
 
-        private void LoadFromSymbolFile(string symbolPath, Symbol symbol)
+        public void LoadFromSymbolFile(string symbolPath, Symbol symbol)
         {
             List<BaseComponent> symbolComps = new List<BaseComponent>();
             XmlDocument xmlDoc = new XmlDocument();
@@ -775,15 +775,19 @@ namespace Scada.Scheme
                     component.SchemeView = this;
                     component.LoadFromXml(compNode);
                     Point location = new Point();
-                    if (count == 0) {
-                        location = new Point(symbol.Location.X + tuplesFilter[indice].Item2.X, symbol.Location.Y + tuplesFilter[indice].Item2.Y);
-                        locFirstComponent = component.Location;
-                    }
-                    else
+                    if (tuplesFilter.Count != 0)
                     {
-                        double distX = component.Location.X - locFirstComponent.X;
-                        double distY = component.Location.Y - locFirstComponent.Y;
-                        location = new Point((int)Math.Round(symbol.Location.X + distX + tuplesFilter[indice].Item2.X), (int)Math.Round(symbol.Location.Y + distY + tuplesFilter[indice].Item2.Y));
+                        if (count == 0)
+                        {
+                            location = new Point(symbol.Location.X + tuplesFilter[indice].Item2.X, symbol.Location.Y + tuplesFilter[indice].Item2.Y);
+                            locFirstComponent = component.Location;
+                        }
+                        else
+                        {
+                            double distX = component.Location.X - locFirstComponent.X;
+                            double distY = component.Location.Y - locFirstComponent.Y;
+                            location = new Point((int)Math.Round(symbol.Location.X + distX + tuplesFilter[indice].Item2.X), (int)Math.Round(symbol.Location.Y + distY + tuplesFilter[indice].Item2.Y));
+                        }
                     }
                     component.Location = location;
                     count++;

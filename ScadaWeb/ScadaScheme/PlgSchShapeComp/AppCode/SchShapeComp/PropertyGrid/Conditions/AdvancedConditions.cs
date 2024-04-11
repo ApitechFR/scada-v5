@@ -1,6 +1,5 @@
 ﻿using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
-using Scada.Web.SchShapeComp.PropertyGrid;
 using System;
 using System.Drawing.Design;
 using System.Xml;
@@ -21,11 +20,11 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		public AdvancedConditions()
 			: base()
 		{
-			BackgroundColor = "";
+			BackgroundColor = "None";
 			IsVisible = true;
 			Blinking = BlinkingSpeed.None;
-			Rotation = 0;
-			
+			Rotation = null;
+
 		}
 
 		[DisplayName("Background Color"), Category(Categories.Appearance)]
@@ -37,9 +36,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
-		[CM.DefaultValue(0)]
 		public int? Rotation { get; set; }
-		
 
 
 		[DisplayName("Blinking Speed"), Category(Categories.Appearance)]
@@ -50,19 +47,26 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 			base.LoadFromXml(xmlNode);
 			BackgroundColor = xmlNode.GetChildAsString("BackgroundColor");
 			IsVisible = xmlNode.GetChildAsBool("IsVisible");
-			Rotation = xmlNode.GetChildAsInt("Rotation");
 			Blinking = xmlNode.GetChildAsEnum<BlinkingSpeed>("Blinking");
+
+			// If the rotation node is not null, parse the value and assign it to the Rotation property
+			XmlNode rotationNode = xmlNode.SelectSingleNode("Rotation");
+			Rotation = rotationNode != null ? (int?)int.Parse(rotationNode.InnerText) : null;
 		}
-		
+
 		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
-			xmlElem.AppendElem("BackgroundColor", BackgroundColor);
-			xmlElem.AppendElem("Rotation", Rotation);
+			xmlElem.AppendElem("BackgroundColor", string.IsNullOrEmpty(BackgroundColor) ? "None" : BackgroundColor);
 			xmlElem.AppendElem("IsVisible", IsVisible);
 			xmlElem.AppendElem("Blinking", Blinking);
+
+			if (Rotation.HasValue)
+			{
+				xmlElem.AppendElem("Rotation", Rotation.Value);
+			}
 		}
-		
+
 		public override object Clone()
 		{
 			Condition clonedCondition = ScadaUtils.DeepClone(this, PlgUtils.SerializationBinder);
