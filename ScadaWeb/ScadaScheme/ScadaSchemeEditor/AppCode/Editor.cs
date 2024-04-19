@@ -23,6 +23,7 @@
  * Modified : 2020
  */
 
+using Scada.Scheme.DataTransfer;
 using Scada.Scheme.Model;
 using Scada.Scheme.Model.DataTypes;
 using Scada.Web;
@@ -81,6 +82,8 @@ namespace Scada.Scheme.Editor
         private List<BaseComponent> selComponents; // выбранные компоненты схемы
         private List<BaseComponent> clipboard;     // буфер обмена, содержащий скопированные компоненты
 
+        Symbol sym = new Symbol();
+        bool createImage = false;
 
         /// <summary>
         /// Конструктор
@@ -284,6 +287,89 @@ namespace Scada.Scheme.Editor
             return symbolsDir;
         }
 
+        private string getSymbolIndexPath(string filename)
+        {
+            string indexPath = "";
+            string projectRootPath = getProjectRootPath(filename);
+            if (projectRootPath == null) return null;
+            string directoryPath = Path.Combine(projectRootPath, "Views", "Symbols");
+            if (!Directory.Exists(directoryPath)) return null;
+            indexPath = Path.Combine(directoryPath, "index.xml");
+            if (!File.Exists(indexPath)) return null;
+            else return indexPath;
+        }
+
+        private void CreateImageNodes(string fileName)
+        {
+
+            XmlDocument xmlDocIndex = new XmlDocument();
+            string indexPath = getSymbolIndexPath(fileName);
+            if (indexPath != null && File.Exists(indexPath))
+            {
+                FileInfo fileInfo = new FileInfo(indexPath);
+                if (fileInfo.Exists && fileInfo.Length != 0)
+                {
+                    xmlDocIndex.Load(indexPath);
+                    if (xmlDocIndex != null)
+                    {
+                        // for Dynamic Picture
+                        XmlNode imagesNode = xmlDocIndex.SelectSingleNode(".//images");
+                        Dictionary<string, string> dataImages = new Dictionary<string, string>();
+                        if (imagesNode.InnerText != null)
+                        {
+                            foreach (XmlNode image in imagesNode.SelectNodes("image"))
+                            {
+                                if (!dataImages.Keys.Contains(image.Attributes["nameImage"].Value))
+                                {
+                                    dataImages.Add(image.Attributes["nameImage"].Value, image.Attributes["dataImage"].Value);
+                                    createImage = true;
+                                }
+                                else
+                                {
+                                    dataImages[image.Attributes["nameImage"].Value] = image.Attributes["dataImage"].Value;
+                                }
+                            }
+                        }
+                        if (File.Exists(fileName))
+                        {
+                            XmlDocument existingDoc = new XmlDocument();
+                            existingDoc.Load(fileName);
+                            XmlNode imagesNodeExistingDoc = existingDoc.SelectSingleNode(".//Images");
+                            if (imagesNodeExistingDoc == null)
+                            {
+                                XmlNode newImages = existingDoc.CreateElement("Images");
+                                XmlNode schemeViewNode = existingDoc.SelectSingleNode(".//SchemeView");
+                                schemeViewNode.AppendChild(newImages);
+                            }
+                            imagesNodeExistingDoc = existingDoc.SelectSingleNode(".//Images");
+
+                            if (imagesNodeExistingDoc != null)
+                            {
+                                Dictionary<string, Image> images = SchemeView.SchemeDoc.Images;
+                                foreach (var dataImg in dataImages)
+                                {
+
+                                    XmlNode newImageNode = existingDoc.CreateElement("Image");
+                                    XmlNode nameNode = existingDoc.CreateElement("Name");
+                                    nameNode.InnerText = dataImg.Key;
+                                    XmlNode dataNode = existingDoc.CreateElement("Data");
+                                    dataNode.InnerText = dataImg.Value;
+
+                                    // Append Name and Data elements to Image element
+                                    newImageNode.AppendChild(nameNode);
+                                    newImageNode.AppendChild(dataNode);
+
+                                    // Append the new Image element to the Images element
+                                    imagesNodeExistingDoc.AppendChild(newImageNode);
+                                }
+                            }
+                            existingDoc.Save(fileName);
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Инициализировать схему, создав новую или загрузив из файла
         /// </summary>
@@ -298,6 +384,8 @@ namespace Scada.Scheme.Editor
 
                 lock (SchemeView.SyncRoot)
                 {
+                    //loadImages
+                    CreateImageNodes(fileName);
                     loadOK = SchemeView.LoadFromFile(fileName, getSymbolsDir(fileName), out errMsg, symbolUpdatedPath);
                 }
 
@@ -796,7 +884,6 @@ namespace Scada.Scheme.Editor
                             }
                         }  
                     }
-
                     OnSelectionChanged();
                     this.History.EndPoint();
                     PointerMode = PointerMode.Select;

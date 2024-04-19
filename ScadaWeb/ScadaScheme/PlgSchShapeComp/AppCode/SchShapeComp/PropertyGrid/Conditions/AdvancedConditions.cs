@@ -20,11 +20,11 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		public AdvancedConditions()
 			: base()
 		{
-			BackgroundColor = "";
+			BackgroundColor = "None";
 			IsVisible = true;
 			Blinking = BlinkingSpeed.None;
 			Rotation = null;
-			
+
 		}
 
 		[DisplayName("Background Color"), Category(Categories.Appearance)]
@@ -37,7 +37,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 
 		[DisplayName("Rotation"), Category(Categories.Appearance)]
 		public int? Rotation { get; set; }
-		
+
 
 		[DisplayName("Blinking Speed"), Category(Categories.Appearance)]
 		public BlinkingSpeed Blinking { get; set; }
@@ -57,7 +57,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 		public override void SaveToXml(XmlElement xmlElem)
 		{
 			base.SaveToXml(xmlElem);
-			xmlElem.AppendElem("BackgroundColor", BackgroundColor);
+			xmlElem.AppendElem("BackgroundColor", string.IsNullOrEmpty(BackgroundColor) ? "None" : BackgroundColor);
 			xmlElem.AppendElem("IsVisible", IsVisible);
 			xmlElem.AppendElem("Blinking", Blinking);
 
@@ -66,7 +66,7 @@ namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 				xmlElem.AppendElem("Rotation", Rotation.Value);
 			}
 		}
-		
+
 		public override object Clone()
 		{
 			Condition clonedCondition = ScadaUtils.DeepClone(this, PlgUtils.SerializationBinder);
