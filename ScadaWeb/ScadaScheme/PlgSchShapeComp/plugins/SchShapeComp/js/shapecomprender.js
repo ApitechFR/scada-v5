@@ -31,42 +31,42 @@ scada.scheme.handleBlinking = function (divComp, blinking, bool) {
     }
 };
 scada.scheme.updateStyles = function (divComp, cond, bool) {
-    if ("color" in cond) {
-        divComp.css("color", cond.color);
+    if ("Color" in cond) {
+        divComp.css("color", cond.Color);
     }
-    if ("rotation" in cond) {
-        divComp.css("transform", "rotate(" + cond.rotation + "deg)");
+    if ("Rotation" in cond) {
+        divComp.css("transform", "rotate(" + cond.Rotation + "deg)");
     }
 
-    if ("backgroundColor" in cond) {
+    if ("BackgroundColor" in cond) {
         if (bool) {
-            divComp.css("background-color", cond.backgroundColor);
+            divComp.css("background-color", cond.BackgroundColor);
         } else {
             divComp.css(
                 "background-color",
-                cond.backColor ? String(cond.backColor) : "",
+                cond.BackColor ? String(cond.BackColor) : "",
             );
         }
     }
-    if ("isVisible" in cond) {
+    if ("IsVisible" in cond) {
         if (bool) {
-            divComp.css("visibility", cond.isVisible ? "visible" : "hidden");
+            divComp.css("visibility", cond.IsVisible ? "visible" : "hidden");
         } else {
             divComp.css("visibility", "visible");
         }
     }
 
-    if ("width" in cond) {
+    if ("Width" in cond) {
         if (bool) {
-            divComp.css("width", cond.width);
+            divComp.css("width", cond.Width);
         } else {
             divComp.css("width", "100px");
         }
     }
 
-    if ("height" in cond) {
+    if ("Height" in cond) {
         if (bool) {
-            divComp.css("height", cond.height);
+            divComp.css("height", cond.Height);
         } else {
             divComp.css("height", "100px");
         }
@@ -78,16 +78,11 @@ scada.scheme.setRotate = function (divComp, props) {
         var compWrapper = divComp.closest('.comp-wrapper');
         if (compWrapper.length > 0 && props.Rotation) {
             var rotation = parseInt(props.Rotation, 10);
-
-            if (rotation) {
-
+            if (isNaN(rotation) || rotation === 0) {
                 compWrapper.css('transform', '');
-                console.log("Transform removed from comp-wrapper of " + divComp.attr('id'));
             } else {
                 var rotationTransform = 'rotate(' + rotation + 'deg)';
-                console.log(rotationTransform);
                 compWrapper.css('transform', rotationTransform);
-                console.log("Rotation updated for comp-wrapper of " + divComp.attr('id'));
             }
         } else {
             console.error("comp-wrapper not found for " + divComp.attr('id'));
