@@ -1272,11 +1272,6 @@ namespace Scada.Scheme
         }
 
 
-        /// <summary>
-        /// Returns every BaseComponents in the group
-        /// </summary>
-
-
         public BaseComponent getHihghestGroup(BaseComponent comp)
         {
             int groupID = comp.GroupId;
@@ -1291,14 +1286,29 @@ namespace Scada.Scheme
 
             BaseComponent group = Components.Values.Where(x => x.ID == groupID).FirstOrDefault();
             if (group == null) return comp;
-            while (group.GroupId != -1 && group.GroupId != MainSymbol.ID)
+
+            if(MainSymbol == null)
             {
-                group = getHihghestGroup(group);
+                while (group.GroupId != -1)
+                {
+                    group = getHihghestGroup(group);
+                }
             }
+            else
+            {
+                while (group.GroupId != -1 && group.GroupId != MainSymbol.ID)
+                {
+                    group = getHihghestGroup(group);
+                }
+            }
+            
             return group;
         }
 
 
+        /// <summary>
+        /// Returns every BaseComponents in the group
+        /// </summary>
         public List<BaseComponent> getGroupedComponents(int groupID)
         {
             List<BaseComponent> groupedComponents = new List<BaseComponent>();

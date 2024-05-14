@@ -879,8 +879,7 @@ namespace Scada.Scheme.Editor
                             }
                             foreach (XmlNode nodeSymbolComponent in SymbolComponents)
                             {
-                                BaseComponent symbolComponent = CreateComponentOfSymbol(x-minX, y-minY, nodeSymbolComponent);
-                                symbolComponent.GroupId = component.ID;
+                                BaseComponent symbolComponent = CreateComponentOfSymbol(x-minX, y-minY, nodeSymbolComponent, component.ID);
                             }
                         }  
                     }
@@ -907,7 +906,7 @@ namespace Scada.Scheme.Editor
             }
         }
 
-        public BaseComponent CreateComponentOfSymbol(int x, int y, XmlNode node)
+        public BaseComponent CreateComponentOfSymbol(int x, int y, XmlNode node, int parentId)
         {
             string[] name = node.Name.Split(':');
             string componentTypeName = "";
@@ -931,7 +930,7 @@ namespace Scada.Scheme.Editor
             }
             else
             {
-                this.History.BeginPoint();
+                //this.History.BeginPoint();
                 component.LoadFromXml(node);
                 component.ID = SchemeView.GetNextComponentID();
                 component.Location = new Point(x + component.Location.X, y + component.Location.Y);
@@ -945,6 +944,10 @@ namespace Scada.Scheme.Editor
                 if (SchemeView.isSymbol)
                 {
                     component.GroupId = SchemeView.MainSymbol.ID;
+                }
+                else
+                {
+                    component.GroupId = parentId;
                 }
 
                 component.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);
