@@ -930,7 +930,6 @@ namespace Scada.Scheme.Editor
             }
             else
             {
-                //this.History.BeginPoint();
                 component.LoadFromXml(node);
                 component.ID = SchemeView.GetNextComponentID();
                 component.Location = new Point(x + component.Location.X, y + component.Location.Y);
