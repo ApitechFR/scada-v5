@@ -7,6 +7,7 @@ using Scada.Scheme.Model.DataTypes;
 using Scada.Scheme.Model.PropertyGrid;
 using Scada.Web.Plugins.SchShapeComp.PropertyGrid;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Scada.Web.Plugins.SchShapeComp
 {
@@ -213,13 +214,35 @@ namespace Scada.Web.Plugins.SchShapeComp
 			xmlElem.AppendElem("UnderlineOnHover", UnderlineOnHover);
 			xmlElem.AppendElem("Action", Action);
 			xmlElem.AppendElem("ShowValue", ShowValue);
-			xmlElem.AppendElem("InCnlNum", InCnlNum);
-			xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
-			xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
-			xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
-		}
+            if(InCnlNumCustom != null && (InCnlNum == null || InCnlNum == 0) && FindNumberInInCnlNumCustom(InCnlNumCustom) > 0)
+            {
+                InCnlNum = FindNumberInInCnlNumCustom(InCnlNumCustom);
+            }
+            xmlElem.AppendElem("InCnlNum", InCnlNum);
+            xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
+            xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
+            xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
+        }
 
-		
-	}
+        public int FindNumberInInCnlNumCustom(string NumCustom)
+        {
+            int number = 0;
+
+            // Définir l'expression régulière pour extraire les chiffres entre parenthèses
+            string pattern = @"\((\d+)\)";
+
+            // Rechercher une correspondance
+            Match match = Regex.Match(NumCustom, pattern);
+
+            if (match.Success)
+            {
+                // Extraire la valeur numérique et la convertir en entier
+                number = int.Parse(match.Groups[1].Value);
+
+                return number;
+            }
+            return number;
+        }
+    }
 
 }

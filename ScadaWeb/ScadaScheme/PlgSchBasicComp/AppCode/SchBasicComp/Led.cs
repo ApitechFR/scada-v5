@@ -29,6 +29,7 @@ using Scada.Scheme.Model.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Design;
+using System.Text.RegularExpressions;
 using System.Xml;
 using CM = System.ComponentModel;
 
@@ -206,10 +207,34 @@ namespace Scada.Web.Plugins.SchBasicComp
                 condition.SaveToXml(conditionElem);
             }
 
+            if (InCnlNumCustom != null && (InCnlNum == null || InCnlNum == 0) && FindNumberInInCnlNumCustom(InCnlNumCustom) > 0)
+            {
+                InCnlNum = FindNumberInInCnlNumCustom(InCnlNumCustom);
+            }
             xmlElem.AppendElem("InCnlNum", InCnlNum);
             xmlElem.AppendElem("CtrlCnlNum", CtrlCnlNum);
             xmlElem.AppendElem("CtrlCnlNumCustom", CtrlCnlNumCustom);
             xmlElem.AppendElem("InCnlNumCustom", InCnlNumCustom);
+        }
+
+        public int FindNumberInInCnlNumCustom(string NumCustom)
+        {
+            int number = 0;
+
+            // Définir l'expression régulière pour extraire les chiffres entre parenthèses
+            string pattern = @"\((\d+)\)";
+
+            // Rechercher une correspondance
+            Match match = Regex.Match(NumCustom, pattern);
+
+            if (match.Success)
+            {
+                // Extraire la valeur numérique et la convertir en entier
+                number = int.Parse(match.Groups[1].Value);
+
+                return number;
+            }
+            return number;
         }
 
         /// <summary>
