@@ -338,7 +338,7 @@ namespace Scada.Scheme.Editor
                 SchemeDTO dto = new SchemeDTO();
 
                 if (CheckArguments(editorID, viewStamp, dto))
-                    Editor.MoveResizeSelected(dx, dy, w, h, false);
+                    Editor.MoveResizeSelected(dx, dy, w, h, true);
 
                 return JsSerializer.Serialize(dto);
             }
