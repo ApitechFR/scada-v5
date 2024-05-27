@@ -283,89 +283,88 @@ namespace Scada.Scheme.Editor
             //we create folder for index if not exists
             string symbolsDir = Path.Combine(rootPath, "Views", "Symbols");
             Directory.CreateDirectory(symbolsDir);
+
             return symbolsDir;
         }
 
-        private string getSymbolIndexFilePath(string fileName)
+        private string getSymbolIndexPath(string filename)
         {
-            //we create folder for index if not exists
-            string symbolsFolderPath = getSymbolsDir(fileName);
-
-            if (symbolsFolderPath == null)
-            {
-                return null;
-            }
-            //create index file if not exists
-            string indexPath = Path.Combine(symbolsFolderPath, "index.xml");
-            if (!File.Exists(indexPath))
-            {
-                return null;
-            }
-            return indexPath;
+            string indexPath = "";
+            string projectRootPath = getProjectRootPath(filename);
+            if (projectRootPath == null) return null;
+            string directoryPath = Path.Combine(projectRootPath, "Views", "Symbols");
+            if (!Directory.Exists(directoryPath)) return null;
+            indexPath = Path.Combine(directoryPath, "index.xml");
+            if (!File.Exists(indexPath)) return null;
+            else return indexPath;
         }
 
         private void CreateImageNodes(string fileName)
         {
 
             XmlDocument xmlDocIndex = new XmlDocument();
-            string indexPath = getSymbolIndexFilePath(fileName);
+            string indexPath = getSymbolIndexPath(fileName);
             if (indexPath != null && File.Exists(indexPath))
             {
-                xmlDocIndex.Load(indexPath);
-                if (xmlDocIndex != null)
+                FileInfo fileInfo = new FileInfo(indexPath);
+                if (fileInfo.Exists && fileInfo.Length != 0)
                 {
-                    // for Dynamic Picture
-                    XmlNode imagesNode = xmlDocIndex.SelectSingleNode(".//images");
-                    Dictionary<string, string> dataImages = new Dictionary<string, string>();
-                    if (imagesNode.InnerText != null)
+                    xmlDocIndex.Load(indexPath);
+                    if (xmlDocIndex != null)
                     {
-                        foreach (XmlNode image in imagesNode.SelectNodes("image"))
+                        // for Dynamic Picture
+                        XmlNode imagesNode = xmlDocIndex.SelectSingleNode(".//images");
+                        Dictionary<string, string> dataImages = new Dictionary<string, string>();
+                        if (imagesNode.InnerText != null)
                         {
-                            if (!dataImages.Keys.Contains(image.Attributes["nameImage"].Value))
+                            foreach (XmlNode image in imagesNode.SelectNodes("image"))
                             {
-                                dataImages.Add(image.Attributes["nameImage"].Value, image.Attributes["dataImage"].Value);
-                                createImage = true;
-                            }
-                            else
-                            {
-                                dataImages[image.Attributes["nameImage"].Value] = image.Attributes["dataImage"].Value;
-                            }
-                        }
-                    }
-                    if (File.Exists(fileName))
-                    {
-                        XmlDocument existingDoc = new XmlDocument();
-                        existingDoc.Load(fileName);
-                        XmlNode imagesNodeExistingDoc = existingDoc.SelectSingleNode(".//Images");
-                        if (imagesNodeExistingDoc == null)
-                        {
-                            XmlNode newImages = existingDoc.CreateElement("Images");
-                            XmlNode schemeViewNode = existingDoc.SelectSingleNode(".//SchemeView");
-                            schemeViewNode.AppendChild(newImages);
-                        }
-                        imagesNodeExistingDoc = existingDoc.SelectSingleNode(".//Images");
-
-                        if (imagesNodeExistingDoc != null)
-                        {
-                            Dictionary<string, Image> images = SchemeView.SchemeDoc.Images;
-                            foreach (var dataImg in dataImages)
-                            {
-
-                                XmlNode newImageNode = existingDoc.CreateElement("Image");
-                                XmlNode nameNode = existingDoc.CreateElement("Name");
-                                nameNode.InnerText = dataImg.Key;
-                                XmlNode dataNode = existingDoc.CreateElement("Data");
-                                dataNode.InnerText = dataImg.Value;
-
-                                // Append Name and Data elements to Image element
-                                newImageNode.AppendChild(nameNode);
-                                newImageNode.AppendChild(dataNode);
-
-                                // Append the new Image element to the Images element
-                                imagesNodeExistingDoc.AppendChild(newImageNode);
+                                if (!dataImages.Keys.Contains(image.Attributes["nameImage"].Value))
+                                {
+                                    dataImages.Add(image.Attributes["nameImage"].Value, image.Attributes["dataImage"].Value);
+                                    createImage = true;
+                                }
+                                else
+                                {
+                                    dataImages[image.Attributes["nameImage"].Value] = image.Attributes["dataImage"].Value;
+                                }
                             }
                         }
-                        existingDoc.Save(fileName);
+                        if (File.Exists(fileName))
+                        {
+                            XmlDocument existingDoc = new XmlDocument();
+                            existingDoc.Load(fileName);
+                            XmlNode imagesNodeExistingDoc = existingDoc.SelectSingleNode(".//Images");
+                            if (imagesNodeExistingDoc == null)
+                            {
+                                XmlNode newImages = existingDoc.CreateElement("Images");
+                                XmlNode schemeViewNode = existingDoc.SelectSingleNode(".//SchemeView");
+                                schemeViewNode.AppendChild(newImages);
+                            }
+                            imagesNodeExistingDoc = existingDoc.SelectSingleNode(".//Images");
+
+                            if (imagesNodeExistingDoc != null)
+                            {
+                                Dictionary<string, Image> images = SchemeView.SchemeDoc.Images;
+                                foreach (var dataImg in dataImages)
+                                {
+
+                                    XmlNode newImageNode = existingDoc.CreateElement("Image");
+                                    XmlNode nameNode = existingDoc.CreateElement("Name");
+                                    nameNode.InnerText = dataImg.Key;
+                                    XmlNode dataNode = existingDoc.CreateElement("Data");
+                                    dataNode.InnerText = dataImg.Value;
+
+                                    // Append Name and Data elements to Image element
+                                    newImageNode.AppendChild(nameNode);
+                                    newImageNode.AppendChild(dataNode);
+
+                                    // Append the new Image element to the Images element
+                                    imagesNodeExistingDoc.AppendChild(newImageNode);
+                                }
+                            }
+                            existingDoc.Save(fileName);
+                        }
                     }
                 }
             }
@@ -880,8 +879,7 @@ namespace Scada.Scheme.Editor
                             }
                             foreach (XmlNode nodeSymbolComponent in SymbolComponents)
                             {
-                                BaseComponent symbolComponent = CreateComponentOfSymbol(x-minX, y-minY, nodeSymbolComponent);
-                                symbolComponent.GroupId = component.ID;
+                                BaseComponent symbolComponent = CreateComponentOfSymbol(x-minX, y-minY, nodeSymbolComponent, component.ID);
                             }
                         }  
                     }
@@ -908,7 +906,7 @@ namespace Scada.Scheme.Editor
             }
         }
 
-        public BaseComponent CreateComponentOfSymbol(int x, int y, XmlNode node)
+        public BaseComponent CreateComponentOfSymbol(int x, int y, XmlNode node, int parentId)
         {
             string[] name = node.Name.Split(':');
             string componentTypeName = "";
@@ -932,7 +930,6 @@ namespace Scada.Scheme.Editor
             }
             else
             {
-                this.History.BeginPoint();
                 component.LoadFromXml(node);
                 component.ID = SchemeView.GetNextComponentID();
                 component.Location = new Point(x + component.Location.X, y + component.Location.Y);
@@ -946,6 +943,10 @@ namespace Scada.Scheme.Editor
                 if (SchemeView.isSymbol)
                 {
                     component.GroupId = SchemeView.MainSymbol.ID;
+                }
+                else
+                {
+                    component.GroupId = parentId;
                 }
 
                 component.OnItemChanged(SchemeChangeTypes.ComponentAdded, component);

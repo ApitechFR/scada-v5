@@ -35,6 +35,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using System.Xml;
@@ -804,18 +805,30 @@ namespace Scada.Scheme
                         }
 
                         var aliasValue = symbol.AliasList.Where(x => x.Name == entry.Value.Name).First().Value;
-                        var isCnlLinked = (entry.Key == "InCnlNumCustom" || entry.Key == "CtrlCnlNumCustom");
+                        var isInCnlLinked = entry.Key == "InCnlNumCustom";
+                        var isCtrlCnlLinked = entry.Key == "CtrlCnlNumCustom";
+                        var isCnlLinked = isInCnlLinked || isCtrlCnlLinked;
+ 
                         if ( aliasValue.GetType().Name.Equals("Int32") && isCnlLinked)
                         {
                             aliasValue = aliasValue.ToString();
                         }
                         componentProperty.SetValue(component, aliasValue, null);
-                        if (isCnlLinked)
+                        if (isCnlLinked && component is IDynamicComponent dynamicComp)
                         {
                             var componentChannelPropertyName = entry.Key.Substring(0, entry.Key.Length - 6);
                             var componentChannelProperty = component.GetType().GetProperty(componentChannelPropertyName);
                             var ChannelNumber = symbol.AliasCnlDictionary[entry.Value.Name];
                             componentChannelProperty.SetValue(component, ChannelNumber, null);
+
+                            if(isCtrlCnlLinked)
+                            {
+                                dynamicComp.CtrlCnlNum = FindNumberCnlNumCustom((string)aliasValue);
+                            }
+                            if (isInCnlLinked)
+                            {
+                                dynamicComp.InCnlNum = FindNumberCnlNumCustom((string)aliasValue);
+                            }
                         }
                     }
 
@@ -898,6 +911,29 @@ namespace Scada.Scheme
                 }
             }
             SetNewSymbolCompsIDs(symbolComps,symbol);
+        }
+
+        /// <summary>
+        /// find the canal number stored between parenthesis in the alias value
+        /// </summary>
+        /// <param name="NumCustom">string including an interger between parenthesis</param>
+        /// <returns>the number between parenthesis</returns>
+        public static int FindNumberCnlNumCustom(string NumCustom)
+        {
+            int number = 0;
+
+            // Définir l'expression régulière pour extraire les chiffres entre parenthèses
+            string pattern = @"\((\d+)\)";
+
+            // Rechercher une correspondance
+            Match match = Regex.Match(NumCustom, pattern);
+
+            if (match.Success)
+            {
+                // Extraire la valeur numérique et la convertir en entier
+                number = int.Parse(match.Groups[1].Value);
+            }
+            return number;
         }
 
         private void SetNewSymbolCompsIDs(List<BaseComponent> components,Symbol symbol)
@@ -1272,11 +1308,6 @@ namespace Scada.Scheme
         }
 
 
-        /// <summary>
-        /// Returns every BaseComponents in the group
-        /// </summary>
-
-
         public BaseComponent getHihghestGroup(BaseComponent comp)
         {
             int groupID = comp.GroupId;
@@ -1291,14 +1322,29 @@ namespace Scada.Scheme
 
             BaseComponent group = Components.Values.Where(x => x.ID == groupID).FirstOrDefault();
             if (group == null) return comp;
-            while (group.GroupId != -1 && group.GroupId != MainSymbol.ID)
+
+            if(MainSymbol == null)
             {
-                group = getHihghestGroup(group);
+                while (group.GroupId != -1)
+                {
+                    group = getHihghestGroup(group);
+                }
             }
+            else
+            {
+                while (group.GroupId != -1 && group.GroupId != MainSymbol.ID)
+                {
+                    group = getHihghestGroup(group);
+                }
+            }
+            
             return group;
         }
 
 
+        /// <summary>
+        /// Returns every BaseComponents in the group
+        /// </summary>
         public List<BaseComponent> getGroupedComponents(int groupID)
         {
             List<BaseComponent> groupedComponents = new List<BaseComponent>();
