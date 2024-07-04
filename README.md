@@ -11,8 +11,14 @@ This patch contains some additional functionalities to the original editor V5:
 * A new type of component : ```Symbol```. It is a reusable component the user can build by gathering non-symbol components.
 
 ##Components Treeview
+Is it a treeview that shows every component in the scheme. It is accessible via this button :
+<img src="https://github.com/ApitechFR/workshop-git/blob/main/images/treeview_tab.PNG" title="" alt="" data-align="center">
+
 ##Group/Ungroup
+
+
 ##Symbols
+
 
 Rapid SCADA
 ===========
