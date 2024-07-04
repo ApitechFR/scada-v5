@@ -1,6 +1,11 @@
 #Apitech - Scada Scheme Editor
+This project is forked from Rapid Scada Sceme Editor. It is a patch for the editor, developped by Apitech.
+
+Apitech website : https://apitech.net/
+Rapid Scada Website : https://rapidscada.org
+
 ##Description
-This project is forked from Rapid Scada Sceme Editor. It contains some additional functionalities :
+This patch contains some additional functionalities to the original editor V5:
 * A treeview with every components of the scheme
 * A Group/Ungroup button to create groups of components
 * A new type of component : ```Symbol```. It is a reusable component the user can build by gathering non-symbol components.
