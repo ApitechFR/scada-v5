@@ -2,6 +2,7 @@
 This project is forked from Rapid Scada Sceme Editor. It is a patch for the editor, developped by Apitech.
 
 Apitech website : https://apitech.net/
+
 Rapid Scada Website : https://rapidscada.org
 
 ## Description
