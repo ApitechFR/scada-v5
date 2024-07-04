@@ -1,3 +1,14 @@
+#Apitech - Scada Scheme Editor
+##Description
+This project is forked from Rapid Scada Sceme Editor. It contains some additional functionalities :
+* A treeview with every components of the scheme
+* A Group/Ungroup button to create groups of components
+* A new type of component : ```Symbol```. It is a reusable component the user can build by gathering non-symbol components.
+
+##Components Treeview
+##Group/Ungroup
+##Symbols
+
 Rapid SCADA
 ===========
 
