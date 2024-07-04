@@ -18,11 +18,11 @@ Download link :
 ## User documentation
 ### Components Treeview
 Is it a treeview that shows every component in the scheme. It is accessible via this button :
-<img src="https://github.com/ApitechFR/workshop-git/blob/main/images/treeview_tab.PNG" title="" alt="" data-align="center">
+<img src="https://github.com/ApitechFR/scada-v5/blob/documentation/images/treeview_tab.PNG" title="" alt="" data-align="center">
 
 ### Group/Ungroup
 To group some components, select the components you want to group, and click the Group/Ungroup button :
-<img src="https://github.com/ApitechFR/workshop-git/blob/main/images/group_ungroup.PNG" title="" alt="" data-align="center">
+<img src="https://github.com/ApitechFR/scada-v5/blob/documentation/images/group_ungroup.PNG" title="" alt="" data-align="center">
 
 To ungroup, just select the group and click Group/Ungroup button
 
