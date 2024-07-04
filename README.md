@@ -27,5 +27,5 @@ To group some components, select the components you want to group, and click the
 To ungroup, just select the group and click Group/Ungroup button
 
 ### Symbols
-Here is a tutorial video to understand how to use symbols : [https://](https://www.youtube.com/watch?v=d71i52gGkMw)
+Here is a tutorial video to understand how to use symbols : [Tutorial Rapid Scada Scheme Editor - Symbols](https://www.youtube.com/watch?v=d71i52gGkMw)
   
