@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Text;
 using System.IO;
 using System;
-using Svg;
 
 namespace Scada.Web.Plugins.SchShapeComp.PropertyGrid
 {
