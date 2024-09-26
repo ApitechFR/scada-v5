@@ -277,7 +277,7 @@ namespace Scada.Scheme
                     while (currentSymbolInstancesComponentsLocations.Count>0)
                     {
                         //future location of the instance of the symbol
-                        Point location;
+                        //Point location;
                         //we clone the symbol node
                         XmlNode clonedSymbol = symbolNode.CloneNode(deep: true);
 
@@ -289,20 +289,20 @@ namespace Scada.Scheme
                         }
 
                         //we calculate the minimum point of the components of the first instance of the symbol
-                        location = GetMinimumPoint(currentSymbolInstancesComponentsLocations, symbolComponentsCount);
+                        //location = GetMinimumPoint(currentSymbolInstancesComponentsLocations, symbolComponentsCount);
 
-                        //we update the location of the cloned symbol with the calculated minimum point
-                        XmlNode locationNode = clonedSymbol.SelectSingleNode("Location");
-                        if (locationNode != null)
-                        {
-                            XmlNode XNode = locationNode.SelectSingleNode("X");
-                            XmlNode YNode = locationNode.SelectSingleNode("Y");
-                            if(XNode != null && YNode != null)
-                            {
-                                XNode.InnerText = location.X.ToString();
-                                YNode.InnerText = location.Y.ToString();
-                            }
-                        }
+                        ////we update the location of the cloned symbol with the calculated minimum point
+                        //XmlNode locationNode = clonedSymbol.SelectSingleNode("Location");
+                        //if (locationNode != null)
+                        //{
+                        //    XmlNode XNode = locationNode.SelectSingleNode("X");
+                        //    XmlNode YNode = locationNode.SelectSingleNode("Y");
+                        //    if(XNode != null && YNode != null)
+                        //    {
+                        //        XNode.InnerText = location.X.ToString();
+                        //        YNode.InnerText = location.Y.ToString();
+                        //    }
+                        //}
 
                         for (int i = 0; i < symbolComponentsCount; i++)
                         {
@@ -408,7 +408,7 @@ namespace Scada.Scheme
                     {
                         string instanceRef = compNode.SelectSingleNode("symbolInstanceRef")?.InnerText;
                         LoadSymbol(Symbolpath, rootElem, symbol, instanceRef);
-                        component.Location = new Point(component.Location.X, component.Location.Y);
+                        //component.Location = new Point(component.Location.X, component.Location.Y);
                     }
 
                     // добавление входных каналов представления
