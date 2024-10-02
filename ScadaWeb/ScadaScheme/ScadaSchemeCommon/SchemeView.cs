@@ -1188,8 +1188,8 @@ namespace Scada.Scheme
                 component.LoadFromXml(componentNode);
                 //if (component.Location.X + component.Location.Y <= 20) component.Location = new Point(0, 0);
 
-                Point location = new Point(component.Location.X + symbol.Location.X, component.Location.Y + symbol.Location.Y);
-                component.Location = location;
+                //Point location = new Point(component.Location.X + symbol.Location.X, component.Location.Y + symbol.Location.Y);
+                //component.Location = location;
 
 
 
