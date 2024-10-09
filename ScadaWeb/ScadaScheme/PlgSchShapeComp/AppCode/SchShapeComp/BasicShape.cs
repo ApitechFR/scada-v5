@@ -143,8 +143,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 				}
 			}
 			ShapeType = xmlNode.GetChildAsString("ShapeType");
-			
-		}
+            Size = Size.GetChildAsSize(xmlNode, "Size");
+        }
 
 		public override void SaveToXml(XmlElement xmlElem)
 		{
