@@ -598,25 +598,6 @@ namespace Scada.Scheme
             return maxID;
         }
 
-        //private int CountPatternOccurences(List<ObjetcComponentLocation> source, XmlNode symbNode) 
-        //{
-        //    int count = 0;
-
-        //    string id = symbNode.SelectSingleNode("SymbolId").InnerText;
-
-        //    int result = source
-        //        .Where(obj => obj.SymbID == id)
-        //        .GroupBy(obj => new { obj.SymbID, obj.RefInstance})
-        //        .Select(group => new
-        //        {
-        //            SymbID = group.Key.SymbID,
-        //            Ref = group.Key.RefInstance
-        //        })
-        //        .Count();
-
-        //    return result;
-        //}
-
         /// <summary>
         /// Returns the location of the components that fit with the pattern
         /// </summary>
@@ -630,6 +611,7 @@ namespace Scada.Scheme
                 .Select(x => x.Position)
                 .ToList();
         }
+
         /// <summary>
         /// Returns the nodes of the components that fit with the pattern
         /// </summary>
@@ -1063,68 +1045,6 @@ namespace Scada.Scheme
                 AddCtrlCnlNums(component.GetCtrlCnlNums(), ctrlCnlOffset);
 
             }
-
-            //if (symbolNode.SelectSingleNode("Components") is XmlNode componentsNode)
-            //{
-            //    HashSet<string> errNodeNames = new HashSet<string>(); // имена узлов незагруженных компонентов
-            //    CompManager compManager = CompManager.GetInstance();
-            //    LoadErrors.AddRange(compManager.LoadErrors);
-            //    SortedDictionary<int, ComponentBinding> componentBindings = templateBindings?.ComponentBindings;
-
-            //    foreach (XmlNode componentNode in componentsNode.ChildNodes)
-            //    {
-            //        BaseComponent component = compManager.CreateComponent(componentNode, out string errMsg);
-
-            //        if (component == null)
-            //        {
-            //            component = new UnknownComponent { XmlNode = componentNode };
-            //            if (errNodeNames.Add(componentNode.Name))
-            //                LoadErrors.Add(errMsg);
-            //        }
-
-            //        // загрузка компонента и добавление его в представление
-            //        component.SchemeView = this;
-            //        component.LoadFromXml(componentNode);
-            //        //if (component.Location.X + component.Location.Y <= 20) component.Location = new Point(0, 0);
-
-            //        Point location = new Point(component.Location.X + symbol.Location.X, component.Location.Y + symbol.Location.Y);
-            //        component.Location = location;
-
-
-
-            //        components.Add(component);
-            //        //if (component is Symbol sym)
-            //        //{
-            //        //    LoadSymbol(Symbolpath, symbolNode as XmlElement, sym);
-            //        //}
-
-            //        // добавление входных каналов представления
-            //        if (component is IDynamicComponent dynamicComponent)
-            //        {
-            //            if (componentBindings != null &&
-            //                componentBindings.TryGetValue(component.ID, out ComponentBinding binding))
-            //            {
-            //                dynamicComponent.InCnlNum = binding.InCnlNum;
-            //                dynamicComponent.CtrlCnlNum = binding.CtrlCnlNum;
-            //            }
-            //            else
-            //            {
-            //                if (inCnlOffset > 0 && dynamicComponent.InCnlNum > 0)
-            //                    dynamicComponent.InCnlNum += inCnlOffset;
-            //                if (ctrlCnlOffset > 0 && dynamicComponent.CtrlCnlNum > 0)
-            //                    dynamicComponent.CtrlCnlNum += ctrlCnlOffset;
-            //            }
-
-            //            AddCnlNum(dynamicComponent.InCnlNum);
-            //            AddCtrlCnlNum(dynamicComponent.CtrlCnlNum);
-            //        }
-
-            //        AddInCnlNums(component.GetInCnlNums(), inCnlOffset);
-            //        AddCtrlCnlNums(component.GetCtrlCnlNums(), ctrlCnlOffset);
-
-            //    }
-            //}
-
 
             // load groups
             if (symbolNode.SelectSingleNode("Groups") is XmlNode groupsNode)
