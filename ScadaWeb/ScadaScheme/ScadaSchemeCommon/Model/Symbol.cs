@@ -79,7 +79,6 @@ namespace Scada.Scheme.Model
                 }
                 AliasList.AddRange(listTemp);
             }
-
         }
         public List<Alias> updateAliasList(Symbol symbol)
         {

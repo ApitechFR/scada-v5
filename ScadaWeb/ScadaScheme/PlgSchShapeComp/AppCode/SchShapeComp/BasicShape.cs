@@ -130,7 +130,6 @@ namespace Scada.Web.Plugins.SchShapeComp
 			CtrlCnlNumCustom = xmlNode.GetChildAsString("CtrlCnlNumCustom");
 			XmlNode conditionsNode = xmlNode.SelectSingleNode("Conditions");
 
-
 			if (conditionsNode != null)
 			{
 				Conditions = new List<BasicShapeConditions>();
@@ -143,8 +142,8 @@ namespace Scada.Web.Plugins.SchShapeComp
 				}
 			}
 			ShapeType = xmlNode.GetChildAsString("ShapeType");
-			
-		}
+            Size = Size.GetChildAsSize(xmlNode, "Size");
+        }
 
 		public override void SaveToXml(XmlElement xmlElem)
 		{
