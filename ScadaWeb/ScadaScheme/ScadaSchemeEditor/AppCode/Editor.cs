@@ -827,9 +827,7 @@ namespace Scada.Scheme.Editor
                 {
                     if (NewComponentTypeName.Contains("Symbol"))
                     {
-                        
                         XmlNode mainSymbolNode = xmlDoc.SelectSingleNode(".//MainSymbol");
-
                         if (mainSymbolNode != null)
                         {
                             component.LoadFromXml(mainSymbolNode);
